@@ -12,7 +12,7 @@ struct ScanResultView: View {
 
     enum ViewMode {
         case list
-        case treemap
+        case sunburst
     }
 
     var body: some View {
@@ -51,15 +51,15 @@ struct ScanResultView: View {
                 Picker("View Mode", selection: $viewMode) {
                     Label("List", systemImage: "list.bullet")
                         .tag(ViewMode.list)
-                    Label("Treemap", systemImage: "square.grid.3x3.fill")
-                        .tag(ViewMode.treemap)
+                    Label("Sunburst", systemImage: "circle.hexagongrid.fill")
+                        .tag(ViewMode.sunburst)
                 }
                 .pickerStyle(.segmented)
-                .help("Switch between list and treemap views")
+                .help("Switch between list and sunburst views")
             }
 
             ToolbarItem(placement: .primaryAction) {
-                if viewMode == .treemap {
+                if viewMode == .sunburst {
                     Button {
                         showLegend.toggle()
                     } label: {
@@ -137,13 +137,13 @@ struct ScanResultView: View {
                     rootNode: result.rootNode,
                     selectedNode: $selectedNode
                 )
-            case .treemap:
-                treemapSection
+            case .sunburst:
+                sunburstSection
             }
         }
     }
 
-    private var treemapSection: some View {
+    private var sunburstSection: some View {
         VStack(spacing: 0) {
             // Breadcrumb navigation
             if zoomedNode != nil {
@@ -161,9 +161,9 @@ struct ScanResultView: View {
                 Divider()
             }
 
-            // Treemap with legend overlay
+            // Sunburst with legend overlay
             ZStack(alignment: .topTrailing) {
-                TreemapView(
+                SunburstView(
                     rootNode: result.rootNode,
                     selectedNode: $selectedNode,
                     zoomedNode: $zoomedNode

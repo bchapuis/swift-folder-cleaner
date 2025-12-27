@@ -32,6 +32,9 @@
 		A1000023 /* TreemapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000025 /* TreemapView.swift */; };
 		A1000024 /* FileTypeLegend.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000026 /* FileTypeLegend.swift */; };
 		A1000025 /* BreadcrumbView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000027 /* BreadcrumbView.swift */; };
+		A1000026 /* SunburstRing.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000028 /* SunburstRing.swift */; };
+		A1000027 /* SunburstLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000029 /* SunburstLayout.swift */; };
+		A1000028 /* SunburstView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000030 /* SunburstView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -62,6 +65,9 @@
 		A2000025 /* TreemapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TreemapView.swift; sourceTree = "<group>"; };
 		A2000026 /* FileTypeLegend.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileTypeLegend.swift; sourceTree = "<group>"; };
 		A2000027 /* BreadcrumbView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BreadcrumbView.swift; sourceTree = "<group>"; };
+		A2000028 /* SunburstRing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SunburstRing.swift; sourceTree = "<group>"; };
+		A2000029 /* SunburstLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SunburstLayout.swift; sourceTree = "<group>"; };
+		A2000030 /* SunburstView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SunburstView.swift; sourceTree = "<group>"; };
 		A3000001 /* DiskAnalyzer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DiskAnalyzer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -125,6 +131,8 @@
 				A2000013 /* ScanState.swift */,
 				A2000023 /* TreemapRectangle.swift */,
 				A2000024 /* TreemapLayout.swift */,
+				A2000028 /* SunburstRing.swift */,
+				A2000029 /* SunburstLayout.swift */,
 			);
 			path = Domain;
 			sourceTree = "<group>";
@@ -152,6 +160,7 @@
 				A2000025 /* TreemapView.swift */,
 				A2000026 /* FileTypeLegend.swift */,
 				A2000027 /* BreadcrumbView.swift */,
+				A2000030 /* SunburstView.swift */,
 				A2000002 /* ContentView.swift */,
 				A2000014 /* ScanViewModel.swift */,
 			);
@@ -251,6 +260,9 @@
 				A1000023 /* TreemapView.swift in Sources */,
 				A1000024 /* FileTypeLegend.swift in Sources */,
 				A1000025 /* BreadcrumbView.swift in Sources */,
+				A1000026 /* SunburstRing.swift in Sources */,
+				A1000027 /* SunburstLayout.swift in Sources */,
+				A1000028 /* SunburstView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
