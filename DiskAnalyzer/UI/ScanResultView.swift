@@ -6,6 +6,13 @@ struct ScanResultView: View {
 
     @State private var selectedNode: FileNode?
     @State private var showDetails = true
+    @State private var viewMode: ViewMode = .list
+    @State private var showLegend = true
+
+    enum ViewMode {
+        case list
+        case treemap
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -14,10 +21,10 @@ struct ScanResultView: View {
 
             Divider()
 
-            // Main content: file browser + details panel
+            // Main content: view + details panel
             HSplitView {
-                // File browser
-                fileBrowserSection
+                // Main view area
+                mainViewSection
 
                 // Details panel
                 if showDetails, let node = selectedNode {
@@ -37,6 +44,28 @@ struct ScanResultView: View {
                     )
                 }
                 .help(showDetails ? "Hide details panel" : "Show details panel")
+            }
+
+            ToolbarItem(placement: .primaryAction) {
+                Picker("View Mode", selection: $viewMode) {
+                    Label("List", systemImage: "list.bullet")
+                        .tag(ViewMode.list)
+                    Label("Treemap", systemImage: "square.grid.3x3.fill")
+                        .tag(ViewMode.treemap)
+                }
+                .pickerStyle(.segmented)
+                .help("Switch between list and treemap views")
+            }
+
+            ToolbarItem(placement: .primaryAction) {
+                if viewMode == .treemap {
+                    Button {
+                        showLegend.toggle()
+                    } label: {
+                        Label("Legend", systemImage: "list.bullet.rectangle")
+                    }
+                    .help(showLegend ? "Hide legend" : "Show legend")
+                }
             }
         }
     }
@@ -94,19 +123,40 @@ struct ScanResultView: View {
         }
     }
 
-    // MARK: - File Browser
+    // MARK: - Main View
 
-    private var fileBrowserSection: some View {
-        VStack(spacing: 0) {
-            if result.rootNode.children.isEmpty {
-                emptyBrowserView
-            } else {
+    @ViewBuilder
+    private var mainViewSection: some View {
+        if result.rootNode.children.isEmpty {
+            emptyBrowserView
+        } else {
+            switch viewMode {
+            case .list:
                 FileBrowserView(
                     rootNode: result.rootNode,
                     selectedNode: $selectedNode
                 )
+            case .treemap:
+                treemapSection
             }
         }
+    }
+
+    private var treemapSection: some View {
+        ZStack(alignment: .topTrailing) {
+            TreemapView(
+                rootNode: result.rootNode,
+                selectedNode: $selectedNode
+            )
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+            if showLegend {
+                FileTypeLegend()
+                    .padding()
+                    .transition(.move(edge: .trailing).combined(with: .opacity))
+            }
+        }
+        .animation(.easeInOut(duration: 0.2), value: showLegend)
     }
 
     private var emptyBrowserView: some View {

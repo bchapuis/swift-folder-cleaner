@@ -29,6 +29,8 @@
 		A1000020 /* FileDetailsPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000022 /* FileDetailsPanel.swift */; };
 		A1000021 /* TreemapRectangle.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000023 /* TreemapRectangle.swift */; };
 		A1000022 /* TreemapLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000024 /* TreemapLayout.swift */; };
+		A1000023 /* TreemapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000025 /* TreemapView.swift */; };
+		A1000024 /* FileTypeLegend.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000026 /* FileTypeLegend.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -56,6 +58,8 @@
 		A2000022 /* FileDetailsPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileDetailsPanel.swift; sourceTree = "<group>"; };
 		A2000023 /* TreemapRectangle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TreemapRectangle.swift; sourceTree = "<group>"; };
 		A2000024 /* TreemapLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TreemapLayout.swift; sourceTree = "<group>"; };
+		A2000025 /* TreemapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TreemapView.swift; sourceTree = "<group>"; };
+		A2000026 /* FileTypeLegend.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileTypeLegend.swift; sourceTree = "<group>"; };
 		A3000001 /* DiskAnalyzer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DiskAnalyzer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -143,6 +147,8 @@
 				A2000019 /* ErrorView.swift */,
 				A2000021 /* FileBrowserView.swift */,
 				A2000022 /* FileDetailsPanel.swift */,
+				A2000025 /* TreemapView.swift */,
+				A2000026 /* FileTypeLegend.swift */,
 				A2000002 /* ContentView.swift */,
 				A2000014 /* ScanViewModel.swift */,
 			);
@@ -239,6 +245,8 @@
 				A1000020 /* FileDetailsPanel.swift in Sources */,
 				A1000021 /* TreemapRectangle.swift in Sources */,
 				A1000022 /* TreemapLayout.swift in Sources */,
+				A1000023 /* TreemapView.swift in Sources */,
+				A1000024 /* FileTypeLegend.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
