@@ -4,18 +4,55 @@ import SwiftUI
 struct ScanResultView: View {
     let result: ScanResult
 
+    @State private var selectedNode: FileNode?
+    @State private var showDetails = true
+
     var body: some View {
-        VStack(spacing: 24) {
-            // Success header
+        VStack(spacing: 0) {
+            // Header with statistics
+            headerSection
+
+            Divider()
+
+            // Main content: file browser + details panel
+            HSplitView {
+                // File browser
+                fileBrowserSection
+
+                // Details panel
+                if showDetails, let node = selectedNode {
+                    FileDetailsPanel(node: node, totalSize: result.rootNode.totalSize)
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button {
+                    showDetails.toggle()
+                } label: {
+                    Label(
+                        showDetails ? "Hide Details" : "Show Details",
+                        systemImage: showDetails ? "sidebar.right" : "sidebar.left"
+                    )
+                }
+                .help(showDetails ? "Hide details panel" : "Show details panel")
+            }
+        }
+    }
+
+    // MARK: - Header
+
+    private var headerSection: some View {
+        VStack(spacing: 12) {
             HStack(spacing: 12) {
                 Image(systemName: "checkmark.circle.fill")
-                    .font(.system(size: 48))
+                    .font(.title2)
                     .foregroundStyle(.green)
 
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Scan Complete!")
-                        .font(.title2)
-                        .fontWeight(.semibold)
+                        .font(.headline)
 
                     Text(result.rootNode.path.path)
                         .font(.caption)
@@ -23,99 +60,85 @@ struct ScanResultView: View {
                         .lineLimit(1)
                         .truncationMode(.middle)
                 }
+
+                Spacer()
+
+                statisticsCompact
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-
-            // Statistics grid
-            statisticsGrid
-
-            // Placeholder for future content
-            placeholderContent
-        }
-        .padding(24)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
-
-    // MARK: - Statistics Grid
-
-    private var statisticsGrid: some View {
-        LazyVGrid(columns: [
-            GridItem(.flexible()),
-            GridItem(.flexible()),
-            GridItem(.flexible()),
-            GridItem(.flexible())
-        ], spacing: 16) {
-            StatCard(
-                title: "Total Files",
-                value: "\(result.totalFilesScanned)",
-                icon: "doc.fill",
-                color: .blue
-            )
-
-            StatCard(
-                title: "Total Size",
-                value: result.rootNode.formattedSize,
-                icon: "internaldrive.fill",
-                color: .purple
-            )
-
-            StatCard(
-                title: "Scan Time",
-                value: result.formattedDuration,
-                icon: "clock.fill",
-                color: .orange
-            )
-
-            StatCard(
-                title: "Avg Speed",
-                value: String(format: "%.0f files/s", result.averageSpeed),
-                icon: "gauge.with.dots.needle.bottom.50percent",
-                color: .green
-            )
         }
         .padding()
         .background(.quaternary)
-        .cornerRadius(12)
     }
 
-    // MARK: - Placeholder
+    // MARK: - Statistics
 
-    private var placeholderContent: some View {
-        ContentUnavailableView {
-            Label("File Browser Coming Soon", systemImage: "list.bullet.rectangle.portrait")
-        } description: {
-            Text("The file browser and treemap visualization will be added in the next phases")
+    private var statisticsCompact: some View {
+        HStack(spacing: 16) {
+            CompactStat(
+                label: "Files",
+                value: "\(result.totalFilesScanned)",
+                icon: "doc.fill"
+            )
+
+            CompactStat(
+                label: "Size",
+                value: result.rootNode.formattedSize,
+                icon: "internaldrive.fill"
+            )
+
+            CompactStat(
+                label: "Time",
+                value: result.formattedDuration,
+                icon: "clock.fill"
+            )
         }
-        .frame(maxHeight: .infinity)
     }
+
+    // MARK: - File Browser
+
+    private var fileBrowserSection: some View {
+        VStack(spacing: 0) {
+            if result.rootNode.children.isEmpty {
+                emptyBrowserView
+            } else {
+                FileBrowserView(
+                    rootNode: result.rootNode,
+                    selectedNode: $selectedNode
+                )
+            }
+        }
+    }
+
+    private var emptyBrowserView: some View {
+        ContentUnavailableView {
+            Label("Empty Folder", systemImage: "folder")
+        } description: {
+            Text("This folder contains no files")
+        }
+    }
+
 }
 
-/// Statistics card component
-private struct StatCard: View {
-    let title: String
+/// Compact statistics display
+private struct CompactStat: View {
+    let label: String
     let value: String
     let icon: String
-    let color: Color
 
     var body: some View {
-        VStack(spacing: 12) {
+        HStack(spacing: 6) {
             Image(systemName: icon)
-                .font(.title)
-                .foregroundStyle(color)
-
-            Text(value)
-                .font(.title3)
-                .fontWeight(.semibold)
-                .monospacedDigit()
-
-            Text(title)
-                .font(.caption)
                 .foregroundStyle(.secondary)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(value)
+                    .font(.callout)
+                    .fontWeight(.semibold)
+                    .monospacedDigit()
+                Text(label)
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+            }
         }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 16)
-        .background(color.opacity(0.1))
-        .cornerRadius(8)
     }
 }
 
