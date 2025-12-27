@@ -1,63 +1,91 @@
 import SwiftUI
 
-/// High-performance treemap visualization using Canvas
+/// High-performance treemap visualization with caching and optimizations
 struct TreemapView: View {
+    // MARK: - Properties
+
     let rootNode: FileNode
     @Binding var selectedNode: FileNode?
     @Binding var zoomedNode: FileNode?
+
     @Environment(\.colorScheme) private var colorScheme
 
-    @State private var hoveredNode: FileNode?
+    @State private var viewModel = TreemapViewModel()
+    @State private var viewSize: CGSize = .zero
     @State private var mouseLocation: CGPoint = .zero
-    @State private var lastClickTime: Date = .distantPast
-    @State private var lastClickLocation: CGPoint = .zero
 
-    // Current node being displayed (zoomed node or root)
+    // Gesture state
+    @GestureState private var isDragging = false
+    @State private var tapCount = 0
+    @State private var lastTapTime: Date = .distantPast
+    @State private var lastTapLocation: CGPoint = .zero
+
+    // MARK: - Computed Properties
+
     private var displayNode: FileNode {
         zoomedNode ?? rootNode
     }
 
+    // MARK: - Body
+
     var body: some View {
         GeometryReader { geometry in
             Canvas { context, size in
-                // Generate layout for current bounds
-                let rectangles = TreemapLayout.layout(
-                    node: displayNode,
-                    in: CGRect(origin: .zero, size: size)
+                // Update layout if needed
+                viewModel.updateLayout(
+                    rootNode: rootNode,
+                    displayNode: displayNode,
+                    size: size
                 )
 
-                // Render each rectangle
-                for rectangle in rectangles {
+                // Draw all rectangles
+                for rectangle in viewModel.rectangles {
                     drawRectangle(rectangle, in: context)
                 }
 
                 // Draw selection highlight
                 if let selected = selectedNode,
-                   let selectedRect = rectangles.first(where: { $0.node.path == selected.path }) {
+                   let selectedRect = viewModel.rectangles.first(where: { $0.node.path == selected.path }) {
                     drawSelectionHighlight(selectedRect, in: context)
+                }
+
+                // Draw hover highlight
+                if let hovered = viewModel.hoveredNode,
+                   let hoveredRect = viewModel.rectangles.first(where: { $0.node.path == hovered.path }),
+                   hoveredRect.node.path != selectedNode?.path {
+                    drawHoverHighlight(hoveredRect, in: context)
                 }
             }
             .gesture(
                 DragGesture(minimumDistance: 0)
+                    .updating($isDragging) { _, state, _ in
+                        state = true
+                    }
                     .onChanged { value in
-                        handleMouseMove(at: value.location, in: geometry.size)
+                        handleDragChanged(value.location, in: geometry.size)
                     }
                     .onEnded { value in
-                        handleClick(at: value.location, in: geometry.size)
+                        handleDragEnded(value.location, in: geometry.size)
+                    }
+            )
+            .gesture(
+                TapGesture(count: 2)
+                    .onEnded {
+                        handleDoubleTap(at: mouseLocation)
                     }
             )
             .onContinuousHover { phase in
                 switch phase {
                 case .active(let location):
-                    handleMouseMove(at: location, in: geometry.size)
+                    handleHover(at: location)
                 case .ended:
-                    hoveredNode = nil
+                    viewModel.updateHover(at: nil)
                 }
             }
             .overlay(alignment: .topLeading) {
-                if let hovered = hoveredNode {
+                if let hovered = viewModel.hoveredNode {
                     tooltipView(for: hovered)
-                        .position(x: mouseLocation.x, y: mouseLocation.y - 40)
+                        .position(x: mouseLocation.x, y: max(40, mouseLocation.y - 40))
                 }
             }
             .focusable()
@@ -69,20 +97,152 @@ struct TreemapView: View {
                 handleEnter()
                 return .handled
             }
+            .onChange(of: geometry.size) { oldSize, newSize in
+                if oldSize != newSize {
+                    viewSize = newSize
+                    viewModel.invalidateLayout()
+                }
+            }
+            .onChange(of: displayNode.path) {
+                viewModel.invalidateLayout()
+            }
+            .onAppear {
+                viewSize = geometry.size
+            }
         }
     }
 
-    // MARK: - Keyboard Handlers
+    // MARK: - Drawing
+
+    private func drawRectangle(_ rectangle: TreemapRectangle, in context: GraphicsContext) {
+        let rect = rectangle.rect
+
+        // Don't draw tiny rectangles
+        guard rect.width > 1 && rect.height > 1 else { return }
+
+        // Choose color based on color scheme
+        let fillColor = colorScheme == .dark
+            ? rectangle.node.fileType.darkModeColor
+            : rectangle.node.fileType.color
+
+        // Fill
+        let path = Path(rect)
+        context.fill(path, with: .color(fillColor))
+
+        // Border
+        context.stroke(
+            path,
+            with: .color(.white.opacity(0.2)),
+            lineWidth: 0.5
+        )
+
+        // Label if space allows
+        if rectangle.canShowLabel {
+            drawLabel(for: rectangle, in: context)
+        }
+    }
+
+    private func drawLabel(for rectangle: TreemapRectangle, in context: GraphicsContext) {
+        let rect = rectangle.rect
+        let node = rectangle.node
+
+        let centerX = rect.midX
+        let centerY = rect.midY
+
+        // Name
+        var nameText = Text(node.name)
+            .font(.system(size: 11, weight: .medium))
+            .foregroundStyle(.white)
+
+        context.draw(
+            nameText,
+            at: CGPoint(x: centerX, y: centerY - 8),
+            anchor: .center
+        )
+
+        // Size if space allows
+        if rectangle.canShowSize {
+            let size = ByteCountFormatter.string(fromByteCount: node.totalSize, countStyle: .file)
+            var sizeText = Text(size)
+                .font(.system(size: 9))
+                .foregroundStyle(.white.opacity(0.9))
+
+            context.draw(
+                sizeText,
+                at: CGPoint(x: centerX, y: centerY + 8),
+                anchor: .center
+            )
+        }
+    }
+
+    private func drawSelectionHighlight(_ rectangle: TreemapRectangle, in context: GraphicsContext) {
+        let rect = rectangle.rect.insetBy(dx: 2, dy: 2)
+        let path = Path(rect)
+
+        // Inner white border
+        context.stroke(
+            path,
+            with: .color(.white),
+            style: StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round)
+        )
+
+        // Outer accent glow
+        context.stroke(
+            path,
+            with: .color(.accentColor),
+            style: StrokeStyle(lineWidth: 4, lineCap: .round, lineJoin: .round)
+        )
+    }
+
+    private func drawHoverHighlight(_ rectangle: TreemapRectangle, in context: GraphicsContext) {
+        let rect = rectangle.rect.insetBy(dx: 1, dy: 1)
+        let path = Path(rect)
+
+        // Subtle hover border
+        context.stroke(
+            path,
+            with: .color(.white.opacity(0.5)),
+            style: StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round)
+        )
+    }
+
+    // MARK: - Interaction Handlers
+
+    private func handleDragChanged(_ location: CGPoint, in size: CGSize) {
+        mouseLocation = location
+    }
+
+    private func handleDragEnded(_ location: CGPoint, in size: CGSize) {
+        // Single tap/click
+        if let node = viewModel.findNode(at: location) {
+            selectedNode = node
+        }
+    }
+
+    private func handleDoubleTap(at location: CGPoint) {
+        guard let node = viewModel.findNode(at: location),
+              node.isDirectory,
+              !node.children.isEmpty else {
+            return
+        }
+
+        withAnimation(.easeInOut(duration: 0.3)) {
+            zoomedNode = node
+        }
+    }
+
+    private func handleHover(at location: CGPoint) {
+        mouseLocation = location
+        viewModel.updateHover(at: location)
+    }
 
     private func handleEscape() {
-        // Zoom out to parent or root
         withAnimation(.easeInOut(duration: 0.3)) {
             zoomedNode = nil
         }
     }
 
     private func handleEnter() {
-        // Zoom into selected directory
         guard let selected = selectedNode,
               selected.isDirectory,
               !selected.children.isEmpty else {
@@ -94,142 +254,6 @@ struct TreemapView: View {
         }
     }
 
-    // MARK: - Drawing
-
-    private func drawRectangle(_ rectangle: TreemapRectangle, in context: GraphicsContext) {
-        let rect = rectangle.rect
-
-        // Don't draw rectangles that are too small
-        guard rect.width > 1 && rect.height > 1 else { return }
-
-        // Choose color based on color scheme
-        let fillColor = colorScheme == .dark
-            ? rectangle.node.fileType.darkModeColor
-            : rectangle.node.fileType.color
-
-        // Fill rectangle
-        var path = Path(rect)
-        context.fill(path, with: .color(fillColor))
-
-        // Draw border
-        context.stroke(
-            path,
-            with: .color(.white.opacity(0.3)),
-            lineWidth: 1
-        )
-
-        // Draw label if space allows
-        if rectangle.canShowLabel {
-            drawLabel(for: rectangle, in: context)
-        }
-    }
-
-    private func drawLabel(for rectangle: TreemapRectangle, in context: GraphicsContext) {
-        let rect = rectangle.rect
-        let node = rectangle.node
-
-        // Calculate text position (centered in rectangle)
-        let centerX = rect.midX
-        let centerY = rect.midY
-
-        // Draw name
-        let name = node.name
-        let namePoint = CGPoint(x: centerX, y: centerY - 8)
-
-        var nameText = Text(name)
-            .font(.system(size: 11, weight: .medium))
-            .foregroundStyle(.white)
-
-        context.draw(
-            nameText,
-            at: namePoint,
-            anchor: .center
-        )
-
-        // Draw size if space allows
-        if rectangle.canShowSize {
-            let size = ByteCountFormatter.string(fromByteCount: node.totalSize, countStyle: .file)
-            let sizePoint = CGPoint(x: centerX, y: centerY + 8)
-
-            var sizeText = Text(size)
-                .font(.system(size: 9))
-                .foregroundStyle(.white.opacity(0.9))
-
-            context.draw(
-                sizeText,
-                at: sizePoint,
-                anchor: .center
-            )
-        }
-    }
-
-    private func drawSelectionHighlight(_ rectangle: TreemapRectangle, in context: GraphicsContext) {
-        let rect = rectangle.rect.insetBy(dx: 2, dy: 2)
-        let path = Path(rect)
-
-        // Draw thick border for selection
-        context.stroke(
-            path,
-            with: .color(.white),
-            style: StrokeStyle(lineWidth: 3, lineCap: .round, lineJoin: .round)
-        )
-
-        // Draw outer glow
-        context.stroke(
-            path,
-            with: .color(.accentColor),
-            style: StrokeStyle(lineWidth: 5, lineCap: .round, lineJoin: .round)
-        )
-    }
-
-    // MARK: - Interaction
-
-    private func handleMouseMove(at location: CGPoint, in size: CGSize) {
-        mouseLocation = location
-
-        // Find node at location
-        let rectangles = TreemapLayout.layout(
-            node: displayNode,
-            in: CGRect(origin: .zero, size: size)
-        )
-
-        hoveredNode = rectangles.first(where: { $0.rect.contains(location) })?.node
-    }
-
-    private func handleClick(at location: CGPoint, in size: CGSize) {
-        let now = Date()
-        let timeSinceLastClick = now.timeIntervalSince(lastClickTime)
-        let distance = hypot(location.x - lastClickLocation.x, location.y - lastClickLocation.y)
-
-        // Find node at location
-        let rectangles = TreemapLayout.layout(
-            node: displayNode,
-            in: CGRect(origin: .zero, size: size)
-        )
-
-        if let tappedRect = rectangles.first(where: { $0.rect.contains(location) }) {
-            // Check for double-click (within 500ms and 10pt distance)
-            if timeSinceLastClick < 0.5 && distance < 10 {
-                // Double-click: zoom into directory
-                handleDoubleClick(node: tappedRect.node)
-            } else {
-                // Single click: select
-                selectedNode = tappedRect.node
-            }
-
-            lastClickTime = now
-            lastClickLocation = location
-        }
-    }
-
-    private func handleDoubleClick(node: FileNode) {
-        guard node.isDirectory && !node.children.isEmpty else { return }
-
-        withAnimation(.easeInOut(duration: 0.3)) {
-            zoomedNode = node
-        }
-    }
-
     // MARK: - Tooltip
 
     @ViewBuilder
@@ -237,6 +261,7 @@ struct TreemapView: View {
         VStack(alignment: .leading, spacing: 4) {
             Text(node.name)
                 .font(.system(size: 12, weight: .semibold))
+                .lineLimit(2)
 
             HStack(spacing: 8) {
                 Text(ByteCountFormatter.string(fromByteCount: node.totalSize, countStyle: .file))
@@ -258,6 +283,8 @@ struct TreemapView: View {
         }
     }
 }
+
+// MARK: - Preview
 
 #Preview {
     let sampleNode = FileNode(
