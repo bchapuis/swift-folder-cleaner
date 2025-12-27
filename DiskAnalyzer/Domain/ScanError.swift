@@ -1,7 +1,7 @@
 import Foundation
 
 /// Errors that can occur during file scanning
-enum ScanError: LocalizedError, Sendable {
+enum ScanError: LocalizedError, Sendable, Equatable {
     case permissionDenied(path: String)
     case pathNotFound(path: String)
     case notADirectory(path: String)

@@ -14,15 +14,10 @@ struct ScanProgress: Sendable {
     }
 
     /// Estimated time remaining (nil if cannot be estimated)
+    /// For file system scanning, we can't estimate completion time
+    /// as we don't know total file count ahead of time
     var estimatedTimeRemaining: TimeInterval? {
-        guard filesScanned > 0 else { return nil }
-
-        let elapsed = Date().timeIntervalSince(startTime)
-        let rate = Double(filesScanned) / elapsed
-
-        // For file system scanning, we can't estimate completion time
-        // as we don't know total file count ahead of time
-        return nil
+        nil
     }
 
     /// Scanning speed in files per second

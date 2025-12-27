@@ -12,6 +12,25 @@ actor AsyncFileScanner {
         self.currentProgress = .initial()
     }
 
+    /// Scans a directory asynchronously with AsyncStream progress updates
+    /// - Parameter url: The root directory to scan
+    /// - Returns: An AsyncStream of progress updates and the final result
+    func scanWithStream(url: URL) -> (stream: AsyncStream<ScanProgress>, result: Task<ScanResult, Error>) {
+        let (stream, continuation) = AsyncStream.makeStream(of: ScanProgress.self)
+
+        let task = Task<ScanResult, Error> {
+            defer { continuation.finish() }
+
+            let result = try await scan(url: url) { progress in
+                continuation.yield(progress)
+            }
+
+            return result
+        }
+
+        return (stream, task)
+    }
+
     /// Scans a directory asynchronously with progress updates
     /// - Parameters:
     ///   - url: The root directory to scan
