@@ -12,7 +12,7 @@ struct ScanResultView: View {
 
     enum ViewMode {
         case list
-        case sunburst
+        case treemap
     }
 
     var body: some View {
@@ -51,15 +51,15 @@ struct ScanResultView: View {
                 Picker("View Mode", selection: $viewMode) {
                     Label("List", systemImage: "list.bullet")
                         .tag(ViewMode.list)
-                    Label("Sunburst", systemImage: "circle.hexagongrid.fill")
-                        .tag(ViewMode.sunburst)
+                    Label("Treemap", systemImage: "square.grid.3x3.fill")
+                        .tag(ViewMode.treemap)
                 }
                 .pickerStyle(.segmented)
-                .help("Switch between list and sunburst views")
+                .help("Switch between list and treemap views")
             }
 
             ToolbarItem(placement: .primaryAction) {
-                if viewMode == .sunburst {
+                if viewMode == .treemap {
                     Button {
                         showLegend.toggle()
                     } label: {
@@ -137,13 +137,13 @@ struct ScanResultView: View {
                     rootNode: result.rootNode,
                     selectedNode: $selectedNode
                 )
-            case .sunburst:
-                sunburstSection
+            case .treemap:
+                treemapSection
             }
         }
     }
 
-    private var sunburstSection: some View {
+    private var treemapSection: some View {
         VStack(spacing: 0) {
             // Breadcrumb navigation
             if zoomedNode != nil {
@@ -161,9 +161,9 @@ struct ScanResultView: View {
                 Divider()
             }
 
-            // Sunburst with legend overlay
-            ZStack(alignment: .topTrailing) {
-                SunburstView(
+            // Treemap with legend overlay
+            ZStack(alignment: .topLeading) {
+                TreemapView(
                     rootNode: result.rootNode,
                     selectedNode: $selectedNode,
                     zoomedNode: $zoomedNode
@@ -173,7 +173,7 @@ struct ScanResultView: View {
                 if showLegend {
                     FileTypeLegend()
                         .padding()
-                        .transition(.move(edge: .trailing).combined(with: .opacity))
+                        .transition(.move(edge: .leading).combined(with: .opacity))
                 }
             }
         }

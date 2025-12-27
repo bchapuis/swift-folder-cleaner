@@ -14,12 +14,24 @@ struct TreemapRectangle: Identifiable {
 
     /// Whether this rectangle is large enough to show a label
     var canShowLabel: Bool {
-        rect.width > 60 && rect.height > 30
+        rect.width > 80 && rect.height > 40
     }
 
     /// Whether this rectangle is large enough to show size
     var canShowSize: Bool {
-        rect.width > 100 && rect.height > 50
+        rect.width > 120 && rect.height > 60
+    }
+
+    /// Optimal font size for this rectangle
+    var labelFontSize: CGFloat {
+        let area = rect.width * rect.height
+        if area > 20000 {
+            return 13
+        } else if area > 10000 {
+            return 11
+        } else {
+            return 10
+        }
     }
 }
 

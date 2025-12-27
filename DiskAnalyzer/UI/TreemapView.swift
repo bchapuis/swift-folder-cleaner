@@ -149,12 +149,20 @@ struct TreemapView: View {
         let centerX = rect.midX
         let centerY = rect.midY
 
+        // Truncate long filenames
+        let displayName = truncateFilename(node.name, maxWidth: rect.width - 8)
+        let fontSize = rectangle.labelFontSize
+
+        // Draw text shadow for better contrast
+        var shadowContext = context
+        shadowContext.addFilter(.shadow(color: .black.opacity(0.7), radius: 2, x: 0, y: 1))
+
         // Name
-        var nameText = Text(node.name)
-            .font(.system(size: 11, weight: .medium))
+        var nameText = Text(displayName)
+            .font(.system(size: fontSize, weight: .medium))
             .foregroundStyle(.white)
 
-        context.draw(
+        shadowContext.draw(
             nameText,
             at: CGPoint(x: centerX, y: centerY - 8),
             anchor: .center
@@ -164,15 +172,29 @@ struct TreemapView: View {
         if rectangle.canShowSize {
             let size = ByteCountFormatter.string(fromByteCount: node.totalSize, countStyle: .file)
             var sizeText = Text(size)
-                .font(.system(size: 9))
-                .foregroundStyle(.white.opacity(0.9))
+                .font(.system(size: fontSize - 2))
+                .foregroundStyle(.white.opacity(0.95))
 
-            context.draw(
+            shadowContext.draw(
                 sizeText,
-                at: CGPoint(x: centerX, y: centerY + 8),
+                at: CGPoint(x: centerX, y: centerY + 10),
                 anchor: .center
             )
         }
+    }
+
+    private func truncateFilename(_ name: String, maxWidth: CGFloat) -> String {
+        // Estimate character width (rough approximation)
+        let avgCharWidth: CGFloat = 7
+        let maxChars = Int(maxWidth / avgCharWidth)
+
+        if name.count <= maxChars {
+            return name
+        }
+
+        // Truncate with ellipsis
+        let keepChars = max(maxChars - 3, 1)
+        return String(name.prefix(keepChars)) + "..."
     }
 
     private func drawSelectionHighlight(_ rectangle: TreemapRectangle, in context: GraphicsContext) {
