@@ -120,14 +120,16 @@ struct SunburstView: View {
                 height: ring.outerRadius * 2
             ))
         } else {
-            // Draw ring segment
-            path.move(to: polarToCartesian(
+            // Draw ring segment using proper arc construction
+            // Start at outer radius
+            let outerStart = polarToCartesian(
                 center: center,
-                radius: ring.innerRadius,
+                radius: ring.outerRadius,
                 angle: ring.startAngle
-            ))
+            )
+            path.move(to: outerStart)
 
-            // Outer arc
+            // Draw outer arc from startAngle to endAngle
             path.addArc(
                 center: center,
                 radius: ring.outerRadius,
@@ -136,14 +138,15 @@ struct SunburstView: View {
                 clockwise: false
             )
 
-            // Line to inner arc
-            path.addLine(to: polarToCartesian(
+            // Draw line to inner arc at endAngle
+            let innerEnd = polarToCartesian(
                 center: center,
                 radius: ring.innerRadius,
                 angle: ring.endAngle
-            ))
+            )
+            path.addLine(to: innerEnd)
 
-            // Inner arc (reverse direction)
+            // Draw inner arc back from endAngle to startAngle
             path.addArc(
                 center: center,
                 radius: ring.innerRadius,
@@ -152,6 +155,7 @@ struct SunburstView: View {
                 clockwise: true
             )
 
+            // Close the path
             path.closeSubpath()
         }
 
@@ -178,7 +182,7 @@ struct SunburstView: View {
             angle: ring.midAngle
         )
 
-        var nameText = Text(ring.node.name)
+        let nameText = Text(ring.node.name)
             .font(.system(size: 10, weight: .medium))
             .foregroundStyle(.white)
 
