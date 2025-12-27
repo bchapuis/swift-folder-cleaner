@@ -8,6 +8,7 @@ struct ScanResultView: View {
     @State private var showDetails = true
     @State private var viewMode: ViewMode = .list
     @State private var showLegend = true
+    @State private var zoomedNode: FileNode?
 
     enum ViewMode {
         case list
@@ -143,20 +144,41 @@ struct ScanResultView: View {
     }
 
     private var treemapSection: some View {
-        ZStack(alignment: .topTrailing) {
-            TreemapView(
-                rootNode: result.rootNode,
-                selectedNode: $selectedNode
-            )
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        VStack(spacing: 0) {
+            // Breadcrumb navigation
+            if zoomedNode != nil {
+                BreadcrumbView(
+                    rootNode: result.rootNode,
+                    currentNode: zoomedNode,
+                    onNavigate: { node in
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            zoomedNode = node
+                        }
+                    }
+                )
+                .transition(.move(edge: .top).combined(with: .opacity))
 
-            if showLegend {
-                FileTypeLegend()
-                    .padding()
-                    .transition(.move(edge: .trailing).combined(with: .opacity))
+                Divider()
+            }
+
+            // Treemap with legend overlay
+            ZStack(alignment: .topTrailing) {
+                TreemapView(
+                    rootNode: result.rootNode,
+                    selectedNode: $selectedNode,
+                    zoomedNode: $zoomedNode
+                )
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+                if showLegend {
+                    FileTypeLegend()
+                        .padding()
+                        .transition(.move(edge: .trailing).combined(with: .opacity))
+                }
             }
         }
         .animation(.easeInOut(duration: 0.2), value: showLegend)
+        .animation(.easeInOut(duration: 0.3), value: zoomedNode?.path)
     }
 
     private var emptyBrowserView: some View {

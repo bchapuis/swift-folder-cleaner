@@ -4,17 +4,25 @@ import SwiftUI
 struct TreemapView: View {
     let rootNode: FileNode
     @Binding var selectedNode: FileNode?
+    @Binding var zoomedNode: FileNode?
     @Environment(\.colorScheme) private var colorScheme
 
     @State private var hoveredNode: FileNode?
     @State private var mouseLocation: CGPoint = .zero
+    @State private var lastClickTime: Date = .distantPast
+    @State private var lastClickLocation: CGPoint = .zero
+
+    // Current node being displayed (zoomed node or root)
+    private var displayNode: FileNode {
+        zoomedNode ?? rootNode
+    }
 
     var body: some View {
         GeometryReader { geometry in
             Canvas { context, size in
                 // Generate layout for current bounds
                 let rectangles = TreemapLayout.layout(
-                    node: rootNode,
+                    node: displayNode,
                     in: CGRect(origin: .zero, size: size)
                 )
 
@@ -52,6 +60,37 @@ struct TreemapView: View {
                         .position(x: mouseLocation.x, y: mouseLocation.y - 40)
                 }
             }
+            .focusable()
+            .onKeyPress(.escape) {
+                handleEscape()
+                return .handled
+            }
+            .onKeyPress(.return) {
+                handleEnter()
+                return .handled
+            }
+        }
+    }
+
+    // MARK: - Keyboard Handlers
+
+    private func handleEscape() {
+        // Zoom out to parent or root
+        withAnimation(.easeInOut(duration: 0.3)) {
+            zoomedNode = nil
+        }
+    }
+
+    private func handleEnter() {
+        // Zoom into selected directory
+        guard let selected = selectedNode,
+              selected.isDirectory,
+              !selected.children.isEmpty else {
+            return
+        }
+
+        withAnimation(.easeInOut(duration: 0.3)) {
+            zoomedNode = selected
         }
     }
 
@@ -150,7 +189,7 @@ struct TreemapView: View {
 
         // Find node at location
         let rectangles = TreemapLayout.layout(
-            node: rootNode,
+            node: displayNode,
             in: CGRect(origin: .zero, size: size)
         )
 
@@ -158,14 +197,36 @@ struct TreemapView: View {
     }
 
     private func handleClick(at location: CGPoint, in size: CGSize) {
+        let now = Date()
+        let timeSinceLastClick = now.timeIntervalSince(lastClickTime)
+        let distance = hypot(location.x - lastClickLocation.x, location.y - lastClickLocation.y)
+
         // Find node at location
         let rectangles = TreemapLayout.layout(
-            node: rootNode,
+            node: displayNode,
             in: CGRect(origin: .zero, size: size)
         )
 
         if let tappedRect = rectangles.first(where: { $0.rect.contains(location) }) {
-            selectedNode = tappedRect.node
+            // Check for double-click (within 500ms and 10pt distance)
+            if timeSinceLastClick < 0.5 && distance < 10 {
+                // Double-click: zoom into directory
+                handleDoubleClick(node: tappedRect.node)
+            } else {
+                // Single click: select
+                selectedNode = tappedRect.node
+            }
+
+            lastClickTime = now
+            lastClickLocation = location
+        }
+    }
+
+    private func handleDoubleClick(node: FileNode) {
+        guard node.isDirectory && !node.children.isEmpty else { return }
+
+        withAnimation(.easeInOut(duration: 0.3)) {
+            zoomedNode = node
         }
     }
 
@@ -181,8 +242,8 @@ struct TreemapView: View {
                 Text(ByteCountFormatter.string(fromByteCount: node.totalSize, countStyle: .file))
                     .font(.system(size: 11))
 
-                if node.totalSize > 0 && rootNode.totalSize > 0 {
-                    let percentage = (Double(node.totalSize) / Double(rootNode.totalSize)) * 100
+                if node.totalSize > 0 && displayNode.totalSize > 0 {
+                    let percentage = (Double(node.totalSize) / Double(displayNode.totalSize)) * 100
                     Text(String(format: "%.1f%%", percentage))
                         .font(.system(size: 11))
                         .foregroundStyle(.secondary)
@@ -237,6 +298,10 @@ struct TreemapView: View {
         isDirectory: true
     )
 
-    return TreemapView(rootNode: sampleNode, selectedNode: .constant(nil))
-        .frame(width: 800, height: 600)
+    return TreemapView(
+        rootNode: sampleNode,
+        selectedNode: .constant(nil),
+        zoomedNode: .constant(nil)
+    )
+    .frame(width: 800, height: 600)
 }
