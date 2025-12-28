@@ -27,19 +27,19 @@ struct ScanResultView: View {
 
             Divider()
 
-            // Dual pane: treemap + file list
+            // Dual pane: treemap + file list (50/50 split)
             HSplitView {
                 // Left: Treemap visualization
                 TreemapView(
                     viewModel: viewModel
                 )
-                .frame(minWidth: 300, idealWidth: 400)
+                .frame(minWidth: 400)
 
                 // Right: File list
                 FileListView(
                     viewModel: viewModel
                 )
-                .frame(minWidth: 400, idealWidth: 600)
+                .frame(minWidth: 400)
             }
 
             Divider()

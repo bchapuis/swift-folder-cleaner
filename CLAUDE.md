@@ -6,38 +6,38 @@ Quick reference for Claude Code.
 
 ```bash
 # Clean, Build & Run (use /run slash command)
-xcodebuild clean && rm -rf ~/Library/Developer/Xcode/DerivedData/*DiskAnalyzer* && xcodebuild -scheme DiskAnalyzer -configuration Debug build && open ~/Library/Developer/Xcode/DerivedData/DiskAnalyzer-*/Build/Products/Debug/DiskAnalyzer.app
+xcodebuild clean && rm -rf ~/Library/Developer/Xcode/DerivedData/*DirectoryCleaner* && xcodebuild -scheme DirectoryCleaner -configuration Debug build && open ~/Library/Developer/Xcode/DerivedData/DirectoryCleaner-*/Build/Products/Debug/DirectoryCleaner.app
 
 # Build (Release)
-xcodebuild -scheme DiskAnalyzer -configuration Release build
+xcodebuild -scheme DirectoryCleaner -configuration Release build
 
 # Test
-xcodebuild test -scheme DiskAnalyzer
+xcodebuild test -scheme DirectoryCleaner
 swift test
 
 # Clean
 xcodebuild clean
-rm -rf ~/Library/Developer/Xcode/DerivedData/*DiskAnalyzer*
+rm -rf ~/Library/Developer/Xcode/DerivedData/*DirectoryCleaner*
 
 # Archive & Export
-xcodebuild archive -scheme DiskAnalyzer -archivePath ./build/DiskAnalyzer.xcarchive
-xcodebuild -exportArchive -archivePath ./build/DiskAnalyzer.xcarchive -exportPath ./build/Release -exportOptionsPlist ExportOptions.plist
+xcodebuild archive -scheme DirectoryCleaner -archivePath ./build/DirectoryCleaner.xcarchive
+xcodebuild -exportArchive -archivePath ./build/DirectoryCleaner.xcarchive -exportPath ./build/Release -exportOptionsPlist ExportOptions.plist
 
 # Code Sign & Notarize
-codesign --deep --force --sign "Developer ID Application" ./build/Release/DiskAnalyzer.app
-xcrun notarytool submit ./build/DiskAnalyzer.dmg --keychain-profile "AC_PASSWORD" --wait
-xcrun stapler staple ./build/DiskAnalyzer.dmg
+codesign --deep --force --sign "Developer ID Application" ./build/Release/DirectoryCleaner.app
+xcrun notarytool submit ./build/DirectoryCleaner.dmg --keychain-profile "AC_PASSWORD" --wait
+xcrun stapler staple ./build/DirectoryCleaner.dmg
 
 # Lint
 swiftlint lint
 swiftlint --fix
 
 # DocC
-xcodebuild docbuild -scheme DiskAnalyzer -destination 'platform=macOS'
+xcodebuild docbuild -scheme DirectoryCleaner -destination 'platform=macOS'
 
 # Profile
-instruments -t "Time Profiler" ./build/Release/DiskAnalyzer.app
-instruments -t "Allocations" ./build/Release/DiskAnalyzer.app
+instruments -t "Time Profiler" ./build/Release/DirectoryCleaner.app
+instruments -t "Allocations" ./build/Release/DirectoryCleaner.app
 ```
 
 ## Tech Stack
@@ -49,12 +49,12 @@ instruments -t "Allocations" ./build/Release/DiskAnalyzer.app
 ## Structure
 
 ```
-DiskAnalyzer/
-├── DiskAnalyzer.xcodeproj
-├── DiskAnalyzer/
-│   ├── DiskAnalyzerApp.swift  # @main
+DirectoryCleaner/
+├── DirectoryCleaner.xcodeproj
+├── DirectoryCleaner/
+│   ├── DirectoryCleanerApp.swift  # @main
 │   ├── Info.plist
-│   ├── DiskAnalyzer.entitlements
+│   ├── DirectoryCleaner.entitlements
 │   ├── Domain/                 # Models, use cases
 │   ├── Data/                   # FileManager, I/O
 │   └── UI/                     # SwiftUI views

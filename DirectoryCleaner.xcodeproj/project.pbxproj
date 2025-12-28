@@ -22,7 +22,7 @@
 		A1000039 /* NavigationState.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000041 /* NavigationState.swift */; };
 		A1000040 /* SelectionState.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000042 /* SelectionState.swift */; };
 		A1000041 /* ScanResultViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000043 /* ScanResultViewModel.swift */; };
-		A1000001 /* DiskAnalyzerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000001 /* DiskAnalyzerApp.swift */; };
+		A1000001 /* DirectoryCleanerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000001 /* DirectoryCleanerApp.swift */; };
 		A1000002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000002 /* ContentView.swift */; };
 		A1000003 /* FileType.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000005 /* FileType.swift */; };
 		A1000004 /* FileNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000006 /* FileNode.swift */; };
@@ -60,10 +60,10 @@
 		A2000041 /* NavigationState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationState.swift; sourceTree = "<group>"; };
 		A2000042 /* SelectionState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectionState.swift; sourceTree = "<group>"; };
 		A2000043 /* ScanResultViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanResultViewModel.swift; sourceTree = "<group>"; };
-		A2000001 /* DiskAnalyzerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiskAnalyzerApp.swift; sourceTree = "<group>"; };
+		A2000001 /* DirectoryCleanerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectoryCleanerApp.swift; sourceTree = "<group>"; };
 		A2000002 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		A2000003 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		A2000004 /* DiskAnalyzer.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DiskAnalyzer.entitlements; sourceTree = "<group>"; };
+		A2000004 /* DirectoryCleaner.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DirectoryCleaner.entitlements; sourceTree = "<group>"; };
 		A2000005 /* FileType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileType.swift; sourceTree = "<group>"; };
 		A2000006 /* FileNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileNode.swift; sourceTree = "<group>"; };
 		A2000007 /* ScanProgress.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanProgress.swift; sourceTree = "<group>"; };
@@ -82,7 +82,7 @@
 		A2000028 /* TreemapViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TreemapViewModel.swift; sourceTree = "<group>"; };
 		618C97FFF83C4AD39098B704 /* IndexedFileTree.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IndexedFileTree.swift; sourceTree = "<group>"; };
 		0256EFCFD64E429EB168ED79 /* FilenameFilterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilenameFilterView.swift; sourceTree = "<group>"; };
-		A3000001 /* DiskAnalyzer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DiskAnalyzer.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A3000001 /* DirectoryCleaner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DirectoryCleaner.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -99,23 +99,23 @@
 		A5000001 = {
 			isa = PBXGroup;
 			children = (
-				A5000002 /* DiskAnalyzer */,
+				A5000002 /* DirectoryCleaner */,
 				A5000003 /* Tests */,
 				A5000004 /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		A5000002 /* DiskAnalyzer */ = {
+		A5000002 /* DirectoryCleaner */ = {
 			isa = PBXGroup;
 			children = (
-				A2000001 /* DiskAnalyzerApp.swift */,
+				A2000001 /* DirectoryCleanerApp.swift */,
 				A2000003 /* Info.plist */,
-				A2000004 /* DiskAnalyzer.entitlements */,
+				A2000004 /* DirectoryCleaner.entitlements */,
 				A5000005 /* Domain */,
 				A5000006 /* Data */,
 				A5000007 /* UI */,
 			);
-			path = DiskAnalyzer;
+			path = DirectoryCleaner;
 			sourceTree = "<group>";
 		};
 		A5000003 /* Tests */ = {
@@ -128,7 +128,7 @@
 		A5000004 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				A3000001 /* DiskAnalyzer.app */,
+				A3000001 /* DirectoryCleaner.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -192,9 +192,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		A6000001 /* DiskAnalyzer */ = {
+		A6000001 /* DirectoryCleaner */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = A7000001 /* Build configuration list for PBXNativeTarget "DiskAnalyzer" */;
+			buildConfigurationList = A7000001 /* Build configuration list for PBXNativeTarget "DirectoryCleaner" */;
 			buildPhases = (
 				A8000001 /* Sources */,
 				A4000001 /* Frameworks */,
@@ -204,9 +204,9 @@
 			);
 			dependencies = (
 			);
-			name = DiskAnalyzer;
-			productName = DiskAnalyzer;
-			productReference = A3000001 /* DiskAnalyzer.app */;
+			name = DirectoryCleaner;
+			productName = DirectoryCleaner;
+			productReference = A3000001 /* DirectoryCleaner.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -224,7 +224,7 @@
 					};
 				};
 			};
-			buildConfigurationList = A7000002 /* Build configuration list for PBXProject "DiskAnalyzer" */;
+			buildConfigurationList = A7000002 /* Build configuration list for PBXProject "DirectoryCleaner" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -237,7 +237,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				A6000001 /* DiskAnalyzer */,
+				A6000001 /* DirectoryCleaner */,
 			);
 		};
 /* End PBXProject section */
@@ -258,7 +258,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A1000002 /* ContentView.swift in Sources */,
-				A1000001 /* DiskAnalyzerApp.swift in Sources */,
+				A1000001 /* DirectoryCleanerApp.swift in Sources */,
 				A1000003 /* FileType.swift in Sources */,
 				A1000004 /* FileNode.swift in Sources */,
 				A1000005 /* ScanProgress.swift in Sources */,
@@ -424,7 +424,7 @@
 				ARCHS = "$(ARCHS_STANDARD)";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = DiskAnalyzer/DiskAnalyzer.entitlements;
+				CODE_SIGN_ENTITLEMENTS = DirectoryCleaner/DirectoryCleaner.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
@@ -432,14 +432,14 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = DiskAnalyzer/Info.plist;
+				INFOPLIST_FILE = DirectoryCleaner/Info.plist;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.example.DiskAnalyzer;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.DirectoryCleaner;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -452,7 +452,7 @@
 				ARCHS = "$(ARCHS_STANDARD)";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = DiskAnalyzer/DiskAnalyzer.entitlements;
+				CODE_SIGN_ENTITLEMENTS = DirectoryCleaner/DirectoryCleaner.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
@@ -460,14 +460,14 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = DiskAnalyzer/Info.plist;
+				INFOPLIST_FILE = DirectoryCleaner/Info.plist;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.example.DiskAnalyzer;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.DirectoryCleaner;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -477,7 +477,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		A7000001 /* Build configuration list for PBXNativeTarget "DiskAnalyzer" */ = {
+		A7000001 /* Build configuration list for PBXNativeTarget "DirectoryCleaner" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				A7000005 /* Debug */,
@@ -486,7 +486,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		A7000002 /* Build configuration list for PBXProject "DiskAnalyzer" */ = {
+		A7000002 /* Build configuration list for PBXProject "DirectoryCleaner" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				A7000003 /* Debug */,

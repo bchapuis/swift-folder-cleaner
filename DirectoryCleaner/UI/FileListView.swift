@@ -81,6 +81,10 @@ struct FileListView: View {
             return sortAscending
                 ? files.sorted { $0.totalSize < $1.totalSize }
                 : files.sorted { $0.totalSize > $1.totalSize }
+        case .percentage:
+            return sortAscending
+                ? files.sorted { percentage(for: $0) < percentage(for: $1) }
+                : files.sorted { percentage(for: $0) > percentage(for: $1) }
         case .type:
             return sortAscending
                 ? files.sorted { $0.fileType.rawValue < $1.fileType.rawValue }
@@ -92,6 +96,12 @@ struct FileListView: View {
         }
     }
 
+    private func percentage(for file: FileNode) -> Double {
+        let totalSize = viewModel.currentRoot.totalSize
+        guard totalSize > 0 else { return 0 }
+        return Double(file.totalSize) / Double(totalSize) * 100
+    }
+
     // MARK: - Header
 
     private var headerView: some View {
@@ -101,6 +111,9 @@ struct FileListView: View {
 
             // Size column
             columnHeader("Size", column: .size, flex: 1.5)
+
+            // Percentage column
+            columnHeader("%", column: .percentage, flex: 0.8)
 
             // Type column
             columnHeader("Type", column: .type, flex: 1)
@@ -171,6 +184,12 @@ struct FileListView: View {
                 .foregroundStyle(isSelected ? .primary : .secondary)
                 .frame(maxWidth: .infinity * 1.5, alignment: .leading)
 
+            // Percentage
+            Text(String(format: "%.1f%%", percentage(for: file)))
+                .font(.system(size: 12))
+                .foregroundStyle(isSelected ? .primary : .secondary)
+                .frame(maxWidth: .infinity * 0.8, alignment: .leading)
+
             // Type
             Text(file.fileType.displayName)
                 .font(.system(size: 12))
@@ -226,6 +245,7 @@ struct FileListView: View {
 enum SortColumn {
     case name
     case size
+    case percentage
     case type
     case path
 }

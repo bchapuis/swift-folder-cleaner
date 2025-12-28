@@ -6,11 +6,6 @@ struct ContentView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // Header
-            headerView
-
-            Divider()
-
             // State-based content
             switch viewModel.state {
             case .idle:
@@ -24,37 +19,42 @@ struct ContentView: View {
             }
         }
         .frame(minWidth: 800, minHeight: 600)
-    }
-
-    // MARK: - Header
-
-    private var headerView: some View {
-        HStack {
-            Text("Disk Analyzer")
-                .font(.title2)
-                .fontWeight(.semibold)
-
-            Spacer()
-
-            if case .complete = viewModel.state {
-                Button("New Scan") {
-                    viewModel.reset()
-                }
-                .buttonStyle(.borderedProminent)
-            } else if !viewModel.state.isScanning {
-                Button("Scan Folder") {
-                    startScan()
-                }
-                .buttonStyle(.borderedProminent)
-            } else {
-                Button("Cancel") {
-                    viewModel.cancelScan()
-                }
-                .buttonStyle(.bordered)
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                toolbarButton
             }
         }
-        .padding()
-        .background(.quaternary)
+    }
+
+    // MARK: - Toolbar
+
+    @ViewBuilder
+    private var toolbarButton: some View {
+        if viewModel.state.isScanning {
+            Button {
+                viewModel.cancelScan()
+            } label: {
+                VStack(spacing: 4) {
+                    Image(systemName: "xmark.circle")
+                        .font(.system(size: 20))
+                    Text("Cancel")
+                        .font(.system(size: 11))
+                }
+            }
+            .buttonStyle(.plain)
+        } else {
+            Button {
+                startScan()
+            } label: {
+                VStack(spacing: 4) {
+                    Image(systemName: "folder.badge.gearshape")
+                        .font(.system(size: 20))
+                    Text("Scan Folder")
+                        .font(.system(size: 11))
+                }
+            }
+            .buttonStyle(.plain)
+        }
     }
 
     // MARK: - States

@@ -8,26 +8,26 @@ allowed-tools: Bash, Read, Edit
 
 ```bash
 # Build
-xcodebuild -scheme DiskAnalyzer build
-xcodebuild -scheme DiskAnalyzer -configuration Release build
+xcodebuild -scheme DirectoryCleaner build
+xcodebuild -scheme DirectoryCleaner -configuration Release build
 
 # Test
-xcodebuild test -scheme DiskAnalyzer
-xcodebuild test -only-testing:DiskAnalyzerTests/FileScannerTests
+xcodebuild test -scheme DirectoryCleaner
+xcodebuild test -only-testing:DirectoryCleanerTests/FileScannerTests
 
 # Clean
 xcodebuild clean
-rm -rf ~/Library/Developer/Xcode/DerivedData/*DiskAnalyzer*
+rm -rf ~/Library/Developer/Xcode/DerivedData/*DirectoryCleaner*
 
 # Archive
-xcodebuild archive -scheme DiskAnalyzer -archivePath ./build/DiskAnalyzer.xcarchive
+xcodebuild archive -scheme DirectoryCleaner -archivePath ./build/DirectoryCleaner.xcarchive
 
 # Universal Binary (ARM64 + x86_64)
-xcodebuild -scheme DiskAnalyzer -configuration Release \
+xcodebuild -scheme DirectoryCleaner -configuration Release \
   -arch arm64 -arch x86_64 ONLY_ACTIVE_ARCH=NO build
 
 # Verify architecture
-lipo -info build/Release/DiskAnalyzer.app/Contents/MacOS/DiskAnalyzer
+lipo -info build/Release/DirectoryCleaner.app/Contents/MacOS/DirectoryCleaner
 ```
 
 ## Compiler Flags
@@ -52,10 +52,10 @@ lipo -info build/Release/DiskAnalyzer.app/Contents/MacOS/DiskAnalyzer
 
 ```bash
 # View entitlements
-codesign -d --entitlements :- build/Release/DiskAnalyzer.app
+codesign -d --entitlements :- build/Release/DirectoryCleaner.app
 
 # Verify signature
-codesign --verify --verbose build/Release/DiskAnalyzer.app
+codesign --verify --verbose build/Release/DirectoryCleaner.app
 
 # Clear caches
 rm -rf ~/Library/Developer/Xcode/DerivedData

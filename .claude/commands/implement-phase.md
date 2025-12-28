@@ -10,9 +10,9 @@ Phase: $1
 2. Reference REQUIREMENTS.md, DESIGN.md
 3. Implement tasks
 4. Write tests (XCTest)
-5. Run: `xcodebuild test -scheme DiskAnalyzer`
+5. Run: `xcodebuild test -scheme DirectoryCleaner`
 6. Verify checkpoint
 7. Update PLAN.md checkboxes
-8. Build: `xcodebuild build -scheme DiskAnalyzer`
+8. Build: `xcodebuild build -scheme DirectoryCleaner`
 
 Use subagents: swift-architect, test-engineer, performance-optimizer, ui-polish

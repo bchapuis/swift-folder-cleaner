@@ -1,7 +1,7 @@
 import SwiftUI
 
 @main
-struct DiskAnalyzerApp: App {
+struct DirectoryCleanerApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
     var body: some Scene {
