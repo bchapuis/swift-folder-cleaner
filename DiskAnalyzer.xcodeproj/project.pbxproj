@@ -41,6 +41,7 @@
 		A1000025 /* BreadcrumbView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000027 /* BreadcrumbView.swift */; };
 		A1000026 /* TreemapViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000028 /* TreemapViewModel.swift */; };
 		ABFFD5E7D5524F8A9E0A9B43 /* IndexedFileTree.swift in Sources */ = {isa = PBXBuildFile; fileRef = 618C97FFF83C4AD39098B704 /* IndexedFileTree.swift */; };
+		A8B16D4A06B94E08AFDE0576 /* FilenameFilterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0256EFCFD64E429EB168ED79 /* FilenameFilterView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -80,6 +81,7 @@
 		A2000027 /* BreadcrumbView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BreadcrumbView.swift; sourceTree = "<group>"; };
 		A2000028 /* TreemapViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TreemapViewModel.swift; sourceTree = "<group>"; };
 		618C97FFF83C4AD39098B704 /* IndexedFileTree.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IndexedFileTree.swift; sourceTree = "<group>"; };
+		0256EFCFD64E429EB168ED79 /* FilenameFilterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilenameFilterView.swift; sourceTree = "<group>"; };
 		A3000001 /* DiskAnalyzer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DiskAnalyzer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -173,6 +175,7 @@
 				A2000028 /* TreemapViewModel.swift */,
 				A2000026 /* FileTypeLegend.swift */,
 				FD8626E1F1154E5F8C1C379F /* SizeFilterLegend.swift */,
+				0256EFCFD64E429EB168ED79 /* FilenameFilterView.swift */,
 				A2000027 /* BreadcrumbView.swift */,
 				A2000002 /* ContentView.swift */,
 				A2000038 /* FileActions.swift */,
@@ -271,6 +274,7 @@
 				A1000026 /* TreemapViewModel.swift in Sources */,
 				A1000024 /* FileTypeLegend.swift in Sources */,
 				9126A4C808E648AB968A002C /* SizeFilterLegend.swift in Sources */,
+				A8B16D4A06B94E08AFDE0576 /* FilenameFilterView.swift in Sources */,
 				A1000025 /* BreadcrumbView.swift in Sources */,
 				ABFFD5E7D5524F8A9E0A9B43 /* IndexedFileTree.swift in Sources */,
 				A1000027 /* DuplicateFinder.swift in Sources */,

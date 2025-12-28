@@ -113,6 +113,36 @@ struct DateFilter: FileTreeFilter {
     }
 }
 
+/// Filter by filename with wildcard support (*.ts, node_modules, etc.)
+struct FilenameFilter: FileTreeFilter {
+    private let nameFilter: NameFilter
+
+    init(pattern: String) {
+        let trimmed = pattern.trimmingCharacters(in: .whitespaces)
+
+        if trimmed.hasPrefix("*") && trimmed.hasSuffix("*") {
+            // *something* - contains
+            let text = String(trimmed.dropFirst().dropLast())
+            self.nameFilter = NameFilter(pattern: .contains(text, caseSensitive: false))
+        } else if trimmed.hasPrefix("*") {
+            // *.ts - suffix
+            let text = String(trimmed.dropFirst())
+            self.nameFilter = NameFilter(pattern: .suffix(text, caseSensitive: false))
+        } else if trimmed.hasSuffix("*") {
+            // test* - prefix
+            let text = String(trimmed.dropLast())
+            self.nameFilter = NameFilter(pattern: .prefix(text, caseSensitive: false))
+        } else {
+            // node_modules - exact match (using contains for simplicity)
+            self.nameFilter = NameFilter(pattern: .contains(trimmed, caseSensitive: false))
+        }
+    }
+
+    func matches(_ node: FileNode) -> Bool {
+        nameFilter.matches(node)
+    }
+}
+
 /// Filter by name pattern
 struct NameFilter: FileTreeFilter {
     enum Pattern {
@@ -274,22 +304,24 @@ struct NotFilter: FileTreeFilter {
 
 extension FileNode {
     /// Filter tree using a FileTreeFilter
+    /// Directories always act as containers for matching files
+    /// The folder type filter only controls whether EMPTY directories are shown
     func filtered(by filter: FileTreeFilter) -> FileNode? {
         // For files: include only if filter matches
         if !isDirectory {
             return filter.matches(self) ? self : nil
         }
 
-        // For directories: recursively filter children
+        // For directories: recursively filter children first
         let filteredChildren = children.compactMap { child in
             child.filtered(by: filter)
         }
 
-        // Include directory if it has matching children or matches itself
-        if !filteredChildren.isEmpty || filter.matches(self) {
+        // Include directory if it has matching children (acts as container)
+        if !filteredChildren.isEmpty {
             let filteredTotalSize = filteredChildren.reduce(0) { $0 + $1.totalSize }
-            let filteredFileCount = 1 + filteredChildren.reduce(0) { $0 + $1.fileCount }
-            let filteredMaxDepth = filteredChildren.isEmpty ? 0 : (filteredChildren.map(\.maxDepth).max() ?? 0) + 1
+            let filteredFileCount = filteredChildren.reduce(0) { $0 + $1.fileCount }
+            let filteredMaxDepth = (filteredChildren.map(\.maxDepth).max() ?? 0) + 1
 
             return FileNode(
                 path: path,
@@ -302,6 +334,23 @@ extension FileNode {
                 totalSize: filteredTotalSize,
                 fileCount: filteredFileCount,
                 maxDepth: filteredMaxDepth
+            )
+        }
+
+        // For empty directories: only include if folder type is in filter
+        let directoryMatchesFilter = filter.matches(self)
+        if directoryMatchesFilter {
+            return FileNode(
+                path: path,
+                name: name,
+                size: size,
+                fileType: fileType,
+                modifiedDate: modifiedDate,
+                children: [],
+                isDirectory: isDirectory,
+                totalSize: 0,
+                fileCount: 0,
+                maxDepth: 0
             )
         }
 

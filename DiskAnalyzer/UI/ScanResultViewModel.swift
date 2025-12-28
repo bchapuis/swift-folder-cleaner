@@ -44,6 +44,7 @@ final class ScanResultViewModel {
     private var lastNavigationPath: URL?
     private var lastFilterTypes: Set<FileType>?
     private var lastActiveSize: FileSizeFilter?
+    private var lastFilenamePattern: String?
 
     /// Cached breadcrumb trail (invalidated when navigation changes)
     private var cachedBreadcrumb: [FileNode]?
@@ -94,41 +95,54 @@ final class ScanResultViewModel {
         filter.size
     }
 
-    /// Filtered tree (coordinated: navigation + filter) - cached for performance
-    var filteredRoot: FileNode {
-        let currentNode = navigation.currentNode
-        let currentTypes = filter.types
-        let currentSize = filter.size
-
-        // Return cache if unchanged (use object identity for node, value comparison for filters)
-        if let cached = cachedFilteredRoot,
-           lastNavigationPath == currentNode.path,
-           lastFilterTypes == currentTypes,
-           lastActiveSize == currentSize {
-            return cached
-        }
-
-        // Recompute and cache
-        let filtered = filter.filteredTree(from: currentNode)
-        cachedFilteredRoot = filtered
-        lastNavigationPath = currentNode.path
-        lastFilterTypes = currentTypes
-        lastActiveSize = currentSize
-
-        return filtered
-    }
-
     /// Flattened list of files for display using indexed queries (FAST!)
+    /// This is the SINGLE SOURCE OF TRUTH for filtered data used by both TreemapView and FileListView
     var displayFiles: [FileNode] {
         // Use index for instant filtering - O(1) instead of O(n) tree traversal!
         let types = filter.types
         let sizeFilter = filter.size
+        let filenamePattern = filter.filename
         let currentPath = navigation.currentNode.path
 
         let minSize: Int64? = sizeFilter == .all ? nil : sizeFilter.threshold
 
-        // Filter by current navigation context + type + size filters
-        return scanResult.index.filter(types: types, minSize: minSize, underPath: currentPath)
+        // Filter by current navigation context + type + size + filename filters
+        return scanResult.index.filter(
+            types: types,
+            minSize: minSize,
+            underPath: currentPath,
+            filenamePattern: filenamePattern.isEmpty ? nil : filenamePattern
+        )
+    }
+
+    /// Filtered tree (coordinated: navigation + filter) - cached for performance
+    /// Uses direct tree filtering (faster than rebuild from flat list)
+    var filteredRoot: FileNode {
+        let currentNode = navigation.currentNode
+        let currentTypes = filter.types
+        let currentSize = filter.size
+        let currentFilename = filter.filename
+
+        // Return cache if unchanged
+        if let cached = cachedFilteredRoot,
+           lastNavigationPath == currentNode.path,
+           lastFilterTypes == currentTypes,
+           lastActiveSize == currentSize,
+           lastFilenamePattern == currentFilename {
+            return cached
+        }
+
+        // Recompute using direct tree filtering (fast!)
+        let filtered = filter.filteredTree(from: currentNode)
+
+        // Cache result
+        cachedFilteredRoot = filtered
+        lastNavigationPath = currentNode.path
+        lastFilterTypes = currentTypes
+        lastActiveSize = currentSize
+        lastFilenamePattern = currentFilename
+
+        return filtered
     }
 
     // MARK: - Initialization
@@ -203,11 +217,11 @@ final class ScanResultViewModel {
     func toggleFileType(_ type: FileType) {
         filter.toggle(type)
 
-        // Explicitly invalidate caches to force recomputation
+        // Invalidate caches (displayFiles will change)
         cachedFilteredRoot = nil
         filterVersion += 1
 
-        // Validate selection after filtering
+        // Validate selection after filtering (using rebuilt tree)
         selection.clearInvalidSelections(in: filteredRoot)
 
         // Invalidate layout to trigger re-filtering
@@ -218,11 +232,26 @@ final class ScanResultViewModel {
     func toggleSizeFilter(_ size: FileSizeFilter) {
         filter.toggleSize(size)
 
-        // Explicitly invalidate caches to force recomputation
+        // Invalidate caches (displayFiles will change)
         cachedFilteredRoot = nil
         filterVersion += 1
 
-        // Validate selection after filtering
+        // Validate selection after filtering (using rebuilt tree)
+        selection.clearInvalidSelections(in: filteredRoot)
+
+        // Invalidate layout to trigger re-filtering
+        treemapViewModel.invalidateLayout()
+    }
+
+    /// Set filename filter pattern
+    func setFilenameFilter(_ pattern: String) {
+        filter.setFilenamePattern(pattern)
+
+        // Invalidate caches (displayFiles will change)
+        cachedFilteredRoot = nil
+        filterVersion += 1
+
+        // Validate selection after filtering (using rebuilt tree)
         selection.clearInvalidSelections(in: filteredRoot)
 
         // Invalidate layout to trigger re-filtering

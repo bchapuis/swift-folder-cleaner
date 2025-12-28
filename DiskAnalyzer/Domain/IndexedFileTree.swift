@@ -114,33 +114,64 @@ struct IndexedFileTree: Sendable {
     }
 
     /// Filter by multiple criteria within a specific directory subtree
-    /// Returns ALL descendants (files and directories recursively) under the given path
-    func filter(types: Set<FileType>, minSize: Int64?, underPath: URL) -> [FileNode] {
+    /// Returns matching files and (optionally) directories that contain matching files
+    /// If .directory is NOT in the types filter, directories are excluded entirely
+    func filter(types: Set<FileType>, minSize: Int64?, underPath: URL, filenamePattern: String? = nil) -> [FileNode] {
         // Filter to only descendants of the given path
         let pathString = underPath.path
-        var result = allFiles.filter { node in
+        let descendantsUnderPath = allFiles.filter { node in
             // Must be under the given path (but not the path itself)
             node.path.path.hasPrefix(pathString) && node.path != underPath
         }
 
-        // For files, apply type and size filters
-        result = result.filter { node in
-            if node.isDirectory {
-                // Always include directories
-                return true
-            } else {
-                // Files must match type filter
-                guard types.contains(node.fileType) else { return false }
+        // First pass: identify matching FILES
+        let matchingFiles = descendantsUnderPath.filter { node in
+            guard !node.isDirectory else { return false }
 
-                // Apply size filter if specified
-                if let minSize = minSize, minSize > 0 {
-                    return node.totalSize >= minSize
-                }
-                return true
+            // Files must match type filter
+            guard types.contains(node.fileType) else { return false }
+
+            // Apply size filter if specified
+            if let minSize = minSize, minSize > 0 {
+                guard node.totalSize >= minSize else { return false }
             }
+
+            // Apply filename filter if specified
+            if let pattern = filenamePattern, !pattern.isEmpty {
+                let filter = FilenameFilter(pattern: pattern)
+                guard filter.matches(node) else { return false }
+            }
+
+            return true
         }
 
-        return result
+        // Second pass: include directories ONLY if .directory type is selected
+        // This makes the filter intuitive: unchecking "Folder" hides ALL folders
+        let shouldIncludeFolders = types.contains(.directory)
+
+        if shouldIncludeFolders {
+            // Find all ancestor directories of matching files
+            var ancestorDirs = Set<URL>()
+            for file in matchingFiles {
+                var currentPath = file.path.deletingLastPathComponent()
+                // Walk up the tree until we reach underPath or root
+                while currentPath.path.hasPrefix(pathString) && currentPath != underPath {
+                    ancestorDirs.insert(currentPath)
+                    currentPath = currentPath.deletingLastPathComponent()
+                }
+            }
+
+            // Include directories that are ancestors of matching files
+            let matchingDirectories = descendantsUnderPath.filter { node in
+                node.isDirectory && ancestorDirs.contains(node.path)
+            }
+
+            // Combine matching files and directories
+            return matchingFiles + matchingDirectories
+        } else {
+            // User unchecked "Folder" → show ONLY files, no directories
+            return matchingFiles
+        }
     }
 
     // MARK: - Statistics

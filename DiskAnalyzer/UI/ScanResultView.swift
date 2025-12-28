@@ -58,6 +58,13 @@ struct ScanResultView: View {
 
             Divider()
 
+            // Filename filter (text input with wildcards)
+            FilenameFilterView(
+                viewModel: viewModel
+            )
+
+            Divider()
+
             // Bottom: Action toolbar
             HStack(spacing: 16) {
                 // Selection info

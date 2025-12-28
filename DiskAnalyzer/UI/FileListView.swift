@@ -47,12 +47,8 @@ struct FileListView: View {
             // Navigation changed - update file list
             updateCache()
         }
-        .onChange(of: viewModel.selectedTypes) { _, _ in
-            // Type filter changed - update file list
-            updateCache()
-        }
-        .onChange(of: viewModel.selectedSize) { _, _ in
-            // Size filter changed - update file list
+        .onChange(of: viewModel.filterVersion) { _, _ in
+            // Any filter changed (type, size, filename, etc.) - update file list
             updateCache()
         }
         .onChange(of: sortBy) { _, _ in
