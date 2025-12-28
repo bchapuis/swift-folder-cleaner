@@ -44,6 +44,13 @@ struct ScanResultView: View {
 
             Divider()
 
+            // Filename filter (text input with wildcards)
+            FilenameFilterView(
+                viewModel: viewModel
+            )
+
+            Divider()
+
             // File type legend (clickable filters) - full width
             FileTypeLegend(
                 viewModel: viewModel
@@ -53,13 +60,6 @@ struct ScanResultView: View {
 
             // Size filter legend (clickable filters) - full width
             SizeFilterLegend(
-                viewModel: viewModel
-            )
-
-            Divider()
-
-            // Filename filter (text input with wildcards)
-            FilenameFilterView(
                 viewModel: viewModel
             )
 

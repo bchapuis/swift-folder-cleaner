@@ -21,6 +21,11 @@ struct FileTypeLegend: View {
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 12) {
+                Text("Type:")
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundStyle(.secondary)
+                    .frame(width: 40, alignment: .leading)
+
                 ForEach(fileTypes, id: \.self) { type in
                     legendItem(for: type)
                 }

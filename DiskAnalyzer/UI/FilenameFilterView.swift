@@ -11,6 +11,7 @@ struct FilenameFilterView: View {
             Text("Name:")
                 .font(.system(size: 11, weight: .semibold))
                 .foregroundStyle(.secondary)
+                .frame(width: 40, alignment: .leading)
 
             // Search field
             HStack(spacing: 6) {

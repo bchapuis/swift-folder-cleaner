@@ -13,6 +13,7 @@ struct SizeFilterLegend: View {
                 Text("Size:")
                     .font(.system(size: 11, weight: .semibold))
                     .foregroundStyle(.secondary)
+                    .frame(width: 40, alignment: .leading)
 
                 ForEach(sizeFilters) { filter in
                     legendItem(for: filter)
