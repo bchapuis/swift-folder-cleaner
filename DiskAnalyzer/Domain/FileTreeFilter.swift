@@ -38,6 +38,12 @@ struct SizeFilter: FileTreeFilter {
     }
 
     func matches(_ node: FileNode) -> Bool {
+        // Size filters only apply to files, not directories
+        // Directories always pass through (they're included based on matching children)
+        if node.isDirectory {
+            return true
+        }
+
         if let min, node.totalSize < min {
             return false
         }

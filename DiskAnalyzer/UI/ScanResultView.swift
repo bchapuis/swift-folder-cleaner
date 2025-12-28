@@ -51,6 +51,13 @@ struct ScanResultView: View {
 
             Divider()
 
+            // Size filter legend (clickable filters) - full width
+            SizeFilterLegend(
+                viewModel: viewModel
+            )
+
+            Divider()
+
             // Bottom: Action toolbar
             HStack(spacing: 16) {
                 // Selection info
@@ -105,17 +112,20 @@ struct ScanResultView: View {
 }
 
 #Preview {
-    ScanResultView(
-        result: ScanResult(
-            rootNode: FileNode.directory(
-                path: URL(fileURLWithPath: "/Users/example/Documents"),
-                name: "Documents",
-                modifiedDate: Date(),
-                children: []
-            ),
-            scanDuration: 12.5,
-            totalFilesScanned: 5432,
-            errors: []
-        )
+    let rootNode = FileNode.directory(
+        path: URL(fileURLWithPath: "/Users/example/Documents"),
+        name: "Documents",
+        modifiedDate: Date(),
+        children: []
     )
+
+    let scanResult = ScanResult(
+        rootNode: rootNode,
+        scanDuration: 12.5,
+        totalFilesScanned: 5432,
+        errors: [],
+        index: IndexedFileTree(root: rootNode)
+    )
+
+    return ScanResultView(result: scanResult)
 }

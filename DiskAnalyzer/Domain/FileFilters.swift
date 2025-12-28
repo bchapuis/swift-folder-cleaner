@@ -1,26 +1,41 @@
 import Foundation
 
 /// File size filters for identifying large files
-enum FileSizeFilter: String, CaseIterable, Identifiable {
+enum FileSizeFilter: String, CaseIterable, Identifiable, Hashable {
+    case all = "All"
+    case large1KB = ">1 KB"
+    case large10KB = ">10 KB"
+    case large100KB = ">100 KB"
+    case large1MB = ">1 MB"
+    case large10MB = ">10 MB"
     case large100MB = ">100 MB"
     case large1GB = ">1 GB"
-    case large10GB = ">10 GB"
 
     var id: String { rawValue }
 
     var threshold: Int64 {
         switch self {
+        case .all: return 0
+        case .large1KB: return 1024
+        case .large10KB: return 10 * 1024
+        case .large100KB: return 100 * 1024
+        case .large1MB: return 1024 * 1024
+        case .large10MB: return 10 * 1024 * 1024
         case .large100MB: return 100 * 1024 * 1024
         case .large1GB: return 1024 * 1024 * 1024
-        case .large10GB: return 10 * 1024 * 1024 * 1024
         }
     }
 
     var systemImage: String {
         switch self {
-        case .large100MB: return "doc.fill"
+        case .all: return "doc.on.doc"
+        case .large1KB: return "doc.plaintext"
+        case .large10KB: return "doc.text"
+        case .large100KB: return "doc.text.fill"
+        case .large1MB: return "doc.fill"
+        case .large10MB: return "doc.badge.plus"
+        case .large100MB: return "doc.badge.gearshape"
         case .large1GB: return "doc.badge.gearshape.fill"
-        case .large10GB: return "externaldrive.fill"
         }
     }
 }

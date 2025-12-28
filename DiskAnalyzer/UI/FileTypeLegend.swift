@@ -92,11 +92,12 @@ extension FileType {
         rootNode: rootNode,
         scanDuration: 1.0,
         totalFilesScanned: 100,
-        errors: []
+        errors: [],
+        index: IndexedFileTree(root: rootNode)
     )
 
     let viewModel = ScanResultViewModel(scanResult: scanResult)
 
-    return FileTypeLegend(viewModel: viewModel)
+    FileTypeLegend(viewModel: viewModel)
         .frame(width: 800)
 }

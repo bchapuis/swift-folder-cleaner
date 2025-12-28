@@ -7,6 +7,9 @@ struct ScanResult: Sendable {
     let totalFilesScanned: Int
     let errors: [ScanError]
 
+    /// High-performance indexed tree for fast queries
+    let index: IndexedFileTree
+
     /// Total size of all scanned files
     var totalSize: Int64 {
         rootNode.totalSize
@@ -46,11 +49,15 @@ extension ScanResult {
         startTime: Date,
         errors: [ScanError] = []
     ) -> ScanResult {
-        ScanResult(
+        // Build index from tree
+        let index = IndexedFileTree(root: rootNode)
+
+        return ScanResult(
             rootNode: rootNode,
             scanDuration: Date().timeIntervalSince(startTime),
             totalFilesScanned: rootNode.fileCount,
-            errors: errors
+            errors: errors,
+            index: index
         )
     }
 }

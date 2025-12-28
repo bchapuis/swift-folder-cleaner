@@ -86,7 +86,12 @@ struct TreemapView: View {
                 canvasID = UUID()
             }
             .onChange(of: viewModel.selectedTypes) { _, _ in
-                // Filter changed - update layout with new filtered tree
+                // File type filter changed - update layout with new filtered tree
+                layoutViewModel.updateLayout(rootNode: viewModel.filteredRoot, size: currentSize)
+                canvasID = UUID()
+            }
+            .onChange(of: viewModel.selectedSize) { _, _ in
+                // Size filter changed - update layout with new filtered tree
                 layoutViewModel.updateLayout(rootNode: viewModel.filteredRoot, size: currentSize)
                 canvasID = UUID()
             }

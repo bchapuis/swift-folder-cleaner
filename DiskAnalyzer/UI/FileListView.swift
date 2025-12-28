@@ -11,10 +11,71 @@ struct FileListView: View {
     @State private var lastTapTime: Date = .distantPast
     @State private var lastTapNode: FileNode?
 
-    /// Sorted files computed from ViewModel's filtered data
-    private var sortedFiles: [FileNode] {
-        let files = viewModel.displayFiles
+    // Cache sorted files to prevent recomputation on selection changes
+    @State private var cachedSortedFiles: [FileNode] = []
+    @State private var lastDisplayFilesCount = 0
+    @State private var lastSortBy: SortColumn = .size
+    @State private var lastSortAscending = false
 
+    var body: some View {
+        VStack(spacing: 0) {
+            // Header
+            headerView
+
+            Divider()
+
+            // File list with scroll-to-selection
+            ScrollViewReader { proxy in
+                ScrollView {
+                    LazyVStack(spacing: 0) {
+                        ForEach(cachedSortedFiles, id: \.path) { file in
+                            fileRow(file)
+                                .id(file.path)
+                        }
+                    }
+                }
+                .onChange(of: viewModel.selectedNode?.path) { _, newPath in
+                    // Scroll to selected item (both files and directories are now in the list)
+                    if let path = newPath {
+                        proxy.scrollTo(path, anchor: .center)
+                    }
+                }
+            }
+        }
+        .background(Color(.controlBackgroundColor))
+        .onChange(of: viewModel.currentRoot.path) { _, _ in
+            // Navigation changed - update file list
+            updateCache()
+        }
+        .onChange(of: viewModel.selectedTypes) { _, _ in
+            // Type filter changed - update file list
+            updateCache()
+        }
+        .onChange(of: viewModel.selectedSize) { _, _ in
+            // Size filter changed - update file list
+            updateCache()
+        }
+        .onChange(of: sortBy) { _, _ in
+            updateCache()
+        }
+        .onChange(of: sortAscending) { _, _ in
+            updateCache()
+        }
+        .onAppear {
+            updateCache()
+        }
+    }
+
+    // Update cached sorted files
+    private func updateCache() {
+        let files = viewModel.displayFiles
+        cachedSortedFiles = sortFiles(files)
+        lastDisplayFilesCount = files.count
+        lastSortBy = sortBy
+        lastSortAscending = sortAscending
+    }
+
+    private func sortFiles(_ files: [FileNode]) -> [FileNode] {
         switch sortBy {
         case .name:
             return sortAscending
@@ -33,36 +94,6 @@ struct FileListView: View {
                 ? files.sorted { $0.path.path < $1.path.path }
                 : files.sorted { $0.path.path > $1.path.path }
         }
-    }
-
-    var body: some View {
-        VStack(spacing: 0) {
-            // Header
-            headerView
-
-            Divider()
-
-            // File list with scroll-to-selection
-            ScrollViewReader { proxy in
-                ScrollView {
-                    LazyVStack(spacing: 0) {
-                        ForEach(sortedFiles, id: \.path) { file in
-                            fileRow(file)
-                                .id(file.path)
-                        }
-                    }
-                }
-                .onChange(of: viewModel.selectedNode?.path) { _, newPath in
-                    // Scroll to selected item when selection changes
-                    if let path = newPath {
-                        withAnimation {
-                            proxy.scrollTo(path, anchor: .center)
-                        }
-                    }
-                }
-            }
-        }
-        .background(Color(.controlBackgroundColor))
     }
 
     // MARK: - Header
@@ -119,7 +150,7 @@ struct FileListView: View {
 
     @ViewBuilder
     private func fileRow(_ file: FileNode) -> some View {
-        let isSelected = file.path.standardized == viewModel.selectedNode?.path.standardized
+        let isSelected = file.path == viewModel.selectedNode?.path
 
         HStack(spacing: 0) {
             // Name
@@ -181,7 +212,7 @@ struct FileListView: View {
         let timeSinceLastTap = now.timeIntervalSince(lastTapTime)
 
         // Check for double-tap (within 0.3s and same node)
-        let isDoubleTap = timeSinceLastTap < 0.3 && lastTapNode?.path.standardized == file.path.standardized
+        let isDoubleTap = timeSinceLastTap < 0.3 && lastTapNode?.path == file.path
 
         if isDoubleTap && file.isDirectory {
             viewModel.drillDown(to: file)

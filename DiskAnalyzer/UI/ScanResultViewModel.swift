@@ -39,18 +39,18 @@ final class ScanResultViewModel {
 
     // MARK: - Performance Caches
 
-    /// Cached flattened files list (invalidated when tree changes)
-    private var cachedDisplayFiles: [FileNode]?
-    private var lastDisplayTree: FileNode?
-
     /// Cached filtered tree (invalidated when navigation or filter changes)
     private var cachedFilteredRoot: FileNode?
     private var lastNavigationPath: URL?
     private var lastFilterTypes: Set<FileType>?
+    private var lastActiveSize: FileSizeFilter?
 
     /// Cached breadcrumb trail (invalidated when navigation changes)
     private var cachedBreadcrumb: [FileNode]?
     private var lastBreadcrumbPath: [URL]?
+
+    /// Filter version to force view updates
+    private(set) var filterVersion = 0
 
     // MARK: - Derived State (Computed from sub-modules)
 
@@ -89,43 +89,46 @@ final class ScanResultViewModel {
         filter.types
     }
 
+    /// Active size filter (from filter)
+    var selectedSize: FileSizeFilter {
+        filter.size
+    }
+
     /// Filtered tree (coordinated: navigation + filter) - cached for performance
     var filteredRoot: FileNode {
-        let currentPath = navigation.currentNode.path
+        let currentNode = navigation.currentNode
         let currentTypes = filter.types
+        let currentSize = filter.size
 
-        // Return cache if unchanged
+        // Return cache if unchanged (use object identity for node, value comparison for filters)
         if let cached = cachedFilteredRoot,
-           lastNavigationPath == currentPath,
-           lastFilterTypes == currentTypes {
+           lastNavigationPath == currentNode.path,
+           lastFilterTypes == currentTypes,
+           lastActiveSize == currentSize {
             return cached
         }
 
         // Recompute and cache
-        let filtered = filter.filteredTree(from: navigation.currentNode)
+        let filtered = filter.filteredTree(from: currentNode)
         cachedFilteredRoot = filtered
-        lastNavigationPath = currentPath
+        lastNavigationPath = currentNode.path
         lastFilterTypes = currentTypes
+        lastActiveSize = currentSize
 
         return filtered
     }
 
-    /// Flattened list of files for display (cached)
+    /// Flattened list of files for display using indexed queries (FAST!)
     var displayFiles: [FileNode] {
-        let currentTree = filteredRoot
+        // Use index for instant filtering - O(1) instead of O(n) tree traversal!
+        let types = filter.types
+        let sizeFilter = filter.size
+        let currentPath = navigation.currentNode.path
 
-        // Return cache if tree unchanged
-        if let cached = cachedDisplayFiles,
-           lastDisplayTree?.path.standardized == currentTree.path.standardized {
-            return cached
-        }
+        let minSize: Int64? = sizeFilter == .all ? nil : sizeFilter.threshold
 
-        // Recompute and cache
-        let files = currentTree.flatten()
-        cachedDisplayFiles = files
-        lastDisplayTree = currentTree
-
-        return files
+        // Filter by current navigation context + type + size filters
+        return scanResult.index.filter(types: types, minSize: minSize, underPath: currentPath)
     }
 
     // MARK: - Initialization
@@ -199,6 +202,25 @@ final class ScanResultViewModel {
     /// Toggle a file type filter (click in legend)
     func toggleFileType(_ type: FileType) {
         filter.toggle(type)
+
+        // Explicitly invalidate caches to force recomputation
+        cachedFilteredRoot = nil
+        filterVersion += 1
+
+        // Validate selection after filtering
+        selection.clearInvalidSelections(in: filteredRoot)
+
+        // Invalidate layout to trigger re-filtering
+        treemapViewModel.invalidateLayout()
+    }
+
+    /// Toggle a size filter (click in size legend)
+    func toggleSizeFilter(_ size: FileSizeFilter) {
+        filter.toggleSize(size)
+
+        // Explicitly invalidate caches to force recomputation
+        cachedFilteredRoot = nil
+        filterVersion += 1
 
         // Validate selection after filtering
         selection.clearInvalidSelections(in: filteredRoot)
