@@ -266,6 +266,18 @@ final class ScanResultViewModel {
         fileOperations.showInFinder(node)
     }
 
+    /// Open selected node in Preview
+    func showInPreview() {
+        guard let node = selectedNode else { return }
+        fileOperations.showInPreview(node)
+    }
+
+    /// Check if selected node can be previewed
+    var canPreviewSelection: Bool {
+        guard let node = selectedNode else { return false }
+        return fileOperations.canPreview(node)
+    }
+
     /// Delete selected node (move to trash)
     func deleteSelected() async {
         guard let node = selectedNode else { return }

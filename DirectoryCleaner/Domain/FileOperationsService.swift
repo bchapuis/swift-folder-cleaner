@@ -11,6 +11,16 @@ final class FileOperationsService {
         FileActions.showInFinder([node])
     }
 
+    /// Open file in Preview
+    func showInPreview(_ node: FileNode) {
+        FileActions.showInPreview(node)
+    }
+
+    /// Check if node can be previewed
+    func canPreview(_ node: FileNode) -> Bool {
+        FileActions.canPreview(node)
+    }
+
     /// Move file or directory to trash
     /// - Returns: Result indicating success or failure with message
     func moveToTrash(_ node: FileNode) async -> FileActionResult {

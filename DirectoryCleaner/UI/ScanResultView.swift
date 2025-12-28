@@ -81,6 +81,12 @@ struct ScanResultView: View {
                 Spacer()
 
                 // Actions
+                if viewModel.canPreviewSelection {
+                    Button("Show in Preview") {
+                        viewModel.showInPreview()
+                    }
+                }
+
                 Button("Show in Finder") {
                     viewModel.showInFinder()
                 }

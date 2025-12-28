@@ -41,6 +41,17 @@ class FileActions {
         NSWorkspace.shared.activateFileViewerSelecting(urls)
     }
 
+    /// Open file in Quick Look Preview
+    static func showInPreview(_ node: FileNode) {
+        guard !node.isDirectory else { return }
+        NSWorkspace.shared.open(node.path)
+    }
+
+    /// Check if node can be previewed (only files, not directories)
+    static func canPreview(_ node: FileNode) -> Bool {
+        return !node.isDirectory
+    }
+
     /// Move files to trash with confirmation
     static func moveToTrash(_ nodes: Set<FileNode>) async -> FileActionResult {
         guard !nodes.isEmpty else {
