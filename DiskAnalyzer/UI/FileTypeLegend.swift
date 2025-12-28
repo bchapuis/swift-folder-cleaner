@@ -45,17 +45,10 @@ struct FileTypeLegend: View {
                     .fill(colorScheme == .dark ? type.darkModeColor : type.color)
                     .frame(width: 16, height: 16)
                     .opacity(isSelected ? 1.0 : 0.3)
-                    .overlay {
-                        RoundedRectangle(cornerRadius: 3)
-                            .strokeBorder(
-                                isSelected ? Color.accentColor : Color.white.opacity(0.3),
-                                lineWidth: isSelected ? 1.5 : 0.5
-                            )
-                    }
 
                 // Type name
                 Text(type.displayName)
-                    .font(.system(size: 11, weight: isSelected ? .semibold : .regular))
+                    .font(.system(size: 11, weight: .medium))
                     .foregroundStyle(isSelected ? .primary : .tertiary)
             }
             .padding(.horizontal, 8)
@@ -63,7 +56,7 @@ struct FileTypeLegend: View {
             .background(isSelected ? Color.accentColor.opacity(0.1) : Color.clear)
             .cornerRadius(6)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.borderless)
         .help(isSelected ? "Hide \(type.displayName)" : "Show \(type.displayName)")
     }
 }
