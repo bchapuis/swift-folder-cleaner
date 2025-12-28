@@ -1,215 +1,105 @@
 import SwiftUI
 
-/// View shown when scan is complete
+/// Dual-pane view: treemap (left) + file list (right)
+/// All state managed by ScanResultViewModel for perfect synchronization
 struct ScanResultView: View {
     let result: ScanResult
 
-    @State private var selectedNode: FileNode?
-    @State private var showDetails = true
-    @State private var viewMode: ViewMode = .list
-    @State private var showLegend = true
-    @State private var zoomedNode: FileNode?
+    @State private var viewModel: ScanResultViewModel
 
-    enum ViewMode {
-        case list
-        case treemap
+    init(result: ScanResult) {
+        self.result = result
+        self._viewModel = State(initialValue: ScanResultViewModel(scanResult: result))
     }
 
     var body: some View {
         VStack(spacing: 0) {
-            // Header with statistics
-            headerSection
+            // Breadcrumb navigation
+            BreadcrumbView(
+                breadcrumbTrail: viewModel.breadcrumbTrail,
+                onNavigate: { index in
+                    viewModel.navigateToBreadcrumb(at: index)
+                },
+                onNavigateUp: {
+                    viewModel.navigateUp()
+                }
+            )
 
             Divider()
 
-            // Main content: view + details panel
+            // Dual pane: treemap + file list
             HSplitView {
-                // Main view area
-                mainViewSection
+                // Left: Treemap visualization
+                TreemapView(
+                    viewModel: viewModel
+                )
+                .frame(minWidth: 300, idealWidth: 400)
 
-                // Details panel
-                if showDetails, let node = selectedNode {
-                    FileDetailsPanel(node: node, totalSize: result.rootNode.totalSize)
-                }
-            }
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                Button {
-                    showDetails.toggle()
-                } label: {
-                    Label(
-                        showDetails ? "Hide Details" : "Show Details",
-                        systemImage: showDetails ? "sidebar.right" : "sidebar.left"
-                    )
-                }
-                .help(showDetails ? "Hide details panel" : "Show details panel")
+                // Right: File list
+                FileListView(
+                    viewModel: viewModel
+                )
+                .frame(minWidth: 400, idealWidth: 600)
             }
 
-            ToolbarItem(placement: .primaryAction) {
-                Picker("View Mode", selection: $viewMode) {
-                    Label("List", systemImage: "list.bullet")
-                        .tag(ViewMode.list)
-                    Label("Treemap", systemImage: "square.grid.3x3.fill")
-                        .tag(ViewMode.treemap)
-                }
-                .pickerStyle(.segmented)
-                .help("Switch between list and treemap views")
-            }
+            Divider()
 
-            ToolbarItem(placement: .primaryAction) {
-                if viewMode == .treemap {
-                    Button {
-                        showLegend.toggle()
-                    } label: {
-                        Label("Legend", systemImage: "list.bullet.rectangle")
-                    }
-                    .help(showLegend ? "Hide legend" : "Show legend")
-                }
-            }
-        }
-    }
+            // File type legend (clickable filters) - full width
+            FileTypeLegend(
+                viewModel: viewModel
+            )
 
-    // MARK: - Header
+            Divider()
 
-    private var headerSection: some View {
-        VStack(spacing: 12) {
-            HStack(spacing: 12) {
-                Image(systemName: "checkmark.circle.fill")
-                    .font(.title2)
-                    .foregroundStyle(.green)
-
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Scan Complete!")
-                        .font(.headline)
-
-                    Text(result.rootNode.path.path)
-                        .font(.caption)
+            // Bottom: Action toolbar
+            HStack(spacing: 16) {
+                // Selection info
+                if let selected = viewModel.selectedNode {
+                    Text("\(selected.name) · \(ByteCountFormatter.string(fromByteCount: selected.totalSize, countStyle: .file))")
+                        .font(.callout)
                         .foregroundStyle(.secondary)
-                        .lineLimit(1)
-                        .truncationMode(.middle)
+                } else {
+                    Text("No selection")
+                        .font(.callout)
+                        .foregroundStyle(.tertiary)
                 }
 
                 Spacer()
 
-                statisticsCompact
-            }
-        }
-        .padding()
-        .background(.quaternary)
-    }
-
-    // MARK: - Statistics
-
-    private var statisticsCompact: some View {
-        HStack(spacing: 16) {
-            CompactStat(
-                label: "Files",
-                value: "\(result.totalFilesScanned)",
-                icon: "doc.fill"
-            )
-
-            CompactStat(
-                label: "Size",
-                value: result.rootNode.formattedSize,
-                icon: "internaldrive.fill"
-            )
-
-            CompactStat(
-                label: "Time",
-                value: result.formattedDuration,
-                icon: "clock.fill"
-            )
-        }
-    }
-
-    // MARK: - Main View
-
-    @ViewBuilder
-    private var mainViewSection: some View {
-        if result.rootNode.children.isEmpty {
-            emptyBrowserView
-        } else {
-            switch viewMode {
-            case .list:
-                FileBrowserView(
-                    rootNode: result.rootNode,
-                    selectedNode: $selectedNode
-                )
-            case .treemap:
-                treemapSection
-            }
-        }
-    }
-
-    private var treemapSection: some View {
-        VStack(spacing: 0) {
-            // Breadcrumb navigation
-            if zoomedNode != nil {
-                BreadcrumbView(
-                    rootNode: result.rootNode,
-                    currentNode: zoomedNode,
-                    onNavigate: { node in
-                        withAnimation(.easeInOut(duration: 0.3)) {
-                            zoomedNode = node
-                        }
-                    }
-                )
-                .transition(.move(edge: .top).combined(with: .opacity))
-
-                Divider()
-            }
-
-            // Treemap with legend overlay
-            ZStack(alignment: .topLeading) {
-                TreemapView(
-                    rootNode: result.rootNode,
-                    selectedNode: $selectedNode,
-                    zoomedNode: $zoomedNode
-                )
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-
-                if showLegend {
-                    FileTypeLegend()
-                        .padding()
-                        .transition(.move(edge: .leading).combined(with: .opacity))
+                // Actions
+                Button("Show in Finder") {
+                    viewModel.showInFinder()
                 }
+                .disabled(viewModel.selectedNode == nil)
+
+                Button("Delete", role: .destructive) {
+                    Task {
+                        await viewModel.deleteSelected()
+                    }
+                }
+                .disabled(viewModel.selectedNode == nil)
+                .keyboardShortcut(.delete, modifiers: .command)
             }
-        }
-        .animation(.easeInOut(duration: 0.2), value: showLegend)
-        .animation(.easeInOut(duration: 0.3), value: zoomedNode?.path)
-    }
+            .padding()
+            .background(.quaternary)
 
-    private var emptyBrowserView: some View {
-        ContentUnavailableView {
-            Label("Empty Folder", systemImage: "folder")
-        } description: {
-            Text("This folder contains no files")
-        }
-    }
-
-}
-
-/// Compact statistics display
-private struct CompactStat: View {
-    let label: String
-    let value: String
-    let icon: String
-
-    var body: some View {
-        HStack(spacing: 6) {
-            Image(systemName: icon)
-                .foregroundStyle(.secondary)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(value)
-                    .font(.callout)
-                    .fontWeight(.semibold)
-                    .monospacedDigit()
-                Text(label)
-                    .font(.caption2)
+            // Action message
+            if let message = viewModel.actionMessage {
+                Text(message)
+                    .font(.caption)
                     .foregroundStyle(.secondary)
+                    .padding(.horizontal)
+                    .padding(.vertical, 8)
+                    .frame(maxWidth: .infinity)
+                    .background(.tertiary)
             }
+        }
+        .onKeyPress(.escape) {
+            if viewModel.canNavigateUp() {
+                viewModel.navigateUp()
+                return .handled
+            }
+            return .ignored
         }
     }
 }

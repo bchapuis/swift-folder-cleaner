@@ -1,148 +1,127 @@
 import SwiftUI
 
-/// Breadcrumb navigation showing the current path in the treemap
+/// Breadcrumb navigation bar - displays current directory path
 struct BreadcrumbView: View {
-    let rootNode: FileNode
-    let currentNode: FileNode?
-    let onNavigate: (FileNode?) -> Void
-
-    // Build path from root to current node
-    private var breadcrumbPath: [FileNode] {
-        guard let current = currentNode else {
-            return [rootNode]
-        }
-
-        var path: [FileNode] = []
-        var node: FileNode? = current
-
-        // Build path backwards from current to root
-        while let currentNode = node {
-            path.insert(currentNode, at: 0)
-
-            // Find parent
-            if currentNode.path == rootNode.path {
-                break
-            }
-
-            node = findParent(of: currentNode, in: rootNode)
-        }
-
-        // Ensure root is first if not already
-        if path.first?.path != rootNode.path {
-            path.insert(rootNode, at: 0)
-        }
-
-        return path
-    }
+    let breadcrumbTrail: [FileNode]
+    let onNavigate: (Int) -> Void  // Navigate to breadcrumb at index
+    let onNavigateUp: () -> Void
 
     var body: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 4) {
-                ForEach(Array(breadcrumbPath.enumerated()), id: \.element.path) { index, node in
-                    Button {
-                        // Navigate to this level (nil for root)
-                        if node.path == rootNode.path {
-                            onNavigate(nil)
-                        } else {
-                            onNavigate(node)
-                        }
-                    } label: {
+        HStack(spacing: 0) {
+            // Breadcrumb trail showing current path
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 4) {
+                    ForEach(Array(breadcrumbTrail.enumerated()), id: \.element.path) { index, node in
                         HStack(spacing: 4) {
-                            if index == 0 {
-                                Image(systemName: "house.fill")
-                                    .font(.system(size: 12))
+                            // Separator
+                            if index > 0 {
+                                Image(systemName: "chevron.right")
+                                    .font(.system(size: 10))
+                                    .foregroundStyle(.tertiary)
                             }
 
-                            Text(index == 0 ? rootNode.name : node.name)
-                                .font(.system(size: 13, weight: .medium))
-                                .lineLimit(1)
+                            // Breadcrumb segment
+                            breadcrumbSegment(
+                                node: node,
+                                index: index,
+                                isLast: index == breadcrumbTrail.count - 1
+                            )
                         }
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background {
-                            if node.path == currentNode?.path {
-                                Capsule()
-                                    .fill(.quaternary)
-                            }
-                        }
-                        .contentShape(Capsule())
-                    }
-                    .buttonStyle(.plain)
-                    .foregroundStyle(node.path == currentNode?.path ? .primary : .secondary)
-
-                    if index < breadcrumbPath.count - 1 {
-                        Image(systemName: "chevron.right")
-                            .font(.system(size: 10, weight: .semibold))
-                            .foregroundStyle(.tertiary)
                     }
                 }
+                .padding(.horizontal, 12)
             }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 8)
+
+            Spacer()
         }
         .frame(height: 36)
-        .background(.bar)
+        .background(.quaternary.opacity(0.5))
     }
 
-    // MARK: - Helper Methods
-
-    /// Recursively finds the parent of a given node
-    private func findParent(of targetNode: FileNode, in searchNode: FileNode) -> FileNode? {
-        // Check if any of searchNode's children match the target
-        for child in searchNode.children {
-            if child.path == targetNode.path {
-                return searchNode
+    @ViewBuilder
+    private func breadcrumbSegment(node: FileNode, index: Int, isLast: Bool) -> some View {
+        if !isLast && node.isDirectory {
+            // Clickable segment (can navigate to this directory)
+            Button {
+                onNavigate(index)
+            } label: {
+                segmentLabel(node: node, isLast: false, isHoverable: true)
             }
-
-            // Recursively search in children
-            if let parent = findParent(of: targetNode, in: child) {
-                return parent
-            }
+            .buttonStyle(BreadcrumbButtonStyle())
+            .help("Click to navigate to \(node.name)")
+        } else {
+            // Current directory (not clickable)
+            segmentLabel(node: node, isLast: isLast, isHoverable: false)
         }
+    }
 
-        return nil
+    @ViewBuilder
+    private func segmentLabel(node: FileNode, isLast: Bool, isHoverable: Bool) -> some View {
+        HStack(spacing: 6) {
+            // Icon
+            Image(systemName: node.fileType.icon)
+                .font(.system(size: 12))
+                .foregroundStyle(node.fileType.color)
+
+            // Name
+            Text(node.name)
+                .font(.system(size: 12, weight: isLast ? .semibold : .regular))
+                .foregroundStyle(isLast ? .primary : (isHoverable ? .primary : .secondary))
+                .lineLimit(1)
+                .underline(isHoverable, color: .secondary.opacity(0.5))
+
+            // Size
+            Text(ByteCountFormatter.string(fromByteCount: node.totalSize, countStyle: .file))
+                .font(.system(size: 11))
+                .foregroundStyle(.tertiary)
+        }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 6)
+        .background(isLast ? Color.accentColor.opacity(0.1) : (isHoverable ? Color.blue.opacity(0.05) : Color.clear))
+        .cornerRadius(6)
+    }
+}
+
+// MARK: - Breadcrumb Button Style
+
+struct BreadcrumbButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .background(configuration.isPressed ? Color.accentColor.opacity(0.15) : Color.clear)
+            .cornerRadius(6)
+            .scaleEffect(configuration.isPressed ? 0.98 : 1.0)
+            .animation(.easeInOut(duration: 0.1), value: configuration.isPressed)
+            .onHover { isHovering in
+                if isHovering {
+                    NSCursor.pointingHand.push()
+                } else {
+                    NSCursor.pop()
+                }
+            }
     }
 }
 
 #Preview {
-    let sampleNode = FileNode(
+    let documentsNode = FileNode.directory(
         path: URL(fileURLWithPath: "/Users/example/Documents"),
         name: "Documents",
-        size: 0,
-        fileType: .directory,
         modifiedDate: Date(),
-        children: [
-            FileNode(
-                path: URL(fileURLWithPath: "/Users/example/Documents/Projects"),
-                name: "Projects",
-                size: 1_000_000_000,
-                fileType: .directory,
-                modifiedDate: Date(),
-                children: [
-                    FileNode(
-                        path: URL(fileURLWithPath: "/Users/example/Documents/Projects/App"),
-                        name: "App",
-                        size: 500_000_000,
-                        fileType: .directory,
-                        modifiedDate: Date(),
-                        children: [],
-                        isDirectory: true
-                    )
-                ],
-                isDirectory: true
-            )
-        ],
-        isDirectory: true
+        children: []
     )
 
-    return VStack {
-        BreadcrumbView(
-            rootNode: sampleNode,
-            currentNode: sampleNode.children.first,
-            onNavigate: { _ in }
-        )
+    let photosNode = FileNode.directory(
+        path: URL(fileURLWithPath: "/Users/example/Documents/Photos"),
+        name: "Photos",
+        modifiedDate: Date(),
+        children: []
+    )
 
-        Spacer()
+    return VStack(spacing: 20) {
+        BreadcrumbView(
+            breadcrumbTrail: [documentsNode, photosNode],
+            onNavigate: { _ in },
+            onNavigateUp: {}
+        )
     }
-    .frame(width: 600, height: 400)
+    .padding()
 }

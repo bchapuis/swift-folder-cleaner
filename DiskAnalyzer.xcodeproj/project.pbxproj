@@ -7,6 +7,21 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A1000027 /* DuplicateFinder.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000029 /* DuplicateFinder.swift */; };
+		A1000028 /* FileFilters.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000030 /* FileFilters.swift */; };
+		A1000029 /* FileOperationsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000031 /* FileOperationsService.swift */; };
+		A1000030 /* FileTreeFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000032 /* FileTreeFilter.swift */; };
+		A1000031 /* FileTreeIndex.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000033 /* FileTreeIndex.swift */; };
+		A1000032 /* FileTreeNavigator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000034 /* FileTreeNavigator.swift */; };
+		A1000033 /* FileTreeQuery.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000035 /* FileTreeQuery.swift */; };
+		A1000034 /* FileTreeTraversal.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000036 /* FileTreeTraversal.swift */; };
+		A1000035 /* NavigationPath.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000037 /* NavigationPath.swift */; };
+		A1000036 /* FileActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000038 /* FileActions.swift */; };
+		A1000037 /* FileListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000039 /* FileListView.swift */; };
+		A1000038 /* FilterState.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000040 /* FilterState.swift */; };
+		A1000039 /* NavigationState.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000041 /* NavigationState.swift */; };
+		A1000040 /* SelectionState.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000042 /* SelectionState.swift */; };
+		A1000041 /* ScanResultViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000043 /* ScanResultViewModel.swift */; };
 		A1000001 /* DiskAnalyzerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000001 /* DiskAnalyzerApp.swift */; };
 		A1000002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000002 /* ContentView.swift */; };
 		A1000003 /* FileType.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000005 /* FileType.swift */; };
@@ -18,16 +33,7 @@
 		A1000009 /* FileScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000011 /* FileScanner.swift */; };
 		A1000010 /* AsyncFileScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000012 /* AsyncFileScanner.swift */; };
 		A1000011 /* ScanState.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000013 /* ScanState.swift */; };
-		A1000012 /* ScanViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000014 /* ScanViewModel.swift */; };
-		A1000013 /* MainWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000015 /* MainWindow.swift */; };
-		A1000014 /* WelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000016 /* WelcomeView.swift */; };
-		A1000015 /* ScanningView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000017 /* ScanningView.swift */; };
-		A1000016 /* ScanResultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000018 /* ScanResultView.swift */; };
-		A1000017 /* ErrorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000019 /* ErrorView.swift */; };
-		A1000018 /* BookmarkManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000020 /* BookmarkManager.swift */; };
-		A1000019 /* FileBrowserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000021 /* FileBrowserView.swift */; };
-		A1000020 /* FileDetailsPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000022 /* FileDetailsPanel.swift */; };
-		A1000021 /* TreemapRectangle.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000023 /* TreemapRectangle.swift */; };
+		A1000012 /* ScanViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000014 /* ScanViewModel.swift */; };		A1000016 /* ScanResultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000018 /* ScanResultView.swift */; };		A1000018 /* BookmarkManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000020 /* BookmarkManager.swift */; };		A1000021 /* TreemapRectangle.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000023 /* TreemapRectangle.swift */; };
 		A1000022 /* TreemapLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000024 /* TreemapLayout.swift */; };
 		A1000023 /* TreemapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000025 /* TreemapView.swift */; };
 		A1000024 /* FileTypeLegend.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000026 /* FileTypeLegend.swift */; };
@@ -36,6 +42,21 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		A2000029 /* DuplicateFinder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuplicateFinder.swift; sourceTree = "<group>"; };
+		A2000030 /* FileFilters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileFilters.swift; sourceTree = "<group>"; };
+		A2000031 /* FileOperationsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileOperationsService.swift; sourceTree = "<group>"; };
+		A2000032 /* FileTreeFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileTreeFilter.swift; sourceTree = "<group>"; };
+		A2000033 /* FileTreeIndex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileTreeIndex.swift; sourceTree = "<group>"; };
+		A2000034 /* FileTreeNavigator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileTreeNavigator.swift; sourceTree = "<group>"; };
+		A2000035 /* FileTreeQuery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileTreeQuery.swift; sourceTree = "<group>"; };
+		A2000036 /* FileTreeTraversal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileTreeTraversal.swift; sourceTree = "<group>"; };
+		A2000037 /* NavigationPath.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationPath.swift; sourceTree = "<group>"; };
+		A2000038 /* FileActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileActions.swift; sourceTree = "<group>"; };
+		A2000039 /* FileListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileListView.swift; sourceTree = "<group>"; };
+		A2000040 /* FilterState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilterState.swift; sourceTree = "<group>"; };
+		A2000041 /* NavigationState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationState.swift; sourceTree = "<group>"; };
+		A2000042 /* SelectionState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectionState.swift; sourceTree = "<group>"; };
+		A2000043 /* ScanResultViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanResultViewModel.swift; sourceTree = "<group>"; };
 		A2000001 /* DiskAnalyzerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiskAnalyzerApp.swift; sourceTree = "<group>"; };
 		A2000002 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		A2000003 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -49,16 +70,7 @@
 		A2000011 /* FileScanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileScanner.swift; sourceTree = "<group>"; };
 		A2000012 /* AsyncFileScanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AsyncFileScanner.swift; sourceTree = "<group>"; };
 		A2000013 /* ScanState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanState.swift; sourceTree = "<group>"; };
-		A2000014 /* ScanViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanViewModel.swift; sourceTree = "<group>"; };
-		A2000015 /* MainWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainWindow.swift; sourceTree = "<group>"; };
-		A2000016 /* WelcomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeView.swift; sourceTree = "<group>"; };
-		A2000017 /* ScanningView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanningView.swift; sourceTree = "<group>"; };
-		A2000018 /* ScanResultView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanResultView.swift; sourceTree = "<group>"; };
-		A2000019 /* ErrorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorView.swift; sourceTree = "<group>"; };
-		A2000020 /* BookmarkManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookmarkManager.swift; sourceTree = "<group>"; };
-		A2000021 /* FileBrowserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileBrowserView.swift; sourceTree = "<group>"; };
-		A2000022 /* FileDetailsPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileDetailsPanel.swift; sourceTree = "<group>"; };
-		A2000023 /* TreemapRectangle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TreemapRectangle.swift; sourceTree = "<group>"; };
+		A2000014 /* ScanViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanViewModel.swift; sourceTree = "<group>"; };		A2000018 /* ScanResultView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanResultView.swift; sourceTree = "<group>"; };		A2000020 /* BookmarkManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookmarkManager.swift; sourceTree = "<group>"; };		A2000023 /* TreemapRectangle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TreemapRectangle.swift; sourceTree = "<group>"; };
 		A2000024 /* TreemapLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TreemapLayout.swift; sourceTree = "<group>"; };
 		A2000025 /* TreemapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TreemapView.swift; sourceTree = "<group>"; };
 		A2000026 /* FileTypeLegend.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileTypeLegend.swift; sourceTree = "<group>"; };
@@ -119,6 +131,15 @@
 			isa = PBXGroup;
 			children = (
 				A2000005 /* FileType.swift */,
+				A2000029 /* DuplicateFinder.swift */,
+				A2000030 /* FileFilters.swift */,
+				A2000031 /* FileOperationsService.swift */,
+				A2000032 /* FileTreeFilter.swift */,
+				A2000033 /* FileTreeIndex.swift */,
+				A2000034 /* FileTreeNavigator.swift */,
+				A2000035 /* FileTreeQuery.swift */,
+				A2000036 /* FileTreeTraversal.swift */,
+				A2000037 /* NavigationPath.swift */,
 				A2000006 /* FileNode.swift */,
 				A2000007 /* ScanProgress.swift */,
 				A2000008 /* ScanError.swift */,
@@ -143,19 +164,17 @@
 		};
 		A5000007 /* UI */ = {
 			isa = PBXGroup;
-			children = (
-				A2000015 /* MainWindow.swift */,
-				A2000016 /* WelcomeView.swift */,
-				A2000017 /* ScanningView.swift */,
-				A2000018 /* ScanResultView.swift */,
-				A2000019 /* ErrorView.swift */,
-				A2000021 /* FileBrowserView.swift */,
-				A2000022 /* FileDetailsPanel.swift */,
-				A2000025 /* TreemapView.swift */,
+			children = (				A2000018 /* ScanResultView.swift */,				A2000025 /* TreemapView.swift */,
 				A2000028 /* TreemapViewModel.swift */,
 				A2000026 /* FileTypeLegend.swift */,
 				A2000027 /* BreadcrumbView.swift */,
 				A2000002 /* ContentView.swift */,
+				A2000038 /* FileActions.swift */,
+				A2000039 /* FileListView.swift */,
+				A2000040 /* FilterState.swift */,
+				A2000041 /* NavigationState.swift */,
+				A2000042 /* SelectionState.swift */,
+				A2000043 /* ScanResultViewModel.swift */,
 				A2000014 /* ScanViewModel.swift */,
 			);
 			path = UI;
@@ -240,21 +259,27 @@
 				A1000009 /* FileScanner.swift in Sources */,
 				A1000010 /* AsyncFileScanner.swift in Sources */,
 				A1000011 /* ScanState.swift in Sources */,
-				A1000012 /* ScanViewModel.swift in Sources */,
-				A1000013 /* MainWindow.swift in Sources */,
-				A1000014 /* WelcomeView.swift in Sources */,
-				A1000015 /* ScanningView.swift in Sources */,
-				A1000016 /* ScanResultView.swift in Sources */,
-				A1000017 /* ErrorView.swift in Sources */,
-				A1000018 /* BookmarkManager.swift in Sources */,
-				A1000019 /* FileBrowserView.swift in Sources */,
-				A1000020 /* FileDetailsPanel.swift in Sources */,
-				A1000021 /* TreemapRectangle.swift in Sources */,
+				A1000012 /* ScanViewModel.swift in Sources */,				A1000016 /* ScanResultView.swift in Sources */,				A1000018 /* BookmarkManager.swift in Sources */,				A1000021 /* TreemapRectangle.swift in Sources */,
 				A1000022 /* TreemapLayout.swift in Sources */,
 				A1000023 /* TreemapView.swift in Sources */,
 				A1000026 /* TreemapViewModel.swift in Sources */,
 				A1000024 /* FileTypeLegend.swift in Sources */,
 				A1000025 /* BreadcrumbView.swift in Sources */,
+				A1000027 /* DuplicateFinder.swift in Sources */,
+				A1000028 /* FileFilters.swift in Sources */,
+				A1000029 /* FileOperationsService.swift in Sources */,
+				A1000030 /* FileTreeFilter.swift in Sources */,
+				A1000031 /* FileTreeIndex.swift in Sources */,
+				A1000032 /* FileTreeNavigator.swift in Sources */,
+				A1000033 /* FileTreeQuery.swift in Sources */,
+				A1000034 /* FileTreeTraversal.swift in Sources */,
+				A1000035 /* NavigationPath.swift in Sources */,
+				A1000036 /* FileActions.swift in Sources */,
+				A1000037 /* FileListView.swift in Sources */,
+				A1000038 /* FilterState.swift in Sources */,
+				A1000039 /* NavigationState.swift in Sources */,
+				A1000040 /* SelectionState.swift in Sources */,
+				A1000041 /* ScanResultViewModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -4,7 +4,7 @@ import SwiftUI
 struct DiskAnalyzerApp: App {
     var body: some Scene {
         WindowGroup {
-            MainWindow()
+            ContentView()
         }
         .windowStyle(.automatic)
         .commands {

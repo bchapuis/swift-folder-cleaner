@@ -37,7 +37,7 @@ struct TreemapRectangle: Identifiable {
 
 extension TreemapRectangle: Equatable {
     static func == (lhs: TreemapRectangle, rhs: TreemapRectangle) -> Bool {
-        lhs.node.path == rhs.node.path && lhs.rect == rhs.rect
+        lhs.node.path.standardized == rhs.node.path.standardized && lhs.rect == rhs.rect
     }
 }
 

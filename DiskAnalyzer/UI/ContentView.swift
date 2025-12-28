@@ -1,133 +1,120 @@
 import SwiftUI
 
+/// Main app view: scan → treemap
 struct ContentView: View {
     @State private var viewModel = ScanViewModel()
 
     var body: some View {
-        VStack(spacing: 20) {
-            Text("Disk Analyzer")
-                .font(.largeTitle)
+        VStack(spacing: 0) {
+            // Header
+            headerView
 
-            // State-based UI rendering
+            Divider()
+
+            // State-based content
             switch viewModel.state {
             case .idle:
                 idleView
             case .scanning(let progress):
                 scanningView(progress: progress)
             case .complete(let result):
-                resultView(result: result)
+                ScanResultView(result: result)
             case .failed(let error):
                 errorView(error: error)
             }
-
-            Button(viewModel.state.isScanning ? "Cancel Scan" : "Test Scan (Documents)") {
-                if viewModel.state.isScanning {
-                    viewModel.cancelScan()
-                } else {
-                    startTestScan()
-                }
-            }
         }
-        .padding()
         .frame(minWidth: 800, minHeight: 600)
     }
 
-    // MARK: - Subviews
+    // MARK: - Header
+
+    private var headerView: some View {
+        HStack {
+            Text("Disk Analyzer")
+                .font(.title2)
+                .fontWeight(.semibold)
+
+            Spacer()
+
+            if case .complete = viewModel.state {
+                Button("New Scan") {
+                    viewModel.reset()
+                }
+                .buttonStyle(.borderedProminent)
+            } else if !viewModel.state.isScanning {
+                Button("Scan Folder") {
+                    startScan()
+                }
+                .buttonStyle(.borderedProminent)
+            } else {
+                Button("Cancel") {
+                    viewModel.cancelScan()
+                }
+                .buttonStyle(.bordered)
+            }
+        }
+        .padding()
+        .background(.quaternary)
+    }
+
+    // MARK: - States
 
     private var idleView: some View {
-        VStack(spacing: 8) {
-            Image(systemName: "folder.badge.gearshape")
-                .font(.system(size: 48))
-                .foregroundStyle(.secondary)
-            Text("Ready to scan")
-                .foregroundStyle(.secondary)
+        ContentUnavailableView {
+            Label("Ready to Scan", systemImage: "folder.badge.gearshape")
+        } description: {
+            Text("Click \"Scan Folder\" to analyze disk usage")
         }
     }
 
     private func scanningView(progress: ScanProgress) -> some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 20) {
             ProgressView()
                 .scaleEffect(1.5)
 
-            Text("Scanning...")
-                .font(.headline)
-
-            VStack(alignment: .leading, spacing: 6) {
-                Text("\(progress.filesScanned) files")
-                Text(progress.formattedBytesScanned)
-                Text(progress.formattedSpeed)
-            }
-            .font(.caption)
-            .foregroundStyle(.secondary)
-            .padding()
-            .background(.quaternary)
-            .cornerRadius(8)
-        }
-    }
-
-    private func resultView(result: ScanResult) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Image(systemName: "checkmark.circle.fill")
-                    .foregroundStyle(.green)
-                Text("Scan Complete!")
+            VStack(spacing: 8) {
+                Text("Scanning...")
                     .font(.headline)
-            }
 
-            Divider()
-
-            VStack(alignment: .leading, spacing: 8) {
-                Label("\(result.totalFilesScanned) files", systemImage: "doc.fill")
-                Label(result.rootNode.formattedSize, systemImage: "internaldrive.fill")
-                Label(result.formattedDuration, systemImage: "clock.fill")
-                Label(String(format: "%.0f files/s", result.averageSpeed), systemImage: "gauge.with.dots.needle.bottom.50percent")
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("\(progress.filesScanned) files")
+                    Text(progress.formattedBytesScanned)
+                    Text(progress.formattedSpeed)
+                }
+                .font(.caption)
+                .foregroundStyle(.secondary)
             }
-            .font(.body)
-
-            Button("New Scan") {
-                viewModel.reset()
-            }
-            .buttonStyle(.borderedProminent)
         }
-        .padding()
-        .background(.quaternary)
-        .cornerRadius(12)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     private func errorView(error: ScanError) -> some View {
-        VStack(spacing: 12) {
-            Image(systemName: "exclamationmark.triangle.fill")
-                .font(.system(size: 48))
+        ContentUnavailableView {
+            Label("Scan Failed", systemImage: "exclamationmark.triangle.fill")
                 .foregroundStyle(.red)
-
-            Text("Scan Failed")
-                .font(.headline)
-
+        } description: {
             Text(error.localizedDescription)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-
-            if let suggestion = error.recoverySuggestion {
-                Text(suggestion)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
-            }
-
+        } actions: {
             Button("Try Again") {
                 viewModel.reset()
             }
-            .buttonStyle(.borderedProminent)
         }
-        .padding()
     }
 
     // MARK: - Actions
 
-    private func startTestScan() {
-        let homeDir = FileManager.default.homeDirectoryForCurrentUser
-        let docsDir = homeDir.appendingPathComponent("Documents")
-        viewModel.startScan(url: docsDir)
+    private func startScan() {
+        let panel = NSOpenPanel()
+        panel.canChooseDirectories = true
+        panel.canChooseFiles = false
+        panel.allowsMultipleSelection = false
+        panel.prompt = "Scan"
+        panel.message = "Select a folder to analyze"
+
+        panel.begin { response in
+            guard response == .OK, let url = panel.url else { return }
+            viewModel.startScan(url: url)
+        }
     }
 }
 

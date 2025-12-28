@@ -3,7 +3,7 @@ import UniformTypeIdentifiers
 import SwiftUI
 
 /// File type classification for visualization
-enum FileType: String, Codable, Sendable {
+enum FileType: String, Codable, Sendable, CaseIterable {
     case directory
     case image
     case video
@@ -75,23 +75,23 @@ enum FileType: String, Codable, Sendable {
         case .directory:
             return "folder.fill"
         case .image:
-            return "photo.fill"
+            return "photo"
         case .video:
-            return "video.fill"
+            return "film"
         case .audio:
-            return "music.note"
+            return "waveform"
         case .document:
-            return "doc.fill"
+            return "doc.text"
         case .code:
-            return "chevron.left.forwardslash.chevron.right"
+            return "doc.plaintext"
         case .archive:
-            return "archivebox.fill"
+            return "doc.zipper"
         case .executable:
-            return "app.fill"
+            return "gearshape.2"
         case .system:
-            return "gearshape.fill"
+            return "gear"
         case .other:
-            return "doc.plaintext.fill"
+            return "doc"
         }
     }
 }

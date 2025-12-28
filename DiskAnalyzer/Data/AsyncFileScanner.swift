@@ -5,6 +5,8 @@ actor AsyncFileScanner {
     private let fileManager: FileManager
     private var currentProgress: ScanProgress
     private let startTime: Date
+    private var lastProgressUpdate: Date = .distantPast
+    private let progressUpdateInterval: TimeInterval = 0.2 // 200ms throttle
 
     init(fileManager: FileManager = .default) {
         self.fileManager = fileManager
@@ -81,29 +83,40 @@ actor AsyncFileScanner {
         let attributes = try await getAttributes(for: url)
         let modifiedDate = attributes.modifiedDate
 
-        // Update progress
-        updateProgress(path: url.path, size: 0)
-        progressHandler?(currentProgress)
+        // Update progress (throttled)
+        updateProgressThrottled(path: url.path, size: 0, handler: progressHandler)
 
         // Get directory contents
         let contents = try await getDirectoryContents(at: url)
 
-        // Scan each child item concurrently (but with limited concurrency)
-        var children: [FileNode] = []
-        for childURL in contents {
-            do {
-                let childNode = try await scanItem(at: childURL, progressHandler: progressHandler)
-                children.append(childNode)
-            } catch is CancellationError {
-                throw ScanError.cancelled
-            } catch {
-                // Skip items we can't access
-                continue
+        // Scan children concurrently using TaskGroup (all cores)
+        let children = try await withThrowingTaskGroup(of: FileNode?.self) { group in
+            // Add tasks for each child
+            for childURL in contents {
+                group.addTask {
+                    do {
+                        return try await self.scanItem(at: childURL, progressHandler: progressHandler)
+                    } catch is CancellationError {
+                        throw ScanError.cancelled
+                    } catch {
+                        // Skip items we can't access
+                        return nil
+                    }
+                }
             }
-        }
 
-        // Sort children by size (largest first)
-        children.sort { $0.totalSize > $1.totalSize }
+            // Collect results
+            var results: [FileNode] = []
+            for try await child in group {
+                if let child {
+                    results.append(child)
+                }
+            }
+
+            // Sort children by size (largest first)
+            results.sort { $0.totalSize > $1.totalSize }
+            return results
+        }
 
         return FileNode.directory(
             path: url,
@@ -138,9 +151,8 @@ actor AsyncFileScanner {
 
         let attributes = try await getAttributes(for: url)
 
-        // Update progress
-        updateProgress(path: url.path, size: attributes.size)
-        progressHandler?(currentProgress)
+        // Update progress (throttled)
+        updateProgressThrottled(path: url.path, size: attributes.size, handler: progressHandler)
 
         return FileNode.file(
             path: url,
@@ -151,14 +163,15 @@ actor AsyncFileScanner {
         )
     }
 
-    /// Gets file attributes for a URL (async wrapper)
-    private func getAttributes(for url: URL) async throws -> FileAttributes {
+    /// Gets file attributes for a URL (nonisolated for true parallelism)
+    private nonisolated func getAttributes(for url: URL) async throws -> FileAttributes {
         try await Task {
             do {
-                let attrs = try fileManager.attributesOfItem(atPath: url.path)
+                // Try cached resource values first (much faster)
+                let resourceValues = try url.resourceValues(forKeys: [.fileSizeKey, .contentModificationDateKey])
 
-                let size = attrs[.size] as? Int64 ?? 0
-                let modifiedDate = attrs[.modificationDate] as? Date ?? Date()
+                let size = Int64(resourceValues.fileSize ?? 0)
+                let modifiedDate = resourceValues.contentModificationDate ?? Date()
 
                 return FileAttributes(size: size, modifiedDate: modifiedDate)
             } catch {
@@ -170,11 +183,11 @@ actor AsyncFileScanner {
         }.value
     }
 
-    /// Gets the contents of a directory (async wrapper)
-    private func getDirectoryContents(at url: URL) async throws -> [URL] {
+    /// Gets the contents of a directory (nonisolated for true parallelism)
+    private nonisolated func getDirectoryContents(at url: URL) async throws -> [URL] {
         try await Task {
             do {
-                return try fileManager.contentsOfDirectory(
+                return try FileManager.default.contentsOfDirectory(
                     at: url,
                     includingPropertiesForKeys: [.isDirectoryKey, .fileSizeKey, .contentModificationDateKey],
                     options: [.skipsHiddenFiles]
@@ -191,6 +204,23 @@ actor AsyncFileScanner {
     /// Updates the current progress (actor-isolated)
     private func updateProgress(path: String, size: Int64) {
         currentProgress = currentProgress.update(path: path, fileSize: size)
+    }
+
+    /// Updates progress with throttling to avoid UI flooding
+    private func updateProgressThrottled(
+        path: String,
+        size: Int64,
+        handler: ((ScanProgress) -> Void)?
+    ) {
+        // Always update internal state
+        updateProgress(path: path, size: size)
+
+        // Only notify handler if enough time has passed
+        let now = Date()
+        if now.timeIntervalSince(lastProgressUpdate) >= progressUpdateInterval {
+            handler?(currentProgress)
+            lastProgressUpdate = now
+        }
     }
 
     /// Gets the current progress (actor-isolated)

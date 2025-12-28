@@ -1,29 +1,21 @@
 import SwiftUI
 
-/// High-performance treemap visualization with caching and optimizations
+/// Treemap visualization - reads state from and sends actions to ScanResultViewModel
 struct TreemapView: View {
     // MARK: - Properties
 
-    let rootNode: FileNode
-    @Binding var selectedNode: FileNode?
-    @Binding var zoomedNode: FileNode?
+    let viewModel: ScanResultViewModel
 
     @Environment(\.colorScheme) private var colorScheme
 
-    @State private var viewModel = TreemapViewModel()
-    @State private var viewSize: CGSize = .zero
     @State private var mouseLocation: CGPoint = .zero
-
-    // Gesture state
-    @GestureState private var isDragging = false
-    @State private var tapCount = 0
-    @State private var lastTapTime: Date = .distantPast
-    @State private var lastTapLocation: CGPoint = .zero
+    @State private var currentSize: CGSize = .zero
+    @State private var canvasID = UUID()
 
     // MARK: - Computed Properties
 
-    private var displayNode: FileNode {
-        zoomedNode ?? rootNode
+    private var layoutViewModel: TreemapViewModel {
+        viewModel.treemapViewModel
     }
 
     // MARK: - Body
@@ -31,84 +23,78 @@ struct TreemapView: View {
     var body: some View {
         GeometryReader { geometry in
             Canvas { context, size in
-                // Update layout if needed
-                viewModel.updateLayout(
-                    rootNode: rootNode,
-                    displayNode: displayNode,
-                    size: size
-                )
-
-                // Draw all rectangles
-                for rectangle in viewModel.rectangles {
+                // Draw pre-filtered rectangles (no computation here!)
+                for rectangle in layoutViewModel.drawableRectangles {
                     drawRectangle(rectangle, in: context)
                 }
 
                 // Draw selection highlight
-                if let selected = selectedNode,
-                   let selectedRect = viewModel.rectangles.first(where: { $0.node.path == selected.path }) {
-                    drawSelectionHighlight(selectedRect, in: context)
+                if let selected = viewModel.selectedNode,
+                   let selectedRect = layoutViewModel.rectangle(for: selected.path) {
+                    // For directories: just draw border
+                    // For files: draw full highlight
+                    if selectedRect.node.isDirectory && !selectedRect.node.children.isEmpty {
+                        drawDirectoryBorder(selectedRect, in: context)
+                    } else {
+                        drawSelectionHighlight(selectedRect, in: context)
+                    }
                 }
 
                 // Draw hover highlight
-                if let hovered = viewModel.hoveredNode,
-                   let hoveredRect = viewModel.rectangles.first(where: { $0.node.path == hovered.path }),
-                   hoveredRect.node.path != selectedNode?.path {
+                if let hovered = layoutViewModel.hoveredNode,
+                   hovered.path != viewModel.selectedNode?.path,
+                   let hoveredRect = layoutViewModel.rectangle(for: hovered.path) {
                     drawHoverHighlight(hoveredRect, in: context)
                 }
             }
-            .gesture(
-                DragGesture(minimumDistance: 0)
-                    .updating($isDragging) { _, state, _ in
-                        state = true
-                    }
-                    .onChanged { value in
-                        handleDragChanged(value.location, in: geometry.size)
-                    }
-                    .onEnded { value in
-                        handleDragEnded(value.location, in: geometry.size)
-                    }
-            )
-            .gesture(
-                TapGesture(count: 2)
-                    .onEnded {
-                        handleDoubleTap(at: mouseLocation)
-                    }
-            )
+            .onTapGesture(count: 2) {
+                // Double-tap - drill down if directory
+                handleDoubleTap(at: mouseLocation)
+            }
+            .onTapGesture(count: 1) {
+                // Single-tap - select item
+                handleSingleTap(at: mouseLocation)
+            }
             .onContinuousHover { phase in
                 switch phase {
                 case .active(let location):
-                    handleHover(at: location)
+                    mouseLocation = location
+                    layoutViewModel.updateHover(at: location)
                 case .ended:
-                    viewModel.updateHover(at: nil)
+                    layoutViewModel.updateHover(at: nil)
                 }
             }
             .overlay(alignment: .topLeading) {
-                if let hovered = viewModel.hoveredNode {
+                if let hovered = layoutViewModel.hoveredNode {
                     tooltipView(for: hovered)
-                        .position(x: mouseLocation.x, y: max(40, mouseLocation.y - 40))
+                        .position(
+                            x: min(mouseLocation.x + 100, geometry.size.width - 100),
+                            y: max(40, min(mouseLocation.y - 40, geometry.size.height - 100))
+                        )
                 }
-            }
-            .focusable()
-            .onKeyPress(.escape) {
-                handleEscape()
-                return .handled
-            }
-            .onKeyPress(.return) {
-                handleEnter()
-                return .handled
             }
             .onChange(of: geometry.size) { oldSize, newSize in
-                if oldSize != newSize {
-                    viewSize = newSize
-                    viewModel.invalidateLayout()
+                if oldSize != newSize && abs(newSize.width - currentSize.width) > 1 || abs(newSize.height - currentSize.height) > 1 {
+                    currentSize = newSize
+                    layoutViewModel.updateLayout(rootNode: viewModel.filteredRoot, size: newSize)
+                    canvasID = UUID() // Force Canvas redraw
                 }
             }
-            .onChange(of: displayNode.path) {
-                viewModel.invalidateLayout()
+            .onChange(of: viewModel.currentRoot.path) { _, _ in
+                // Navigation changed - update layout
+                layoutViewModel.updateLayout(rootNode: viewModel.filteredRoot, size: currentSize)
+                canvasID = UUID()
+            }
+            .onChange(of: viewModel.selectedTypes) { _, _ in
+                // Filter changed - update layout with new filtered tree
+                layoutViewModel.updateLayout(rootNode: viewModel.filteredRoot, size: currentSize)
+                canvasID = UUID()
             }
             .onAppear {
-                viewSize = geometry.size
+                currentSize = geometry.size
+                layoutViewModel.updateLayout(rootNode: viewModel.filteredRoot, size: geometry.size)
             }
+            .id(canvasID)
         }
     }
 
@@ -127,12 +113,12 @@ struct TreemapView: View {
 
         // Fill
         let path = Path(rect)
-        context.fill(path, with: .color(fillColor))
+        context.fill(path, with: .color(fillColor.opacity(0.9)))
 
         // Border
         context.stroke(
             path,
-            with: .color(.white.opacity(0.2)),
+            with: .color(.white.opacity(0.25)),
             lineWidth: 0.5
         )
 
@@ -149,8 +135,8 @@ struct TreemapView: View {
         let centerX = rect.midX
         let centerY = rect.midY
 
-        // Truncate long filenames
-        let displayName = truncateFilename(node.name, maxWidth: rect.width - 8)
+        // Smart truncate: keep file extension visible
+        let displayName = smartTruncate(node.name, maxWidth: rect.width - 8)
         let fontSize = rectangle.labelFontSize
 
         // Draw text shadow for better contrast
@@ -158,7 +144,7 @@ struct TreemapView: View {
         shadowContext.addFilter(.shadow(color: .black.opacity(0.7), radius: 2, x: 0, y: 1))
 
         // Name
-        var nameText = Text(displayName)
+        let nameText = Text(displayName)
             .font(.system(size: fontSize, weight: .medium))
             .foregroundStyle(.white)
 
@@ -171,7 +157,7 @@ struct TreemapView: View {
         // Size if space allows
         if rectangle.canShowSize {
             let size = ByteCountFormatter.string(fromByteCount: node.totalSize, countStyle: .file)
-            var sizeText = Text(size)
+            let sizeText = Text(size)
                 .font(.system(size: fontSize - 2))
                 .foregroundStyle(.white.opacity(0.95))
 
@@ -183,8 +169,7 @@ struct TreemapView: View {
         }
     }
 
-    private func truncateFilename(_ name: String, maxWidth: CGFloat) -> String {
-        // Estimate character width (rough approximation)
+    private func smartTruncate(_ name: String, maxWidth: CGFloat) -> String {
         let avgCharWidth: CGFloat = 7
         let maxChars = Int(maxWidth / avgCharWidth)
 
@@ -192,27 +177,63 @@ struct TreemapView: View {
             return name
         }
 
-        // Truncate with ellipsis
-        let keepChars = max(maxChars - 3, 1)
-        return String(name.prefix(keepChars)) + "..."
+        // Keep extension visible
+        if let dotIndex = name.lastIndex(of: "."),
+           dotIndex != name.startIndex {
+            let ext = String(name[dotIndex...])
+            let nameWithoutExt = String(name[..<dotIndex])
+
+            let extLength = ext.count
+            let availableForName = maxChars - extLength - 3 // "..." + extension
+
+            if availableForName > 0 {
+                return String(nameWithoutExt.prefix(availableForName)) + "..." + ext
+            }
+        }
+
+        // Fallback: simple truncation
+        return String(name.prefix(maxChars - 3)) + "..."
     }
 
     private func drawSelectionHighlight(_ rectangle: TreemapRectangle, in context: GraphicsContext) {
         let rect = rectangle.rect.insetBy(dx: 2, dy: 2)
         let path = Path(rect)
 
-        // Inner white border
+        // Thick accent border
         context.stroke(
             path,
-            with: .color(.white),
-            style: StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round)
+            with: .color(.accentColor),
+            style: StrokeStyle(lineWidth: 3, lineCap: .round, lineJoin: .round)
         )
 
-        // Outer accent glow
+        // Subtle glow
+        var glowContext = context
+        glowContext.addFilter(.shadow(color: .accentColor.opacity(0.5), radius: 4, x: 0, y: 0))
+        glowContext.stroke(
+            path,
+            with: .color(.accentColor),
+            style: StrokeStyle(lineWidth: 3)
+        )
+    }
+
+    private func drawDirectoryBorder(_ rectangle: TreemapRectangle, in context: GraphicsContext) {
+        let rect = rectangle.rect.insetBy(dx: 2, dy: 2)
+        let path = Path(rect)
+
+        // Thick accent border for directory (no fill, no label)
         context.stroke(
             path,
             with: .color(.accentColor),
             style: StrokeStyle(lineWidth: 4, lineCap: .round, lineJoin: .round)
+        )
+
+        // Subtle glow
+        var glowContext = context
+        glowContext.addFilter(.shadow(color: .accentColor.opacity(0.5), radius: 4, x: 0, y: 0))
+        glowContext.stroke(
+            path,
+            with: .color(.accentColor),
+            style: StrokeStyle(lineWidth: 4)
         )
     }
 
@@ -220,137 +241,68 @@ struct TreemapView: View {
         let rect = rectangle.rect.insetBy(dx: 1, dy: 1)
         let path = Path(rect)
 
-        // Subtle hover border
         context.stroke(
             path,
-            with: .color(.white.opacity(0.5)),
+            with: .color(.white.opacity(0.6)),
             style: StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round)
         )
     }
 
     // MARK: - Interaction Handlers
 
-    private func handleDragChanged(_ location: CGPoint, in size: CGSize) {
-        mouseLocation = location
-    }
-
-    private func handleDragEnded(_ location: CGPoint, in size: CGSize) {
-        // Single tap/click
-        if let node = viewModel.findNode(at: location) {
-            selectedNode = node
+    private func handleSingleTap(at location: CGPoint) {
+        guard let node = layoutViewModel.findNode(at: location) else {
+            viewModel.selectNode(nil)
+            return
         }
+
+        viewModel.selectNode(node)
     }
 
     private func handleDoubleTap(at location: CGPoint) {
-        guard let node = viewModel.findNode(at: location),
-              node.isDirectory,
-              !node.children.isEmpty else {
+        guard let node = layoutViewModel.findNode(at: location),
+              node.isDirectory else {
             return
         }
 
-        withAnimation(.easeInOut(duration: 0.3)) {
-            zoomedNode = node
-        }
-    }
-
-    private func handleHover(at location: CGPoint) {
-        mouseLocation = location
-        viewModel.updateHover(at: location)
-    }
-
-    private func handleEscape() {
-        withAnimation(.easeInOut(duration: 0.3)) {
-            zoomedNode = nil
-        }
-    }
-
-    private func handleEnter() {
-        guard let selected = selectedNode,
-              selected.isDirectory,
-              !selected.children.isEmpty else {
-            return
-        }
-
-        withAnimation(.easeInOut(duration: 0.3)) {
-            zoomedNode = selected
-        }
+        viewModel.drillDown(to: node)
     }
 
     // MARK: - Tooltip
 
     @ViewBuilder
     private func tooltipView(for node: FileNode) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: 6) {
+            // Name
             Text(node.name)
                 .font(.system(size: 12, weight: .semibold))
                 .lineLimit(2)
 
+            // Size and percentage
             HStack(spacing: 8) {
                 Text(ByteCountFormatter.string(fromByteCount: node.totalSize, countStyle: .file))
                     .font(.system(size: 11))
 
-                if node.totalSize > 0 && displayNode.totalSize > 0 {
-                    let percentage = (Double(node.totalSize) / Double(displayNode.totalSize)) * 100
+                if node.totalSize > 0 && viewModel.currentRoot.totalSize > 0 {
+                    let percentage = (Double(node.totalSize) / Double(viewModel.currentRoot.totalSize)) * 100
                     Text(String(format: "%.1f%%", percentage))
                         .font(.system(size: 11))
                         .foregroundStyle(.secondary)
                 }
             }
+
+            // File count for directories
+            if node.isDirectory {
+                Text("\(node.children.count) items")
+                    .font(.system(size: 10))
+                    .foregroundStyle(.secondary)
+            }
         }
-        .padding(8)
+        .padding(10)
         .background {
-            RoundedRectangle(cornerRadius: 6)
+            RoundedRectangle(cornerRadius: 8)
                 .fill(.ultraThinMaterial)
-                .shadow(color: .black.opacity(0.2), radius: 4, y: 2)
+                .shadow(color: .black.opacity(0.3), radius: 6, y: 2)
         }
     }
-}
-
-// MARK: - Preview
-
-#Preview {
-    let sampleNode = FileNode(
-        path: URL(fileURLWithPath: "/Sample"),
-        name: "Sample",
-        size: 0,
-        fileType: .directory,
-        modifiedDate: Date(),
-        children: [
-            FileNode(
-                path: URL(fileURLWithPath: "/Sample/Documents"),
-                name: "Documents",
-                size: 1_000_000_000,
-                fileType: .directory,
-                modifiedDate: Date(),
-                children: [],
-                isDirectory: true
-            ),
-            FileNode(
-                path: URL(fileURLWithPath: "/Sample/Images"),
-                name: "Images",
-                size: 500_000_000,
-                fileType: .directory,
-                modifiedDate: Date(),
-                children: [],
-                isDirectory: true
-            ),
-            FileNode(
-                path: URL(fileURLWithPath: "/Sample/Videos"),
-                name: "Videos",
-                size: 300_000_000,
-                fileType: .directory,
-                modifiedDate: Date(),
-                children: [],
-                isDirectory: true
-            )
-        ],
-        isDirectory: true
-    )
-
-    return TreemapView(
-        rootNode: sampleNode,
-        selectedNode: .constant(nil),
-        zoomedNode: .constant(nil)
-    )
-    .frame(width: 800, height: 600)
 }

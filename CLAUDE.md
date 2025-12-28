@@ -5,11 +5,10 @@ Quick reference for Claude Code.
 ## Commands
 
 ```bash
-# Run
-open DiskAnalyzer.xcodeproj  # Cmd+R in Xcode
-xcodebuild -scheme DiskAnalyzer -configuration Debug
+# Clean, Build & Run (use /run slash command)
+xcodebuild clean && rm -rf ~/Library/Developer/Xcode/DerivedData/*DiskAnalyzer* && xcodebuild -scheme DiskAnalyzer -configuration Debug build && open ~/Library/Developer/Xcode/DerivedData/DiskAnalyzer-*/Build/Products/Debug/DiskAnalyzer.app
 
-# Build
+# Build (Release)
 xcodebuild -scheme DiskAnalyzer -configuration Release build
 
 # Test

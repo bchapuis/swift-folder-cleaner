@@ -1,34 +1,40 @@
 # Disk Analyzer - Requirements
 
+**Mission:** Analyze disk usage, identify waste, clean it up.
+**Philosophy:** Do one thing well (Unix philosophy).
+
 ## Functional Requirements
 
 ### Scanning
-- Native folder picker (NSOpenPanel) with common locations, recent scans
-- Recursive traversal with real-time progress (%, count, path, speed, ETA)
+- Native folder picker (NSOpenPanel) with recent scans
+- Recursive traversal with real-time progress (%, count, speed, ETA)
 - Task cancellation with instant response
 - Completion notification
 
 ### Visualization
-- Treemap: rectangles proportional to size, color by type
-- Interactive zoom with breadcrumb navigation
-- Hover: name, size, percentage
-- Legend for color scheme
+- Treemap: rectangles proportional to size, color by file type
+- Click to select files/folders
+- Hover tooltip: name, size, percentage
 - Human-readable sizes (1.5 GB, 342 MB)
+- No zoom, no breadcrumbs (use Finder for navigation)
+- No legend (colors are self-explanatory)
+- No separate file browser (use Finder)
 
-### File Browser
-- Collapsible tree view: name, size, type, date
-- Sortable columns
-- Type icons (SF Symbols)
-- Bidirectional selection sync with treemap
+### File Analysis
+- **Find Large Files**: Filter by size (>100MB, >1GB, >10GB)
+- **Find Duplicates**: Detect identical files by size + SHA-256 hash
+- **Top 10 Largest**: Quick view of biggest space consumers
+- **Selection**: Click to select, Cmd+Click for multiple, Shift+Click for range
 
-### File Information
-- Details panel: path, size, %, count, modified date
-- Actions: Show in Finder, Move to Trash
-- Top consumers list
-- Confirmation dialogs for destructive operations
+### File Operations
+- **Delete**: Move to Trash with confirmation dialog
+- **Batch Delete**: Delete multiple selected items
+- **Show in Finder**: Reveal selected file/folder
+- **Undo Delete**: NSUndoManager support
+- Confirmation for destructive operations (>100MB or >10 files)
 
 ### Preferences
-- Persist: window size, last location, panel visibility
+- Persist: window size, last scan location
 - Keyboard shortcuts for all actions
 
 ## Non-Functional Requirements
@@ -36,7 +42,8 @@
 ### Performance
 - Scan 100,000+ files efficiently via async/await
 - UI responsive during scanning (@MainActor)
-- Memory: lazy evaluation, streaming, proper ARC
+- Duplicate detection streaming (don't load all in memory)
+- Hash calculation on background threads
 - Launch under 2 seconds
 - Treemap at 60fps
 
@@ -55,10 +62,10 @@
 
 ### Design
 - SF Pro typography with clear hierarchy
-- System accent + semantic colors (blue/green/purple/orange)
+- System colors: file type colors (auto light/dark)
 - 8pt grid spacing
 - SF Symbols icons
-- Automatic light/dark mode
+- Minimal chrome, focus on treemap
 
 ### Development
 - Swift API Design Guidelines
@@ -69,6 +76,12 @@
 - Hardened Runtime + Notarization ready
 
 ## Out of Scope
-- Duplicate detection, search, exports, custom themes
-- Multiple scans, network optimization, Quick Look
-- iOS/iPadOS, cloud/Spotlight integration
+- Multiple simultaneous scans
+- Search functionality (use Finder)
+- Export reports/visualizations
+- Custom themes
+- Network drives optimization
+- Quick Look integration
+- iOS/iPadOS versions
+- Cloud storage integration
+- Spotlight integration

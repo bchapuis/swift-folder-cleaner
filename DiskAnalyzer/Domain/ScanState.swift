@@ -64,7 +64,7 @@ extension ScanState: Equatable {
         case let (.scanning(p1), .scanning(p2)):
             return p1.filesScanned == p2.filesScanned && p1.totalBytes == p2.totalBytes
         case let (.complete(r1), .complete(r2)):
-            return r1.rootNode.path == r2.rootNode.path
+            return r1.rootNode.path.standardized == r2.rootNode.path.standardized
         case let (.failed(e1), .failed(e2)):
             return e1 == e2
         default:

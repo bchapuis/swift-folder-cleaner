@@ -1,79 +1,84 @@
 import SwiftUI
 import Observation
 
-/// ViewModel for treemap with caching and performance optimizations
+/// Layout-only ViewModel for treemap visualization
+/// All navigation/selection state managed by ScanResultViewModel
 @MainActor
 @Observable
 final class TreemapViewModel {
-    // MARK: - State
+    // MARK: - Layout State
 
     private(set) var rectangles: [TreemapRectangle] = []
     private(set) var hoveredNode: FileNode?
     private(set) var isLayoutValid = false
 
-    // MARK: - Cache
+    // MARK: - Performance Caches
 
     private var cachedSize: CGSize = .zero
     private var cachedRootNode: FileNode?
-    private var cachedDisplayNode: FileNode?
-    private var hitTestCache: [CGPoint: FileNode] = [:]
 
-    // MARK: - Configuration
+    /// Fast lookup for which nodes have children laid out (avoids O(n²) search)
+    private var nodePathsSet: Set<URL> = []
 
-    private let hitTestCacheSize = 100 // Cache last 100 hit tests
+    /// Rectangles to actually draw (cached, filtered)
+    private(set) var drawableRectangles: [TreemapRectangle] = []
+
+    /// Fast lookup for rectangles by node path (avoids O(n) search for selection/hover)
+    private var rectanglesByPath: [URL: TreemapRectangle] = [:]
 
     // MARK: - Layout Management
 
-    func updateLayout(rootNode: FileNode, displayNode: FileNode, size: CGSize) {
+    func updateLayout(rootNode: FileNode, size: CGSize) {
         // Check if we need to recalculate
-        guard shouldRecalculateLayout(rootNode: rootNode, displayNode: displayNode, size: size) else {
+        guard shouldRecalculateLayout(rootNode: rootNode, size: size) else {
             return
         }
 
-        // Invalidate caches
-        hitTestCache.removeAll()
-
-        // Calculate new layout
+        // Calculate new layout with size-based threshold
+        // Only recurse into directories >= 0.5% of current root size
         rectangles = TreemapLayout.layout(
-            node: displayNode,
-            in: CGRect(origin: .zero, size: size)
+            node: rootNode,
+            in: CGRect(origin: .zero, size: size),
+            minSizeThreshold: 0.005
         )
+
+        // Build fast lookup structures (use standardized URLs for consistency)
+        nodePathsSet = Set(rectangles.map { $0.node.path.standardized })
+        rectanglesByPath = Dictionary(uniqueKeysWithValues: rectangles.map { ($0.node.path.standardized, $0) })
+
+        // Pre-filter drawable rectangles to avoid O(n²) in draw loop
+        drawableRectangles = rectangles.filter { rectangle in
+            if !rectangle.node.isDirectory {
+                return true // Always draw files
+            } else if rectangle.node.children.isEmpty {
+                return true // Always draw empty directories
+            } else {
+                // For directories with children: only draw if children are NOT laid out
+                let hasLaidOutChildren = rectangle.node.children.contains { nodePathsSet.contains($0.path.standardized) }
+                return !hasLaidOutChildren
+            }
+        }
 
         // Update cache
         cachedSize = size
         cachedRootNode = rootNode
-        cachedDisplayNode = displayNode
         isLayoutValid = true
+    }
+
+    /// Fast lookup for rectangle by node path (O(1) instead of O(n))
+    func rectangle(for path: URL) -> TreemapRectangle? {
+        rectanglesByPath[path.standardized]
     }
 
     func invalidateLayout() {
         isLayoutValid = false
-        hitTestCache.removeAll()
     }
 
     // MARK: - Hit Testing
 
     func findNode(at location: CGPoint) -> FileNode? {
-        // Check cache first
-        if let cached = hitTestCache[location] {
-            return cached
-        }
-
-        // Find in rectangles
-        guard let rect = rectangles.first(where: { $0.rect.contains(location) }) else {
-            return nil
-        }
-
-        // Cache result (with size limit)
-        if hitTestCache.count >= hitTestCacheSize {
-            // Remove oldest entry (simple FIFO)
-            if let firstKey = hitTestCache.keys.first {
-                hitTestCache.removeValue(forKey: firstKey)
-            }
-        }
-        hitTestCache[location] = rect.node
-
-        return rect.node
+        // Find in rectangles (reverse order to hit top-most first)
+        rectangles.reversed().first(where: { $0.rect.contains(location) })?.node
     }
 
     func updateHover(at location: CGPoint?) {
@@ -86,19 +91,14 @@ final class TreemapViewModel {
 
     // MARK: - Helper Methods
 
-    private func shouldRecalculateLayout(rootNode: FileNode, displayNode: FileNode, size: CGSize) -> Bool {
+    private func shouldRecalculateLayout(rootNode: FileNode, size: CGSize) -> Bool {
         // Size changed significantly (more than 1pt)
         if abs(size.width - cachedSize.width) > 1 || abs(size.height - cachedSize.height) > 1 {
             return true
         }
 
-        // Display node changed
-        if displayNode.path != cachedDisplayNode?.path {
-            return true
-        }
-
         // Root node changed
-        if rootNode.path != cachedRootNode?.path {
+        if rootNode.path.standardized != cachedRootNode?.path.standardized {
             return true
         }
 
@@ -108,16 +108,5 @@ final class TreemapViewModel {
         }
 
         return false
-    }
-}
-
-// MARK: - Performance Monitoring
-
-extension TreemapViewModel {
-    func logPerformance() {
-        print("TreemapViewModel Performance:")
-        print("  - Rectangles: \(rectangles.count)")
-        print("  - Hit test cache size: \(hitTestCache.count)")
-        print("  - Layout valid: \(isLayoutValid)")
     }
 }

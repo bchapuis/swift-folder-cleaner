@@ -7,8 +7,9 @@ struct TreemapLayout {
     /// - Parameters:
     ///   - node: Root node to layout
     ///   - bounds: Available rectangle to fill
+    ///   - minSizeThreshold: Minimum size (as fraction of root, 0.0-1.0) to recurse into (default 0.005 = 0.5%)
     /// - Returns: Array of rectangles representing each file/folder
-    static func layout(node: FileNode, in bounds: CGRect) -> [TreemapRectangle] {
+    static func layout(node: FileNode, in bounds: CGRect, minSizeThreshold: Double = 0.005) -> [TreemapRectangle] {
         var rectangles: [TreemapRectangle] = []
 
         // Only layout if the node has size
@@ -16,18 +17,26 @@ struct TreemapLayout {
             return rectangles
         }
 
-        // If it's a file (leaf node), create a single rectangle
-        if !node.isDirectory || node.children.isEmpty {
-            rectangles.append(TreemapRectangle(node: node, rect: bounds))
-            return rectangles
+        // Calculate absolute minimum size from threshold
+        let minSize = Int64(Double(node.totalSize) * minSizeThreshold)
+
+        // Always add the node itself as a rectangle
+        rectangles.append(TreemapRectangle(node: node, rect: bounds))
+
+        // If it's a directory with children, layout children on top
+        if node.isDirectory && !node.children.isEmpty {
+            let children = node.children
+                .filter { $0.totalSize > 0 }  // Filter out empty items
+                .sorted { $0.totalSize > $1.totalSize }  // Sort by size (largest first)
+
+            squarify(
+                children: children,
+                bounds: bounds,
+                totalSize: node.totalSize,
+                minSize: minSize,
+                output: &rectangles
+            )
         }
-
-        // Layout children using squarified algorithm
-        let children = node.children
-            .filter { $0.totalSize > 0 }  // Filter out empty items
-            .sorted { $0.totalSize > $1.totalSize }  // Sort by size (largest first)
-
-        squarify(children: children, bounds: bounds, totalSize: node.totalSize, output: &rectangles)
 
         return rectangles
     }
@@ -38,6 +47,7 @@ struct TreemapLayout {
         children: [FileNode],
         bounds: CGRect,
         totalSize: Int64,
+        minSize: Int64,
         output: inout [TreemapRectangle]
     ) {
         guard !children.isEmpty, bounds.width > 0, bounds.height > 0 else { return }
@@ -94,13 +104,23 @@ struct TreemapLayout {
 
                 // Add rectangles for items in the row
                 for (node, rect) in zip(row, rowRects) {
-                    if node.isDirectory && !node.children.isEmpty {
-                        // Recursively layout children
-                        let childRects = layout(node: node, in: rect)
-                        output.append(contentsOf: childRects)
-                    } else {
-                        // Leaf node - add as rectangle
-                        output.append(TreemapRectangle(node: node, rect: rect))
+                    // Always add the node itself as a rectangle (directories and files)
+                    output.append(TreemapRectangle(node: node, rect: rect))
+
+                    // Only recurse if node is large enough (size-based threshold)
+                    if node.isDirectory && !node.children.isEmpty && node.totalSize >= minSize {
+                        // Recursively layout children (will be drawn on top)
+                        let children = node.children
+                            .filter { $0.totalSize > 0 }
+                            .sorted { $0.totalSize > $1.totalSize }
+
+                        squarify(
+                            children: children,
+                            bounds: rect,
+                            totalSize: node.totalSize,
+                            minSize: minSize,
+                            output: &output
+                        )
                     }
                 }
 
