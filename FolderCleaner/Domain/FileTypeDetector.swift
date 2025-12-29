@@ -76,7 +76,8 @@ struct FileTypeDetector: Sendable {
     private static func classify(extension ext: String) -> FileType {
         switch ext {
         // Images
-        case "jpg", "jpeg", "png", "gif", "bmp", "tiff", "tif", "svg", "webp", "heic", "heif", "ico", "raw", "cr2", "nef":
+        case "jpg", "jpeg", "png", "gif", "bmp", "tiff", "tif", "svg", "webp",
+             "heic", "heif", "ico", "raw", "cr2", "nef":
             return .image
 
         // Videos

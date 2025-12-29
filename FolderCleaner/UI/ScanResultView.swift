@@ -69,10 +69,11 @@ struct ScanResultView: View {
             HStack(spacing: 16) {
                 // Selection info
                 if let selected = viewModel.selectedNode {
-                    Text("\(selected.name) · \(ByteCountFormatter.string(fromByteCount: selected.totalSize, countStyle: .file))")
+                    let sizeText = ByteCountFormatter.string(fromByteCount: selected.totalSize, countStyle: .file)
+                    Text("\(selected.name) · \(sizeText)")
                         .font(.callout)
                         .foregroundStyle(.secondary)
-                        .accessibilityLabel("Selected: \(selected.name), \(ByteCountFormatter.string(fromByteCount: selected.totalSize, countStyle: .file))")
+                        .accessibilityLabel("Selected: \(selected.name), \(sizeText)")
                 } else {
                     Text("No selection")
                         .font(.callout)

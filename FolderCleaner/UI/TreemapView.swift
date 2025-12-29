@@ -20,7 +20,7 @@ struct TreemapView: View {
 
     var body: some View {
         GeometryReader { geometry in
-            Canvas { context, size in
+            Canvas { context, _ in
                 // Draw pre-filtered rectangles (no computation here!)
                 for rectangle in layoutViewModel.drawableRectangles {
                     drawRectangle(rectangle, in: context)
@@ -67,7 +67,9 @@ struct TreemapView: View {
                 }
             }
             .onChange(of: geometry.size) { oldSize, newSize in
-                if oldSize != newSize && abs(newSize.width - currentSize.width) > 1 || abs(newSize.height - currentSize.height) > 1 {
+                let widthChanged = abs(newSize.width - currentSize.width) > 1
+                let heightChanged = abs(newSize.height - currentSize.height) > 1
+                if oldSize != newSize && (widthChanged || heightChanged) {
                     currentSize = newSize
                     layoutViewModel.updateLayout(rootNode: viewModel.filteredRoot, size: newSize)
                     canvasID = UUID() // Force Canvas redraw

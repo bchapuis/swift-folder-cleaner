@@ -26,7 +26,9 @@ struct FilenameFilterView: View {
                         viewModel.setFilenameFilter(newValue)
                     }
                     .accessibilityLabel(String(localized: "Filename filter"))
-                    .accessibilityHint(String(localized: "Enter text or wildcards to filter files by name. Use asterisk for any characters."))
+                    .accessibilityHint(String(
+                        localized: "Enter text or wildcards to filter files by name. Use asterisk for any characters."
+                    ))
                     .accessibilityValue(searchText.isEmpty ? String(localized: "No filter") : searchText)
 
                 if !searchText.isEmpty {

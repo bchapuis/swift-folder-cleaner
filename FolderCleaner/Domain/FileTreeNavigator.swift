@@ -6,10 +6,6 @@ import Foundation
 struct FileTreeNavigator: Sendable {
     let root: FileNode
 
-    init(root: FileNode) {
-        self.root = root
-    }
-
     // MARK: - Public API (Deep Module: 2 primary methods)
 
     /// Navigate to a node using a URL path array

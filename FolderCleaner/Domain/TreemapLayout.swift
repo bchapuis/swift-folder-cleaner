@@ -43,6 +43,7 @@ struct TreemapLayout {
 
     // MARK: - Squarified Algorithm
 
+    // swiftlint:disable:next function_body_length
     private static func squarify(
         children: [FileNode],
         bounds: CGRect,

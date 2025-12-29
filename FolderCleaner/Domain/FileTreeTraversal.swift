@@ -269,13 +269,12 @@ struct FileTreeSequence: Sequence, IteratorProtocol {
     }
 
     private mutating func nextDepthFirstPostOrder() -> FileNode? {
-        guard !stack.isEmpty else { return nil }
-
-        var current = stack.last!
+        guard !stack.isEmpty, var current = stack.last else { return nil }
         var visited: Set<URL> = []
 
         while !stack.isEmpty {
-            current = stack.last!
+            guard let lastItem = stack.last else { break }
+            current = lastItem
 
             // If all children visited, return this node
             if current.node.children.allSatisfy({ visited.contains($0.path) }) {
@@ -285,10 +284,8 @@ struct FileTreeSequence: Sequence, IteratorProtocol {
             }
 
             // Add unvisited children
-            for child in current.node.children.reversed() {
-                if !visited.contains(child.path) {
-                    stack.append((child, current.depth + 1))
-                }
+            for child in current.node.children.reversed() where !visited.contains(child.path) {
+                stack.append((child, current.depth + 1))
             }
         }
 

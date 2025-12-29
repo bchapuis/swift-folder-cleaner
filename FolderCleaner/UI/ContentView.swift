@@ -31,19 +31,8 @@ struct ContentView: View {
     @ViewBuilder
     private var toolbarButton: some View {
         if viewModel.state.isScanning {
-            Button {
-                viewModel.cancelScan()
-            } label: {
-                VStack(spacing: 4) {
-                    Image(systemName: "xmark.circle")
-                        .font(.system(size: 20))
-                    Text("Cancel")
-                        .font(.system(size: 11))
-                }
-            }
-            .buttonStyle(.plain)
-            .accessibilityLabel(String(localized: "Cancel scan"))
-            .accessibilityHint(String(localized: "Stops the current folder scan"))
+            // Hide scan button during scanning - show cancel in scanning view instead
+            EmptyView()
         } else {
             Button {
                 startScan()
@@ -101,7 +90,20 @@ struct ContentView: View {
                 .foregroundStyle(.secondary)
             }
             .accessibilityElement(children: .combine)
-            .accessibilityLabel("Scan progress: \(progress.filesScanned.formatted(.number)) files scanned, \(progress.formattedBytesScanned), \(progress.formattedSpeed)")
+            .accessibilityLabel("""
+                Scan progress: \(progress.filesScanned.formatted(.number)) files scanned, \
+                \(progress.formattedBytesScanned), \(progress.formattedSpeed)
+                """)
+
+            Button {
+                viewModel.cancelScan()
+            } label: {
+                Label("Cancel", systemImage: "xmark.circle")
+            }
+            .buttonStyle(.bordered)
+            .accessibilityLabel(String(localized: "Cancel scan"))
+            .accessibilityHint(String(localized: "Stops the current folder scan"))
+            .keyboardShortcut(.escape)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }

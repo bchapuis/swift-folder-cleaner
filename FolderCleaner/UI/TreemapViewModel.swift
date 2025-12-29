@@ -54,7 +54,9 @@ final class TreemapViewModel {
                 return true // Always draw empty directories
             } else {
                 // For directories with children: only draw if children are NOT laid out
-                let hasLaidOutChildren = rectangle.node.children.contains { nodePathsSet.contains($0.path.standardized) }
+                let hasLaidOutChildren = rectangle.node.children.contains {
+                    nodePathsSet.contains($0.path.standardized)
+                }
                 return !hasLaidOutChildren
             }
         }

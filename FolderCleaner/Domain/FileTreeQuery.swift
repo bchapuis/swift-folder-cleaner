@@ -38,10 +38,6 @@ enum SortCriteria: Sendable {
 struct FileTreeQuery: Sendable {
     let root: FileNode
 
-    init(root: FileNode) {
-        self.root = root
-    }
-
     // MARK: - Public API (Deep Module: 3 methods)
 
     /// Search for nodes matching criteria

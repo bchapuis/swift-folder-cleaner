@@ -164,7 +164,7 @@ actor AsyncFileScanner {
     }
 
     /// Gets file attributes for a URL (nonisolated for true parallelism)
-    private nonisolated func getAttributes(for url: URL) async throws -> FileAttributes {
+    nonisolated private func getAttributes(for url: URL) async throws -> FileAttributes {
         try await Task {
             do {
                 // Try cached resource values first (much faster)
@@ -184,7 +184,7 @@ actor AsyncFileScanner {
     }
 
     /// Gets the contents of a directory (nonisolated for true parallelism)
-    private nonisolated func getDirectoryContents(at url: URL) async throws -> [URL] {
+    nonisolated private func getDirectoryContents(at url: URL) async throws -> [URL] {
         try await Task {
             do {
                 return try FileManager.default.contentsOfDirectory(

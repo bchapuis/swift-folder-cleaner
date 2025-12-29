@@ -83,7 +83,6 @@ enum FileType: String, Codable, Sendable, CaseIterable {
         }
     }
 
-
     /// SF Symbol icon for this file type
     var icon: String {
         switch self {

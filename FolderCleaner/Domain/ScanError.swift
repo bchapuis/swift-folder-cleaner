@@ -26,7 +26,10 @@ enum ScanError: LocalizedError, Sendable, Equatable {
     var recoverySuggestion: String? {
         switch self {
         case .permissionDenied:
-            return "Make sure you have permission to access this folder. Try selecting a different folder or granting access in System Settings."
+            return """
+                Make sure you have permission to access this folder. \
+                Try selecting a different folder or granting access in System Settings.
+                """
         case .pathNotFound:
             return "The selected path no longer exists. Please select a different folder."
         case .notADirectory:

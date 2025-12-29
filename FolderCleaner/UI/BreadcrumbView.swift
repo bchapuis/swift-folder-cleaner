@@ -54,8 +54,9 @@ struct BreadcrumbView: View {
             .accessibilityAddTraits(.isButton)
         } else {
             // Current directory (not clickable)
+            let sizeText = ByteCountFormatter.string(fromByteCount: node.totalSize, countStyle: .file)
             segmentLabel(node: node, isLast: isLast, isHoverable: false)
-                .accessibilityLabel("Current folder: \(node.name), \(ByteCountFormatter.string(fromByteCount: node.totalSize, countStyle: .file))")
+                .accessibilityLabel("Current folder: \(node.name), \(sizeText)")
                 .accessibilityAddTraits(.isStaticText)
         }
     }

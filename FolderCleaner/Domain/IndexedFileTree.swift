@@ -210,7 +210,9 @@ private struct SizeBuckets: Sendable {
 
     func files(largerThan minSize: Int64) -> [FileNode] {
         // Find the closest bucket
-        let bucket = Self.thresholds.last { $0 <= minSize } ?? Self.thresholds.first!
+        guard let bucket = Self.thresholds.last(where: { $0 <= minSize }) ?? Self.thresholds.first else {
+            return []
+        }
 
         // Get files from bucket and filter precisely
         return buckets[bucket]?.filter { $0.totalSize >= minSize } ?? []

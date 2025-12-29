@@ -154,10 +154,6 @@ struct NameFilter: FileTreeFilter {
 
     let pattern: Pattern
 
-    init(pattern: Pattern) {
-        self.pattern = pattern
-    }
-
     func matches(_ node: FileNode) -> Bool {
         switch pattern {
         case .contains(let text, let caseSensitive):
