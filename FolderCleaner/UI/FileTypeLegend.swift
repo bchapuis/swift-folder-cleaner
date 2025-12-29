@@ -3,7 +3,6 @@ import SwiftUI
 /// File type legend showing color coding for different file types - clickable for filtering
 struct FileTypeLegend: View {
     let viewModel: ScanResultViewModel
-    @Environment(\.colorScheme) private var colorScheme
 
     private let fileTypes: [FileType] = [
         .directory,
@@ -45,9 +44,9 @@ struct FileTypeLegend: View {
             viewModel.toggleFileType(type)
         } label: {
             HStack(spacing: 6) {
-                // Color indicator
+                // Color indicator - automatically adapts to light/dark mode
                 RoundedRectangle(cornerRadius: 3)
-                    .fill(colorScheme == .dark ? type.darkModeColor : type.color)
+                    .fill(type.color)
                     .frame(width: 16, height: 16)
                     .opacity(isSelected ? 1.0 : 0.3)
 

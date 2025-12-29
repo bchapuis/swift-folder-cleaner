@@ -6,8 +6,6 @@ struct TreemapView: View {
 
     let viewModel: ScanResultViewModel
 
-    @Environment(\.colorScheme) private var colorScheme
-
     @State private var mouseLocation: CGPoint = .zero
     @State private var currentSize: CGSize = .zero
     @State private var canvasID = UUID()
@@ -101,10 +99,8 @@ struct TreemapView: View {
         // Don't draw tiny rectangles
         guard rect.width > 1 && rect.height > 1 else { return }
 
-        // Choose color based on color scheme
-        let fillColor = colorScheme == .dark
-            ? rectangle.node.fileType.darkModeColor
-            : rectangle.node.fileType.color
+        // Color automatically adapts to light/dark mode via asset catalog
+        let fillColor = rectangle.node.fileType.color
 
         // Create sharp rectangle path (no rounding)
         let path = Path(rect)

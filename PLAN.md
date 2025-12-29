@@ -90,7 +90,7 @@
 - [x] 8.2: Selection feedback with visual highlights
 - [x] 8.3: Confirmation dialogs for delete operations
 - [x] 8.4: Loading states (ProgressView during scan)
-- [ ] 8.5: Dark mode support with FileType color variants (WCAG AA in both modes)
+- [x] 8.5: Dark mode support with FileType color variants (WCAG AA in both modes)
 
 **Checkpoint:** Polished, intuitive interface with dark mode support
 
