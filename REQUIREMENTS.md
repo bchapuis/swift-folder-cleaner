@@ -1,64 +1,62 @@
-# Disk Analyzer - Requirements
+# FolderCleaner - Requirements
 
 **Mission:** Analyze disk usage, identify waste, clean it up.
-**Philosophy:** Do one thing well (Unix philosophy).
+**Philosophy:** Clean, focused interface for disk space management.
 
 ## Functional Requirements
 
 ### Scanning
-- Native folder picker (NSOpenPanel) with recent scans
-- Recursive traversal with real-time progress (%, count, speed, ETA)
+- Native folder picker (NSOpenPanel) via "Scan Folder" button
+- Recursive traversal with real-time progress (file count, total size)
 - Task cancellation with instant response
-- Completion notification
+- Async/await with structured concurrency
 
 ### Visualization
-- Treemap: rectangles proportional to size, color by file type
-- Click to select files/folders
-- Hover tooltip: name, size, percentage
+- **Treemap**: Rectangles proportional to size, color by file type
+- **File List**: Sortable table view showing files/folders with size, type, date
+- **Breadcrumbs**: Navigate directory hierarchy
+- **Legends**: File type color legend and size filter legend
+- Click to select files/folders (single selection)
+- Hover tooltip on treemap: name, size, percentage
 - Human-readable sizes (1.5 GB, 342 MB)
-- No zoom, no breadcrumbs (use Finder for navigation)
-- No legend (colors are self-explanatory)
-- No separate file browser (use Finder)
 
 ### File Analysis
-- **Find Large Files**: Filter by size (>100MB, >1GB, >10GB)
-- **Find Duplicates**: Detect identical files by size + SHA-256 hash
-- **Top 10 Largest**: Quick view of biggest space consumers
-- **Selection**: Click to select, Cmd+Click for multiple, Shift+Click for range
+- **Filter by Size**: Min/max size sliders with real-time filtering
+- **Filter by Type**: Toggle file types (code, documents, images, videos, archives, etc.)
+- **Filter by Name**: Text search for filename filtering
+- **Selection**: Click to select single file/folder
 
 ### File Operations
-- **Delete**: Move to Trash with confirmation dialog
-- **Batch Delete**: Delete multiple selected items
-- **Show in Finder**: Reveal selected file/folder
-- **Undo Delete**: NSUndoManager support
-- Confirmation for destructive operations (>100MB or >10 files)
+- **Show in Finder**: Reveal selected file/folder using NSWorkspace
+- **Delete**: Move to Trash with confirmation dialog (via FileOperationsService)
+- File operations integrated with macOS security model
 
-### Preferences
-- Persist: window size, last scan location
-- Keyboard shortcuts for all actions
+### State Management
+- Real-time UI updates with @Observable pattern
+- Efficient file tree indexing for fast queries
+- Immutable state objects for predictable behavior
 
 ## Non-Functional Requirements
 
 ### Performance
-- Scan 100,000+ files efficiently via async/await
+- Scan large directories efficiently via async/await
 - UI responsive during scanning (@MainActor)
-- Duplicate detection streaming (don't load all in memory)
-- Hash calculation on background threads
-- Launch under 2 seconds
-- Treemap at 60fps
+- Efficient file tree indexing for fast filtering
+- Fast treemap layout algorithm (squarified)
+- Responsive UI with immediate visual feedback
 
 ### Platform
-- macOS 14 Sonoma (13 Ventura compatible)
-- Swift 5.9+, Swift Concurrency
+- macOS 14 Sonoma minimum
+- Swift 5.9+, Swift Concurrency (async/await, actors)
 - Universal binary (ARM64 + x86_64)
-- App Sandbox with security-scoped bookmarks
+- App Sandbox enabled
+- SwiftUI with @Observable macro
 
 ### Accessibility
-- VoiceOver with descriptive labels
-- Keyboard navigation (FocusState)
-- Dynamic Type support
-- WCAG AA contrast
-- Reduce Motion support
+- VoiceOver support for main UI elements
+- Keyboard navigation
+- System color scheme (auto light/dark mode)
+- Standard macOS controls
 
 ### Design
 - SF Pro typography with clear hierarchy
@@ -75,13 +73,22 @@
 - SwiftUI previews
 - Hardened Runtime + Notarization ready
 
-## Out of Scope
-- Multiple simultaneous scans
-- Search functionality (use Finder)
-- Export reports/visualizations
-- Custom themes
-- Network drives optimization
-- Quick Look integration
-- iOS/iPadOS versions
-- Cloud storage integration
-- Spotlight integration
+## Implemented Features
+
+### Current Architecture
+- **Domain Layer**: FileNode, FileType, ScanResult, ScanProgress, ScanError, FileTypeDetector, TreemapLayout
+- **Data Layer**: AsyncFileScanner for async file I/O
+- **UI Layer**: ContentView, ScanResultView, TreemapView, FileListView, BreadcrumbView
+- **State Management**: ScanViewModel, ScanResultViewModel, TreemapViewModel, FilterState, SelectionState, NavigationState
+- **File Tree Operations**: FileTreeIndex, FileTreeQuery, FileTreeNavigator, FileTreeFilter, IndexedFileTree
+- **File Operations**: FileActions, FileOperationsService
+
+### Not Implemented (Removed)
+- Duplicate file detection (DuplicateFinder removed)
+- Security-scoped bookmarks and recent folders (BookmarkManager removed)
+- Undo support for file operations
+- Multiple selection (Cmd+Click, Shift+Click)
+- Batch delete operations
+- Keyboard shortcuts
+- Window state persistence
+- Drag-drop folder onto window

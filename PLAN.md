@@ -1,6 +1,6 @@
-# Implementation Plan
+# Implementation Plan - FolderCleaner
 
-**Simplified approach following Unix philosophy: Do one thing well.**
+**Status:** Core features implemented. Polish and additional features in progress.
 
 ## Phase 1: Foundation & Domain
 
@@ -19,21 +19,21 @@
 **Goal:** Progress tracking and state management
 
 - [x] 2.1: `ScanState` enum, `ScanViewModel` (@Observable/@MainActor)
-- [x] 2.2: Actor for thread-safe progress, AsyncStream for updates, speed/ETA calculation
+- [x] 2.2: Real-time progress updates with file count and total size
 - [x] 2.3: `ScanError` enum with LocalizedError, graceful error handling
 
-**Checkpoint:** Scan 1000+ files with streaming progress and error recovery
+**Checkpoint:** Scan large directories with streaming progress and error recovery
 
 ## Phase 3: Basic UI
 
-**Goal:** Single-view app: scan → treemap → actions
+**Goal:** Functional UI with scan and visualization
 
-- [x] 3.1: Window with scan button
-- [x] 3.2: NSOpenPanel + security-scoped bookmarks, recent folders
+- [x] 3.1: ContentView with scan button and folder picker
+- [x] 3.2: NSOpenPanel for folder selection
 - [x] 3.3: Display scan progress with ProgressView
-- [ ] 3.4: Simplify to single ContentView (no separate Welcome/Scanning/Result views)
+- [x] 3.4: ScanResultView showing treemap and file list
 
-**Checkpoint:** Select folder, scan, see treemap
+**Checkpoint:** Select folder, scan, see results
 
 ## Phase 4: Treemap Algorithm
 
@@ -48,53 +48,57 @@
 
 ## Phase 5: Treemap Rendering
 
-**Goal:** Simple interactive treemap (no zoom, no breadcrumbs, no legend)
+**Goal:** Interactive treemap visualization
 
-- [x] 5.1: Canvas-based rendering
-- [x] 5.2: Click selection
+- [x] 5.1: Canvas-based rendering with TreemapView
+- [x] 5.2: Click selection (single selection)
 - [x] 5.3: Hover tooltip (name, size, %)
-- [ ] 5.4: Remove zoom functionality
-- [ ] 5.5: Remove breadcrumb navigation
-- [ ] 5.6: Remove color legend
-- [ ] 5.7: Multiple selection (Cmd+Click, Shift+Click)
+- [x] 5.4: Breadcrumb navigation (BreadcrumbView)
+- [x] 5.5: File type color legend (FileTypeLegend)
+- [x] 5.6: Size filter legend (SizeFilterLegend)
+- [x] 5.7: File list view alongside treemap (FileListView)
 
-**Checkpoint:** Click to select, hover for info, treemap at 60fps
+**Checkpoint:** Interactive treemap with navigation and tooltips
 
-## Phase 6: File Analysis
+## Phase 6: File Analysis & Filtering
 
-**Goal:** Identify what to clean
+**Goal:** Advanced filtering capabilities
 
-- [ ] 6.1: Large file detection (>100MB, >1GB, >10GB filters)
-- [ ] 6.2: Duplicate file finder (size + SHA-256 hash)
-- [ ] 6.3: Top 10 largest files/folders
-- [ ] 6.4: Filter UI in toolbar
+- [x] 6.1: Size filtering with min/max sliders (FilterState)
+- [x] 6.2: File type filtering with toggles (FileTreeFilter)
+- [x] 6.3: Filename search filtering (FilenameFilterView)
+- [x] 6.4: Real-time filtering with FileTreeIndex and FileTreeQuery
+- [x] 6.5: Efficient file tree navigation (FileTreeNavigator)
 
-**Checkpoint:** Find duplicates and large files instantly
+**Checkpoint:** Filter files by size, type, and name with instant results
 
 ## Phase 7: File Operations
 
-**Goal:** Clean up disk space
+**Goal:** File management capabilities
 
-- [ ] 7.1: Show in Finder (NSWorkspace)
-- [ ] 7.2: Move to trash (FileManager.trashItem) with confirmation
-- [ ] 7.3: Batch delete with size/count warnings
-- [ ] 7.4: Undo support (NSUndoManager)
-- [ ] 7.5: Delete button in toolbar, Cmd+Delete shortcut
+- [x] 7.1: Show in Finder (NSWorkspace via FileActions)
+- [x] 7.2: Move to trash with confirmation (FileOperationsService)
+- [x] 7.3: FileActions with async operations
+- [ ] 7.4: Batch delete with size/count warnings
+- [ ] 7.5: Undo support (NSUndoManager)
+- [ ] 7.6: Keyboard shortcuts (Cmd+Delete, etc.)
 
-**Checkpoint:** Delete files safely, see space reclaimed, undo works
+**Checkpoint:** Delete files safely and reveal in Finder
 
 ## Phase 8: Polish & UX
 
 **Goal:** Streamlined experience
 
-- [ ] 8.1: Toolbar: [Scan] [Large Files ▾] [Duplicates] [Delete]
-- [ ] 8.2: Status bar: "5 files selected (2.3 GB)"
-- [ ] 8.3: Confirmation dialogs for >100MB or >10 files
-- [ ] 8.4: Loading states (ProgressView)
+- [x] 8.1: Filter UI with size sliders and type toggles
+- [x] 8.2: Selection feedback with visual highlights
+- [x] 8.3: Confirmation dialogs for delete operations
+- [x] 8.4: Loading states (ProgressView during scan)
 - [ ] 8.5: Keyboard shortcuts with tooltips
 - [ ] 8.6: Drag-drop folder onto window
+- [ ] 8.7: Status bar showing selection info
+- [ ] 8.8: Multiple selection (Cmd+Click, Shift+Click)
 
-**Checkpoint:** Clean, focused interface
+**Checkpoint:** Polished, intuitive interface
 
 ## Phase 9: Accessibility
 
@@ -134,11 +138,32 @@
 
 **Checkpoint:** Notarized app installs and runs on clean Mac
 
-## Removed Phases
+## Features Removed from Codebase
 
-**Eliminated to simplify:**
-- ~~Phase 4: File Browser~~ (use Finder instead)
-- ~~Phase 7: Navigation~~ (no zoom/breadcrumbs)
-- ~~Multiple visualizations~~ (treemap only)
-- ~~Details panel~~ (tooltip is enough)
-- ~~Legend~~ (colors are obvious)
+**Code cleanup (2025-12-29):**
+- ~~BookmarkManager~~ - Security-scoped bookmarks and recent folders (not implemented)
+- ~~FileScanner~~ - Synchronous scanner (replaced by AsyncFileScanner)
+- ~~DuplicateFinder~~ - Duplicate file detection (not implemented)
+- ~~NavigationPath~~ - Custom navigation structure (unused)
+
+## Current State Summary
+
+**Implemented:**
+- Core scanning with AsyncFileScanner
+- Treemap visualization with squarified layout
+- File list view with sortable columns
+- Breadcrumb navigation
+- File type and size filtering
+- Filename search
+- Show in Finder and delete operations
+- Real-time progress updates
+- Efficient file tree indexing
+
+**Not Implemented:**
+- Duplicate file detection
+- Multiple selection
+- Batch operations
+- Undo/redo
+- Keyboard shortcuts
+- Window state persistence
+- Drag-drop support

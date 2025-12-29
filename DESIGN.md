@@ -1,4 +1,4 @@
-# Software Design
+# FolderCleaner - Software Design
 
 ## Architecture
 
@@ -8,8 +8,17 @@ UI (SwiftUI) → Domain (Pure Swift) → Data (File I/O)
 
 ### Layers
 - **UI**: Views, ViewModels (@Observable/@MainActor), state management
+  - Views: ContentView, ScanResultView, TreemapView, FileListView, BreadcrumbView, FileTypeLegend, SizeFilterLegend, FilenameFilterView
+  - ViewModels: ScanViewModel, ScanResultViewModel, TreemapViewModel
+  - State: FilterState, SelectionState, NavigationState
 - **Domain**: Models, use cases, business logic (framework-agnostic)
-- **Data**: FileManager integration, repositories, I/O operations
+  - Models: FileNode, FileType, ScanResult, ScanProgress, ScanError, ScanState, TreemapRectangle
+  - Use Cases: FileTypeDetector, TreemapLayout, FileTreeFilter, FileFilters
+  - File Tree Operations: FileTreeIndex, FileTreeQuery, FileTreeNavigator, FileTreeTraversal, IndexedFileTree
+- **Data**: FileManager integration, I/O operations
+  - AsyncFileScanner: Async file scanning with progress
+  - FileActions: File operations (show in Finder, delete)
+  - FileOperationsService: Centralized file operations
 
 ### State Management
 - Unidirectional flow: View → ViewModel → Domain → Data → ViewModel → View
@@ -66,16 +75,16 @@ enum ScanError: LocalizedError {
 ```
 
 ### Protocol-Oriented Design
-Define protocols at boundaries:
+Define protocols for flexibility and testing:
 
 ```swift
-protocol FileScanning: Sendable {
-    func scan(path: URL) async throws -> FileTree
-}
+// Current implementation uses concrete types
+// AsyncFileScanner for scanning
+// FileOperationsService for file operations
 
-protocol FileRepository: Sendable {
-    func save(_ tree: FileTree) async throws
-    func loadRecent() async throws -> [FileTree]
+// Future: Extract protocols for dependency injection
+protocol FileScanning: Sendable {
+    func scan(url: URL, progress: @escaping @Sendable (ScanProgress) -> Void) async throws -> ScanResult
 }
 ```
 
@@ -85,11 +94,15 @@ Constructor injection for testability:
 ```swift
 @MainActor
 @Observable
-class ScanViewModel {
-    private let scanner: any FileScanning
+final class ScanViewModel {
+    private let scanner: AsyncFileScanner
 
-    init(scanner: any FileScanning) {
+    init(scanner: AsyncFileScanner = AsyncFileScanner()) {
         self.scanner = scanner
+    }
+
+    func startScan(url: URL) {
+        // Scan with progress updates
     }
 }
 ```
@@ -206,11 +219,42 @@ Use DocC-style comments for public APIs:
 ```swift
 /// Scans a directory tree and calculates file sizes.
 ///
-/// - Parameter path: Root directory to scan
-/// - Returns: Tree structure with size information
+/// - Parameters:
+///   - url: Root directory to scan
+///   - progress: Callback for progress updates
+/// - Returns: ScanResult with file tree and metadata
 /// - Throws: `ScanError` if permission denied or path invalid
-func scan(path: URL) async throws -> FileTree
+func scan(url: URL, progress: @escaping @Sendable (ScanProgress) -> Void) async throws -> ScanResult
 ```
+
+## Current Implementation Details
+
+### File Tree Structure
+FileNode is the core immutable data structure:
+- Recursive tree with children
+- Cached computations (totalSize, fileCount, maxDepth)
+- Identifiable by URL path
+- Sendable for safe concurrency
+
+### File Tree Indexing
+Efficient querying with FileTreeIndex:
+- Path-based lookups
+- Parent-child relationships
+- Fast filtering operations
+- Used by FileTreeQuery for complex queries
+
+### State Management Pattern
+Three-tier state architecture:
+1. **ScanViewModel**: Manages scan lifecycle and state
+2. **ScanResultViewModel**: Coordinates all UI state (filter, selection, navigation)
+3. **Specialized ViewModels**: TreemapViewModel for treemap-specific logic
+
+### Filtering Architecture
+Multi-layer filtering system:
+- **FilterState**: Min/max size, filename search
+- **FileTreeFilter**: Apply filters to file tree
+- **FileFilters**: Reusable filter predicates
+- Real-time updates with @Observable
 
 ## Refactoring Checklist
 
