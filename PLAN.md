@@ -90,22 +90,19 @@
 - [x] 8.2: Selection feedback with visual highlights
 - [x] 8.3: Confirmation dialogs for delete operations
 - [x] 8.4: Loading states (ProgressView during scan)
+- [ ] 8.5: Dark mode support with FileType color variants (WCAG AA in both modes)
 
-**Checkpoint:** Polished, intuitive interface
+**Checkpoint:** Polished, intuitive interface with dark mode support
 
 ## Phase 9: Accessibility & Localization
 
 **Goal:** Full a11y and i18n support
 
-- [ ] 9.1: VoiceOver labels for all interactive elements
-- [ ] 9.2: Keyboard navigation (Tab, arrows, Space, Enter)
-- [ ] 9.3: Dynamic Type support
-- [ ] 9.4: High Contrast mode testing
-- [ ] 9.5: Reduce Motion testing
-- [ ] 9.6: String extraction with .xcstrings catalog
-- [ ] 9.7: Translations for EN, DE, ES, FR, ZH-Hans, PT, JA, RU, KO, IT
-- [ ] 9.8: Number/size formatting with locale-aware formatters
-- [ ] 9.9: Right-to-left (RTL) layout testing
+- [ ] 9.1: VoiceOver labels for all interactive elements (required for App Store)
+- [ ] 9.2: String extraction with .xcstrings catalog (required for i18n)
+- [ ] 9.3: Locale-aware number/size formatters (e.g., "1,234.56 MB" vs "1 234,56 Mo")
+- [ ] 9.4: Keyboard navigation (Tab, arrows, Space, Enter)
+- [ ] 9.5: Translations for EN, DE, ES, FR, ZH-Hans, PT, JA, RU, KO, IT
 
 **Checkpoint:** Navigate entire app via VoiceOver and keyboard, UI displays correctly in all target languages
 
@@ -156,7 +153,8 @@
 - Efficient file tree indexing
 
 **Remaining Polish:**
-- Accessibility & Localization (VoiceOver, keyboard navigation, i18n for EN/DE/ES/FR/ZH-Hans/PT/JA/RU/KO/IT)
+- Dark mode support with proper color variants (Phase 8.5)
+- Accessibility & Localization (VoiceOver, i18n foundation, 10 languages)
 - Performance optimization and testing
 - Distribution (code signing, notarization, DMG)
 
