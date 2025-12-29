@@ -276,8 +276,8 @@ struct TreemapView: View {
                     .font(.system(size: 11))
 
                 if node.totalSize > 0 && viewModel.currentRoot.totalSize > 0 {
-                    let percentage = (Double(node.totalSize) / Double(viewModel.currentRoot.totalSize)) * 100
-                    Text(String(format: "%.1f%%", percentage))
+                    let percentage = Double(node.totalSize) / Double(viewModel.currentRoot.totalSize)
+                    Text(percentage.formatted(.percent.precision(.fractionLength(1))))
                         .font(.system(size: 11))
                         .foregroundStyle(.secondary)
                 }
@@ -285,7 +285,7 @@ struct TreemapView: View {
 
             // File count for directories
             if node.isDirectory {
-                Text("\(node.children.count) items")
+                Text("\(node.children.count.formatted(.number)) items")
                     .font(.system(size: 10))
                     .foregroundStyle(.secondary)
             }

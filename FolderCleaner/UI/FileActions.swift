@@ -109,7 +109,7 @@ class FileActions {
 
         let alert = NSAlert()
         alert.messageText = "Move to Trash?"
-        alert.informativeText = "This will move \(count) \(itemWord) (\(sizeStr)) to the Trash."
+        alert.informativeText = "This will move \(count.formatted(.number)) \(itemWord) (\(sizeStr)) to the Trash."
         alert.alertStyle = .warning
         alert.addButton(withTitle: "Move to Trash")
         alert.addButton(withTitle: "Cancel")
@@ -123,7 +123,7 @@ class FileActions {
         case .success(let count, let size):
             let sizeStr = ByteCountFormatter.string(fromByteCount: size, countStyle: .file)
             let itemWord = count == 1 ? "item" : "items"
-            return "Moved \(count) \(itemWord) to Trash (\(sizeStr) freed)"
+            return "Moved \(count.formatted(.number)) \(itemWord) to Trash (\(sizeStr) freed)"
 
         case .cancelled:
             return "Operation cancelled"

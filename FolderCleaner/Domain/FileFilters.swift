@@ -107,6 +107,6 @@ extension FileFilters {
         let size = ByteCountFormatter.string(fromByteCount: totalSize(of: nodes), countStyle: .file)
         let itemWord = count == 1 ? "item" : "items"
 
-        return "\(count) \(itemWord) (\(size))"
+        return "\(count.formatted(.number)) \(itemWord) (\(size))"
     }
 }

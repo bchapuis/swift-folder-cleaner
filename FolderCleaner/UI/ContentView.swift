@@ -92,7 +92,7 @@ struct ContentView: View {
                     .font(.headline)
 
                 VStack(alignment: .leading, spacing: 6) {
-                    Text("\(progress.filesScanned) files")
+                    Text("\(progress.filesScanned.formatted(.number)) files")
                     Text(progress.formattedBytesScanned)
                     Text(progress.formattedSpeed)
                 }
@@ -100,7 +100,7 @@ struct ContentView: View {
                 .foregroundStyle(.secondary)
             }
             .accessibilityElement(children: .combine)
-            .accessibilityLabel("Scan progress: \(progress.filesScanned) files scanned, \(progress.formattedBytesScanned), \(progress.formattedSpeed)")
+            .accessibilityLabel("Scan progress: \(progress.filesScanned.formatted(.number)) files scanned, \(progress.formattedBytesScanned), \(progress.formattedSpeed)")
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }

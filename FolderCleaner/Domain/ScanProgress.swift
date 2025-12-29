@@ -28,8 +28,10 @@ struct ScanProgress: Sendable {
     }
 
     /// Human-readable speed string (e.g., "150 files/s")
+    /// Uses locale-aware number formatting
     var formattedSpeed: String {
-        String(format: "%.0f files/s", filesPerSecond)
+        let speedNumber = filesPerSecond.formatted(.number.precision(.fractionLength(0)))
+        return "\(speedNumber) files/s"
     }
 
     /// Human-readable bytes scanned (e.g., "1.5 GB")

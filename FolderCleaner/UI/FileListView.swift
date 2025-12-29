@@ -226,8 +226,8 @@ struct FileListView: View {
                 .foregroundStyle(isSelected ? .primary : .secondary)
                 .frame(width: 80, alignment: .leading)
 
-            // Percentage (fixed)
-            Text(String(format: "%.1f%%", percentage(for: file)))
+            // Percentage (fixed) - locale-aware formatting
+            Text((percentage(for: file) / 100).formatted(.percent.precision(.fractionLength(1))))
                 .font(.system(size: 12))
                 .foregroundStyle(isSelected ? .primary : .secondary)
                 .frame(width: 80, alignment: .leading)
