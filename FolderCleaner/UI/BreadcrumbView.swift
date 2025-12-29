@@ -50,7 +50,7 @@ struct BreadcrumbView: View {
             .buttonStyle(BreadcrumbButtonStyle())
             .help("Click to navigate to \(node.name)")
             .accessibilityLabel("Navigate to \(node.name)")
-            .accessibilityHint("Opens this folder in the treemap")
+            .accessibilityHint(String(localized: "Opens this folder in the treemap"))
             .accessibilityAddTraits(.isButton)
         } else {
             // Current directory (not clickable)

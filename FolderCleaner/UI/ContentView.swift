@@ -42,8 +42,8 @@ struct ContentView: View {
                 }
             }
             .buttonStyle(.plain)
-            .accessibilityLabel("Cancel scan")
-            .accessibilityHint("Stops the current folder scan")
+            .accessibilityLabel(String(localized: "Cancel scan"))
+            .accessibilityHint(String(localized: "Stops the current folder scan"))
         } else {
             Button {
                 startScan()
@@ -56,8 +56,8 @@ struct ContentView: View {
                 }
             }
             .buttonStyle(.plain)
-            .accessibilityLabel("Scan folder")
-            .accessibilityHint("Opens a folder picker to select a folder to analyze")
+            .accessibilityLabel(String(localized: "Scan folder"))
+            .accessibilityHint(String(localized: "Opens a folder picker to select a folder to analyze"))
         }
     }
 
@@ -76,8 +76,8 @@ struct ContentView: View {
             }
             .buttonStyle(.borderedProminent)
             .controlSize(.large)
-            .accessibilityLabel("Scan folder")
-            .accessibilityHint("Opens a folder picker to select a folder to analyze")
+            .accessibilityLabel(String(localized: "Scan folder"))
+            .accessibilityHint(String(localized: "Opens a folder picker to select a folder to analyze"))
         }
     }
 
@@ -85,7 +85,7 @@ struct ContentView: View {
         VStack(spacing: 20) {
             ProgressView()
                 .scaleEffect(1.5)
-                .accessibilityLabel("Scanning in progress")
+                .accessibilityLabel(String(localized: "Scanning in progress"))
 
             VStack(spacing: 8) {
                 Text("Scanning...")
@@ -115,8 +115,8 @@ struct ContentView: View {
             Button("Try Again") {
                 viewModel.reset()
             }
-            .accessibilityLabel("Try scanning again")
-            .accessibilityHint("Resets the scan state so you can select a new folder")
+            .accessibilityLabel(String(localized: "Try scanning again"))
+            .accessibilityHint(String(localized: "Resets the scan state so you can select a new folder"))
         }
     }
 

@@ -77,7 +77,7 @@ struct ScanResultView: View {
                     Text("No selection")
                         .font(.callout)
                         .foregroundStyle(.tertiary)
-                        .accessibilityLabel("No file or folder selected")
+                        .accessibilityLabel(String(localized: "No file or folder selected"))
                 }
 
                 Spacer()
@@ -87,16 +87,16 @@ struct ScanResultView: View {
                     Button("Open in Application") {
                         viewModel.showInPreview()
                     }
-                    .accessibilityLabel("Open in application")
-                    .accessibilityHint("Opens the selected file in its default application")
+                    .accessibilityLabel(String(localized: "Open in Application"))
+                    .accessibilityHint(String(localized: "Opens the selected file in its default application"))
                 }
 
                 Button("Show in Finder") {
                     viewModel.showInFinder()
                 }
                 .disabled(viewModel.selectedNode == nil)
-                .accessibilityLabel("Show in Finder")
-                .accessibilityHint("Reveals the selected item in Finder")
+                .accessibilityLabel(String(localized: "Show in Finder"))
+                .accessibilityHint(String(localized: "Reveals the selected item in Finder"))
 
                 Button("Delete", role: .destructive) {
                     Task {
@@ -105,8 +105,8 @@ struct ScanResultView: View {
                 }
                 .disabled(viewModel.selectedNode == nil)
                 .keyboardShortcut(.delete, modifiers: .command)
-                .accessibilityLabel("Delete")
-                .accessibilityHint("Moves the selected item to trash. Requires confirmation.")
+                .accessibilityLabel(String(localized: "Delete"))
+                .accessibilityHint(String(localized: "Moves the selected item to trash. Requires confirmation."))
             }
             .padding()
             .background(.quaternary)

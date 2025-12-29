@@ -52,7 +52,7 @@ struct SizeFilterLegend: View {
         .buttonStyle(.borderless)
         .help(filter == .all ? "Show all file sizes" : "Show only files \(filter.rawValue)")
         .accessibilityLabel("Size filter: \(filter.rawValue)")
-        .accessibilityValue(isSelected ? "Selected" : "Not selected")
+        .accessibilityValue(isSelected ? String(localized: "Selected") : String(localized: "Not selected"))
         .accessibilityHint(filter == .all ? "Shows all file sizes" : "Shows only files \(filter.rawValue)")
         .accessibilityAddTraits(.isButton)
     }
