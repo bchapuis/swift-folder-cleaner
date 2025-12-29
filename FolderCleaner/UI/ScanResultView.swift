@@ -97,6 +97,7 @@ struct ScanResultView: View {
                 .disabled(viewModel.selectedNode == nil)
                 .accessibilityLabel(String(localized: "Show in Finder"))
                 .accessibilityHint(String(localized: "Reveals the selected item in Finder"))
+                .keyboardShortcut("i", modifiers: .command)
 
                 Button("Delete", role: .destructive) {
                     Task {
@@ -125,6 +126,22 @@ struct ScanResultView: View {
         .onKeyPress(.escape) {
             if viewModel.canNavigateUp() {
                 viewModel.navigateUp()
+                return .handled
+            }
+            return .ignored
+        }
+        .onKeyPress(.return) {
+            // Enter/Return: Drill down into selected directory
+            if let selected = viewModel.selectedNode, selected.isDirectory {
+                viewModel.drillDown(to: selected)
+                return .handled
+            }
+            return .ignored
+        }
+        .onKeyPress(.space) {
+            // Space: Drill down into selected directory
+            if let selected = viewModel.selectedNode, selected.isDirectory {
+                viewModel.drillDown(to: selected)
                 return .handled
             }
             return .ignored

@@ -58,6 +58,7 @@ struct ContentView: View {
             .buttonStyle(.plain)
             .accessibilityLabel(String(localized: "Scan folder"))
             .accessibilityHint(String(localized: "Opens a folder picker to select a folder to analyze"))
+            .keyboardShortcut("o", modifiers: .command)
         }
     }
 
