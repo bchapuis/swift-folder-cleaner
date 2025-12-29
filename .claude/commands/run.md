@@ -1,9 +1,9 @@
 ---
-description: Clean, build, and run the Directory Cleaner application
+description: Clean, build, and run the Folder Cleaner application
 allowed-tools: Bash
 ---
 
-Clean, build, and run the DirectoryCleaner macOS application.
+Clean, build, and run the FolderCleaner macOS application.
 
 You should:
 1. Clean the project and remove derived data
@@ -12,5 +12,5 @@ You should:
 4. Confirm the app has been launched
 
 ```bash
-xcodebuild clean && rm -rf ~/Library/Developer/Xcode/DerivedData/*DirectoryCleaner* && xcodebuild -scheme DirectoryCleaner -configuration Debug build && open ~/Library/Developer/Xcode/DerivedData/DirectoryCleaner-*/Build/Products/Debug/DirectoryCleaner.app
+xcodebuild clean && rm -rf ~/Library/Developer/Xcode/DerivedData/*FolderCleaner* && xcodebuild -scheme FolderCleaner -configuration Debug build && open ~/Library/Developer/Xcode/DerivedData/FolderCleaner-*/Build/Products/Debug/FolderCleaner.app
 ```

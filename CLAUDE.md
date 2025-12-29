@@ -6,38 +6,38 @@ Quick reference for Claude Code.
 
 ```bash
 # Clean, Build & Run (use /run slash command)
-xcodebuild clean && rm -rf ~/Library/Developer/Xcode/DerivedData/*DirectoryCleaner* && xcodebuild -scheme DirectoryCleaner -configuration Debug build && open ~/Library/Developer/Xcode/DerivedData/DirectoryCleaner-*/Build/Products/Debug/DirectoryCleaner.app
+xcodebuild clean && rm -rf ~/Library/Developer/Xcode/DerivedData/*FolderCleaner* && xcodebuild -scheme FolderCleaner -configuration Debug build && open ~/Library/Developer/Xcode/DerivedData/FolderCleaner-*/Build/Products/Debug/FolderCleaner.app
 
 # Build (Release)
-xcodebuild -scheme DirectoryCleaner -configuration Release build
+xcodebuild -scheme FolderCleaner -configuration Release build
 
 # Test
-xcodebuild test -scheme DirectoryCleaner
+xcodebuild test -scheme FolderCleaner
 swift test
 
 # Clean
 xcodebuild clean
-rm -rf ~/Library/Developer/Xcode/DerivedData/*DirectoryCleaner*
+rm -rf ~/Library/Developer/Xcode/DerivedData/*FolderCleaner*
 
 # Archive & Export
-xcodebuild archive -scheme DirectoryCleaner -archivePath ./build/DirectoryCleaner.xcarchive
-xcodebuild -exportArchive -archivePath ./build/DirectoryCleaner.xcarchive -exportPath ./build/Release -exportOptionsPlist ExportOptions.plist
+xcodebuild archive -scheme FolderCleaner -archivePath ./build/FolderCleaner.xcarchive
+xcodebuild -exportArchive -archivePath ./build/FolderCleaner.xcarchive -exportPath ./build/Release -exportOptionsPlist ExportOptions.plist
 
 # Code Sign & Notarize
-codesign --deep --force --sign "Developer ID Application" ./build/Release/DirectoryCleaner.app
-xcrun notarytool submit ./build/DirectoryCleaner.dmg --keychain-profile "AC_PASSWORD" --wait
-xcrun stapler staple ./build/DirectoryCleaner.dmg
+codesign --deep --force --sign "Developer ID Application" ./build/Release/FolderCleaner.app
+xcrun notarytool submit ./build/FolderCleaner.dmg --keychain-profile "AC_PASSWORD" --wait
+xcrun stapler staple ./build/FolderCleaner.dmg
 
 # Lint
 swiftlint lint
 swiftlint --fix
 
 # DocC
-xcodebuild docbuild -scheme DirectoryCleaner -destination 'platform=macOS'
+xcodebuild docbuild -scheme FolderCleaner -destination 'platform=macOS'
 
 # Profile
-instruments -t "Time Profiler" ./build/Release/DirectoryCleaner.app
-instruments -t "Allocations" ./build/Release/DirectoryCleaner.app
+instruments -t "Time Profiler" ./build/Release/FolderCleaner.app
+instruments -t "Allocations" ./build/Release/FolderCleaner.app
 ```
 
 ## Tech Stack
@@ -49,12 +49,12 @@ instruments -t "Allocations" ./build/Release/DirectoryCleaner.app
 ## Structure
 
 ```
-DirectoryCleaner/
-├── DirectoryCleaner.xcodeproj
-├── DirectoryCleaner/
-│   ├── DirectoryCleanerApp.swift  # @main
+FolderCleaner/
+├── FolderCleaner.xcodeproj
+├── FolderCleaner/
+│   ├── FolderCleanerApp.swift  # @main
 │   ├── Info.plist
-│   ├── DirectoryCleaner.entitlements
+│   ├── FolderCleaner.entitlements
 │   ├── Domain/                 # Models, use cases
 │   ├── Data/                   # FileManager, I/O
 │   └── UI/                     # SwiftUI views

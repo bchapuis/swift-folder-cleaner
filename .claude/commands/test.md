@@ -6,8 +6,8 @@ argument-hint: [test-name]
 
 ```bash
 # All tests
-xcodebuild test -scheme DirectoryCleaner
+xcodebuild test -scheme FolderCleaner
 
 # Specific test (if $ARGUMENTS provided)
-xcodebuild test -scheme DirectoryCleaner -only-testing:$ARGUMENTS
+xcodebuild test -scheme FolderCleaner -only-testing:$ARGUMENTS
 ```

@@ -8,26 +8,26 @@ allowed-tools: Bash, Read, Edit
 
 ```bash
 # Build
-xcodebuild -scheme DirectoryCleaner build
-xcodebuild -scheme DirectoryCleaner -configuration Release build
+xcodebuild -scheme FolderCleaner build
+xcodebuild -scheme FolderCleaner -configuration Release build
 
 # Test
-xcodebuild test -scheme DirectoryCleaner
-xcodebuild test -only-testing:DirectoryCleanerTests/FileScannerTests
+xcodebuild test -scheme FolderCleaner
+xcodebuild test -only-testing:FolderCleanerTests/FileScannerTests
 
 # Clean
 xcodebuild clean
-rm -rf ~/Library/Developer/Xcode/DerivedData/*DirectoryCleaner*
+rm -rf ~/Library/Developer/Xcode/DerivedData/*FolderCleaner*
 
 # Archive
-xcodebuild archive -scheme DirectoryCleaner -archivePath ./build/DirectoryCleaner.xcarchive
+xcodebuild archive -scheme FolderCleaner -archivePath ./build/FolderCleaner.xcarchive
 
 # Universal Binary (ARM64 + x86_64)
-xcodebuild -scheme DirectoryCleaner -configuration Release \
+xcodebuild -scheme FolderCleaner -configuration Release \
   -arch arm64 -arch x86_64 ONLY_ACTIVE_ARCH=NO build
 
 # Verify architecture
-lipo -info build/Release/DirectoryCleaner.app/Contents/MacOS/DirectoryCleaner
+lipo -info build/Release/FolderCleaner.app/Contents/MacOS/FolderCleaner
 ```
 
 ## Compiler Flags
@@ -52,10 +52,10 @@ lipo -info build/Release/DirectoryCleaner.app/Contents/MacOS/DirectoryCleaner
 
 ```bash
 # View entitlements
-codesign -d --entitlements :- build/Release/DirectoryCleaner.app
+codesign -d --entitlements :- build/Release/FolderCleaner.app
 
 # Verify signature
-codesign --verify --verbose build/Release/DirectoryCleaner.app
+codesign --verify --verbose build/Release/FolderCleaner.app
 
 # Clear caches
 rm -rf ~/Library/Developer/Xcode/DerivedData
