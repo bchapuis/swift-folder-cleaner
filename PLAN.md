@@ -128,7 +128,7 @@
 
 **Goal:** Submit to Mac App Store
 
-- [ ] 11.1: App icon and assets
+- [x] 11.1: App icon and assets
 - [ ] 11.2: App Sandbox entitlements review (stricter than Developer ID)
 - [ ] 11.3: Code signing with "Apple Distribution" certificate
 - [ ] 11.4: App Store Connect configuration (metadata, screenshots, categories)
