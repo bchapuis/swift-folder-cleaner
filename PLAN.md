@@ -1,6 +1,6 @@
 # Implementation Plan - FolderCleaner
 
-**Status:** Core features implemented. Polish and additional features in progress.
+**Status:** Feature complete. Polishing for release.
 
 ## Phase 1: Foundation & Domain
 
@@ -79,9 +79,6 @@
 - [x] 7.1: Show in Finder (NSWorkspace via FileActions)
 - [x] 7.2: Move to trash with confirmation (FileOperationsService)
 - [x] 7.3: FileActions with async operations
-- [ ] 7.4: Batch delete with size/count warnings
-- [ ] 7.5: Undo support (NSUndoManager)
-- [ ] 7.6: Keyboard shortcuts (Cmd+Delete, etc.)
 
 **Checkpoint:** Delete files safely and reveal in Finder
 
@@ -93,24 +90,24 @@
 - [x] 8.2: Selection feedback with visual highlights
 - [x] 8.3: Confirmation dialogs for delete operations
 - [x] 8.4: Loading states (ProgressView during scan)
-- [ ] 8.5: Keyboard shortcuts with tooltips
-- [ ] 8.6: Drag-drop folder onto window
-- [ ] 8.7: Status bar showing selection info
-- [ ] 8.8: Multiple selection (Cmd+Click, Shift+Click)
 
 **Checkpoint:** Polished, intuitive interface
 
-## Phase 9: Accessibility
+## Phase 9: Accessibility & Localization
 
-**Goal:** Full a11y support
+**Goal:** Full a11y and i18n support
 
 - [ ] 9.1: VoiceOver labels for all interactive elements
 - [ ] 9.2: Keyboard navigation (Tab, arrows, Space, Enter)
 - [ ] 9.3: Dynamic Type support
 - [ ] 9.4: High Contrast mode testing
 - [ ] 9.5: Reduce Motion testing
+- [ ] 9.6: String extraction with .xcstrings catalog
+- [ ] 9.7: Translations for EN, DE, ES, FR, ZH-Hans, PT, JA, RU, KO, IT
+- [ ] 9.8: Number/size formatting with locale-aware formatters
+- [ ] 9.9: Right-to-left (RTL) layout testing
 
-**Checkpoint:** Navigate entire app via VoiceOver and keyboard
+**Checkpoint:** Navigate entire app via VoiceOver and keyboard, UI displays correctly in all target languages
 
 ## Phase 10: Performance & Testing
 
@@ -148,22 +145,25 @@
 
 ## Current State Summary
 
-**Implemented:**
-- Core scanning with AsyncFileScanner
-- Treemap visualization with squarified layout
+**Core Features (Complete):**
+- Async file scanning with real-time progress
+- Interactive treemap visualization (squarified layout)
 - File list view with sortable columns
 - Breadcrumb navigation
 - File type and size filtering
 - Filename search
 - Show in Finder and delete operations
-- Real-time progress updates
 - Efficient file tree indexing
 
-**Not Implemented:**
+**Remaining Polish:**
+- Accessibility & Localization (VoiceOver, keyboard navigation, i18n for EN/DE/ES/FR/ZH-Hans/PT/JA/RU/KO/IT)
+- Performance optimization and testing
+- Distribution (code signing, notarization, DMG)
+
+**Out of Scope:**
 - Duplicate file detection
-- Multiple selection
-- Batch operations
+- Multiple selection / batch operations
 - Undo/redo
-- Keyboard shortcuts
+- Advanced keyboard shortcuts
 - Window state persistence
 - Drag-drop support
