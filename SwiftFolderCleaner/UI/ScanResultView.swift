@@ -33,13 +33,13 @@ struct ScanResultView: View {
                 TreemapView(
                     viewModel: viewModel
                 )
-                .frame(minWidth: 400)
+                .frame(minWidth: 650)
 
                 // Right: File list
                 FileListView(
                     viewModel: viewModel
                 )
-                .frame(minWidth: 400)
+                .frame(minWidth: 650)
             }
 
             Divider()
