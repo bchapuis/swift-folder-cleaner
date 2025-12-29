@@ -1,5 +1,5 @@
 import XCTest
-@testable import DiskAnalyzer
+@testable import FolderCleaner
 
 @MainActor
 final class FileScannerTests: XCTestCase {
@@ -8,7 +8,7 @@ final class FileScannerTests: XCTestCase {
     override func setUp() async throws {
         // Create a temporary test directory
         testDirectory = FileManager.default.temporaryDirectory
-            .appendingPathComponent("DiskAnalyzerTests")
+            .appendingPathComponent("FolderCleanerTests")
             .appendingPathComponent(UUID().uuidString)
 
         try FileManager.default.createDirectory(

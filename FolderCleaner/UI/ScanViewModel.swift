@@ -67,26 +67,6 @@ final class ScanViewModel {
         state = .idle
     }
 
-    /// Whether a scan can be started (not currently scanning)
-    var canStartScan: Bool {
-        !state.isScanning
-    }
-
-    /// The current scan progress, if available
-    var currentProgress: ScanProgress? {
-        state.progress
-    }
-
-    /// The scan result, if available
-    var scanResult: ScanResult? {
-        state.result
-    }
-
-    /// The error message, if any
-    var errorMessage: String? {
-        state.error?.localizedDescription
-    }
-
     // Note: deinit cannot be @MainActor isolated, so we don't cancel here
     // The task will be automatically cleaned up when the instance is deallocated
 }

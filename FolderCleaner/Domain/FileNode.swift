@@ -23,12 +23,6 @@ struct FileNode: Identifiable, Sendable {
     /// Depth of subtree from this node (cached)
     let maxDepth: Int
 
-    /// Percentage of total size relative to a parent size
-    func percentage(of totalSize: Int64) -> Double {
-        guard totalSize > 0 else { return 0.0 }
-        return Double(self.totalSize) / Double(totalSize) * 100.0
-    }
-
     /// Human-readable size string (e.g., "1.5 GB", "342 MB")
     var formattedSize: String {
         ByteCountFormatter.string(fromByteCount: totalSize, countStyle: .file)
@@ -138,41 +132,6 @@ extension FileNode {
         }
 
         return nil
-    }
-}
-
-// MARK: - Navigation
-
-extension FileNode {
-    /// Find a direct child by path
-    func child(at path: URL) -> FileNode? {
-        let standardizedPath = path.standardized
-        return children.first(where: { $0.path.standardized == standardizedPath })
-    }
-
-    /// Find a descendant node by following a path
-    func descendant(at paths: [URL]) -> FileNode? {
-        var current = self
-
-        for path in paths {
-            let standardizedPath = path.standardized
-            guard let child = current.children.first(where: { $0.path.standardized == standardizedPath }) else {
-                return nil
-            }
-            current = child
-        }
-
-        return current
-    }
-
-    /// Check if this subtree contains a node with the given path
-    func contains(path: URL) -> Bool {
-        let standardizedPath = path.standardized
-        if self.path.standardized == standardizedPath {
-            return true
-        }
-
-        return children.contains(where: { $0.contains(path: path) })
     }
 }
 
