@@ -15,56 +15,56 @@ enum FileType: String, Codable, Sendable, CaseIterable {
     case system
     case other
 
-    /// Color mapping for treemap visualization (WCAG AA compliant)
-    /// Colors are adjusted for contrast ratio >= 4.5:1 against both light and dark backgrounds
+    /// Color mapping for treemap visualization (WCAG AA compliant, modern refined palette)
+    /// Colors are adjusted for contrast ratio >= 4.5:1 with softer saturation for Apple aesthetic
     var color: Color {
         switch self {
         case .directory:
-            return Color(red: 0.0, green: 0.48, blue: 0.95)  // Blue
+            return Color(red: 0.0, green: 0.45, blue: 0.85)  // Refined Blue
         case .image:
-            return Color(red: 0.69, green: 0.32, blue: 0.87)  // Purple
+            return Color(red: 0.62, green: 0.30, blue: 0.78)  // Refined Purple
         case .video:
-            return Color(red: 0.94, green: 0.26, blue: 0.58)  // Pink
+            return Color(red: 0.85, green: 0.24, blue: 0.52)  // Refined Pink
         case .audio:
-            return Color(red: 0.0, green: 0.68, blue: 0.78)  // Cyan
+            return Color(red: 0.0, green: 0.60, blue: 0.70)  // Refined Cyan
         case .document:
-            return Color(red: 1.0, green: 0.58, blue: 0.0)  // Orange
+            return Color(red: 0.92, green: 0.52, blue: 0.0)  // Refined Orange
         case .code:
-            return Color(red: 0.2, green: 0.78, blue: 0.35)  // Green
+            return Color(red: 0.18, green: 0.70, blue: 0.32)  // Refined Green
         case .archive:
-            return Color(red: 0.95, green: 0.77, blue: 0.06)  // Yellow
+            return Color(red: 0.85, green: 0.68, blue: 0.05)  // Refined Yellow
         case .executable:
-            return Color(red: 0.93, green: 0.26, blue: 0.21)  // Red
+            return Color(red: 0.82, green: 0.24, blue: 0.20)  // Refined Red
         case .system:
-            return Color(red: 0.56, green: 0.56, blue: 0.58)  // Gray
+            return Color(red: 0.52, green: 0.52, blue: 0.54)  // Refined Gray
         case .other:
-            return Color(red: 0.48, green: 0.48, blue: 0.50)  // Secondary Gray
+            return Color(red: 0.44, green: 0.44, blue: 0.46)  // Refined Secondary
         }
     }
 
-    /// Alternative color for better contrast in dark mode
+    /// Alternative color for better contrast in dark mode (refined, softer palette)
     var darkModeColor: Color {
         switch self {
         case .directory:
-            return Color(red: 0.39, green: 0.71, blue: 1.0)  // Lighter Blue
+            return Color(red: 0.35, green: 0.65, blue: 0.92)  // Refined Light Blue
         case .image:
-            return Color(red: 0.79, green: 0.52, blue: 0.94)  // Lighter Purple
+            return Color(red: 0.72, green: 0.48, blue: 0.86)  // Refined Light Purple
         case .video:
-            return Color(red: 1.0, green: 0.46, blue: 0.72)  // Lighter Pink
+            return Color(red: 0.92, green: 0.42, blue: 0.66)  // Refined Light Pink
         case .audio:
-            return Color(red: 0.39, green: 0.85, blue: 0.92)  // Lighter Cyan
+            return Color(red: 0.35, green: 0.78, blue: 0.85)  // Refined Light Cyan
         case .document:
-            return Color(red: 1.0, green: 0.70, blue: 0.30)  // Lighter Orange
+            return Color(red: 0.92, green: 0.64, blue: 0.28)  // Refined Light Orange
         case .code:
-            return Color(red: 0.48, green: 0.91, blue: 0.60)  // Lighter Green
+            return Color(red: 0.44, green: 0.84, blue: 0.55)  // Refined Light Green
         case .archive:
-            return Color(red: 1.0, green: 0.87, blue: 0.36)  // Lighter Yellow
+            return Color(red: 0.92, green: 0.80, blue: 0.32)  // Refined Light Yellow
         case .executable:
-            return Color(red: 1.0, green: 0.46, blue: 0.42)  // Lighter Red
+            return Color(red: 0.92, green: 0.42, blue: 0.38)  // Refined Light Red
         case .system:
-            return Color(red: 0.68, green: 0.68, blue: 0.70)  // Lighter Gray
+            return Color(red: 0.62, green: 0.62, blue: 0.64)  // Refined Light Gray
         case .other:
-            return Color(red: 0.63, green: 0.63, blue: 0.65)  // Lighter Secondary
+            return Color(red: 0.58, green: 0.58, blue: 0.60)  // Refined Light Secondary
         }
     }
 

@@ -111,16 +111,11 @@ struct TreemapView: View {
             ? rectangle.node.fileType.darkModeColor
             : rectangle.node.fileType.color
 
-        // Fill
+        // Create sharp rectangle path (no rounding)
         let path = Path(rect)
-        context.fill(path, with: .color(fillColor.opacity(0.9)))
 
-        // Border
-        context.stroke(
-            path,
-            with: .color(.white.opacity(0.25)),
-            lineWidth: 0.5
-        )
+        // Fully opaque fill to prevent anti-aliasing gaps
+        context.fill(path, with: .color(fillColor))
 
         // Label if space allows
         if rectangle.canShowLabel {
@@ -139,16 +134,12 @@ struct TreemapView: View {
         let displayName = smartTruncate(node.name, maxWidth: rect.width - 8)
         let fontSize = rectangle.labelFontSize
 
-        // Draw text shadow for better contrast
-        var shadowContext = context
-        shadowContext.addFilter(.shadow(color: .black.opacity(0.7), radius: 2, x: 0, y: 1))
-
-        // Name
+        // Name - clean and simple, no shadow
         let nameText = Text(displayName)
             .font(.system(size: fontSize, weight: .medium))
-            .foregroundStyle(.white)
+            .foregroundStyle(.white.opacity(rectangle.labelOpacity))
 
-        shadowContext.draw(
+        context.draw(
             nameText,
             at: CGPoint(x: centerX, y: centerY - 8),
             anchor: .center
@@ -158,10 +149,10 @@ struct TreemapView: View {
         if rectangle.canShowSize {
             let size = ByteCountFormatter.string(fromByteCount: node.totalSize, countStyle: .file)
             let sizeText = Text(size)
-                .font(.system(size: fontSize - 2))
-                .foregroundStyle(.white.opacity(0.95))
+                .font(.system(size: fontSize - 2, weight: .regular))
+                .foregroundStyle(.white.opacity(rectangle.labelOpacity * 0.85))
 
-            shadowContext.draw(
+            context.draw(
                 sizeText,
                 at: CGPoint(x: centerX, y: centerY + 10),
                 anchor: .center
@@ -197,50 +188,36 @@ struct TreemapView: View {
 
     private func drawSelectionHighlight(_ rectangle: TreemapRectangle, in context: GraphicsContext) {
         let rect = rectangle.rect.insetBy(dx: 2, dy: 2)
-        let path = Path(rect)
+        let cornerRadius = max(0, rectangle.cornerRadius - 1)
+        let path = Path(roundedRect: rect, cornerRadius: cornerRadius)
 
-        // Thick accent border
+        // Simple clean selection border
         context.stroke(
             path,
             with: .color(.accentColor),
-            style: StrokeStyle(lineWidth: 3, lineCap: .round, lineJoin: .round)
-        )
-
-        // Subtle glow
-        var glowContext = context
-        glowContext.addFilter(.shadow(color: .accentColor.opacity(0.5), radius: 4, x: 0, y: 0))
-        glowContext.stroke(
-            path,
-            with: .color(.accentColor),
-            style: StrokeStyle(lineWidth: 3)
+            style: StrokeStyle(lineWidth: 2.5, lineCap: .round, lineJoin: .round)
         )
     }
 
     private func drawDirectoryBorder(_ rectangle: TreemapRectangle, in context: GraphicsContext) {
         let rect = rectangle.rect.insetBy(dx: 2, dy: 2)
-        let path = Path(rect)
+        let cornerRadius = max(0, rectangle.cornerRadius - 1)
+        let path = Path(roundedRect: rect, cornerRadius: cornerRadius)
 
-        // Thick accent border for directory (no fill, no label)
+        // Simple clean directory border
         context.stroke(
             path,
             with: .color(.accentColor),
-            style: StrokeStyle(lineWidth: 4, lineCap: .round, lineJoin: .round)
-        )
-
-        // Subtle glow
-        var glowContext = context
-        glowContext.addFilter(.shadow(color: .accentColor.opacity(0.5), radius: 4, x: 0, y: 0))
-        glowContext.stroke(
-            path,
-            with: .color(.accentColor),
-            style: StrokeStyle(lineWidth: 4)
+            style: StrokeStyle(lineWidth: 3, lineCap: .round, lineJoin: .round)
         )
     }
 
     private func drawHoverHighlight(_ rectangle: TreemapRectangle, in context: GraphicsContext) {
         let rect = rectangle.rect.insetBy(dx: 1, dy: 1)
-        let path = Path(rect)
+        let cornerRadius = max(0, rectangle.cornerRadius - 0.5)
+        let path = Path(roundedRect: rect, cornerRadius: cornerRadius)
 
+        // Simple subtle hover border
         context.stroke(
             path,
             with: .color(.white.opacity(0.6)),
@@ -275,7 +252,7 @@ struct TreemapView: View {
         VStack(alignment: .leading, spacing: 6) {
             // Name
             Text(node.name)
-                .font(.system(size: 12, weight: .semibold))
+                .font(.system(size: 12, weight: .medium))
                 .lineLimit(2)
 
             // Size and percentage
@@ -300,9 +277,8 @@ struct TreemapView: View {
         }
         .padding(10)
         .background {
-            RoundedRectangle(cornerRadius: 8)
+            RoundedRectangle(cornerRadius: 6)
                 .fill(.ultraThinMaterial)
-                .shadow(color: .black.opacity(0.3), radius: 6, y: 2)
         }
     }
 }

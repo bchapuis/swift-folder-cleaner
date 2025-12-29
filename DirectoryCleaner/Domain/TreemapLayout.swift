@@ -233,32 +233,44 @@ struct TreemapLayout {
             rowHeight = height
         }
 
-        var offset: CGFloat = 0
+        // Snap row bounds to pixels first
+        let snappedY = floor(bounds.origin.y)
+        let snappedX = floor(bounds.origin.x)
+        let snappedRowHeight = ceil(bounds.origin.y + rowHeight) - snappedY
+        let snappedRowWidth = ceil(bounds.origin.x + rowWidth) - snappedX
 
-        for node in row {
+        var currentPixel: CGFloat = 0
+
+        for (index, node) in row.enumerated() {
             let itemFraction = CGFloat(node.totalSize) / CGFloat(rowSize)
 
             let rect: CGRect
             if isHorizontal {
                 // Items go across horizontally
-                let itemWidth = rowWidth * itemFraction
+                let nextPixel = (index == row.count - 1)
+                    ? snappedRowWidth
+                    : floor(currentPixel + snappedRowWidth * itemFraction)
+
                 rect = CGRect(
-                    x: bounds.origin.x + offset,
-                    y: bounds.origin.y,
-                    width: itemWidth,
-                    height: rowHeight
+                    x: snappedX + currentPixel,
+                    y: snappedY,
+                    width: nextPixel - currentPixel,
+                    height: snappedRowHeight
                 )
-                offset += itemWidth
+                currentPixel = nextPixel
             } else {
                 // Items go down vertically
-                let itemHeight = rowHeight * itemFraction
+                let nextPixel = (index == row.count - 1)
+                    ? snappedRowHeight
+                    : floor(currentPixel + snappedRowHeight * itemFraction)
+
                 rect = CGRect(
-                    x: bounds.origin.x,
-                    y: bounds.origin.y + offset,
-                    width: rowWidth,
-                    height: itemHeight
+                    x: snappedX,
+                    y: snappedY + currentPixel,
+                    width: snappedRowWidth,
+                    height: nextPixel - currentPixel
                 )
-                offset += itemHeight
+                currentPixel = nextPixel
             }
 
             rectangles.append(rect)
