@@ -102,7 +102,7 @@
 - [x] 9.2: String extraction with .xcstrings catalog (required for i18n)
 - [x] 9.3: Locale-aware number/size formatters (e.g., "1,234.56 MB" vs "1 234,56 Mo")
 - [x] 9.4: Keyboard navigation (Tab, arrows, Space, Enter)
-- [ ] 9.5: Translations for EN, DE, ES, FR, ZH-Hans, PT, JA, RU, KO, IT
+- [x] 9.5: Translations for EN, DE, ES, FR, ZH-Hans, PT, JA, RU, KO, IT
 
 **Checkpoint:** Navigate entire app via VoiceOver and keyboard, UI displays correctly in all target languages
 
