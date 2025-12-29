@@ -72,10 +72,12 @@ struct ScanResultView: View {
                     Text("\(selected.name) · \(ByteCountFormatter.string(fromByteCount: selected.totalSize, countStyle: .file))")
                         .font(.callout)
                         .foregroundStyle(.secondary)
+                        .accessibilityLabel("Selected: \(selected.name), \(ByteCountFormatter.string(fromByteCount: selected.totalSize, countStyle: .file))")
                 } else {
                     Text("No selection")
                         .font(.callout)
                         .foregroundStyle(.tertiary)
+                        .accessibilityLabel("No file or folder selected")
                 }
 
                 Spacer()
@@ -85,12 +87,16 @@ struct ScanResultView: View {
                     Button("Open in Application") {
                         viewModel.showInPreview()
                     }
+                    .accessibilityLabel("Open in application")
+                    .accessibilityHint("Opens the selected file in its default application")
                 }
 
                 Button("Show in Finder") {
                     viewModel.showInFinder()
                 }
                 .disabled(viewModel.selectedNode == nil)
+                .accessibilityLabel("Show in Finder")
+                .accessibilityHint("Reveals the selected item in Finder")
 
                 Button("Delete", role: .destructive) {
                     Task {
@@ -99,6 +105,8 @@ struct ScanResultView: View {
                 }
                 .disabled(viewModel.selectedNode == nil)
                 .keyboardShortcut(.delete, modifiers: .command)
+                .accessibilityLabel("Delete")
+                .accessibilityHint("Moves the selected item to trash. Requires confirmation.")
             }
             .padding()
             .background(.quaternary)

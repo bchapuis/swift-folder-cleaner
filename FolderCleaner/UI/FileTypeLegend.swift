@@ -62,6 +62,10 @@ struct FileTypeLegend: View {
         }
         .buttonStyle(.borderless)
         .help(isSelected ? "Hide \(type.displayName)" : "Show \(type.displayName)")
+        .accessibilityLabel("\(type.displayName) filter")
+        .accessibilityValue(isSelected ? "Shown" : "Hidden")
+        .accessibilityHint("Toggles visibility of \(type.displayName.lowercased()) files in the treemap")
+        .accessibilityAddTraits(.isButton)
     }
 }
 

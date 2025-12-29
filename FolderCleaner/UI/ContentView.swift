@@ -42,6 +42,8 @@ struct ContentView: View {
                 }
             }
             .buttonStyle(.plain)
+            .accessibilityLabel("Cancel scan")
+            .accessibilityHint("Stops the current folder scan")
         } else {
             Button {
                 startScan()
@@ -54,6 +56,8 @@ struct ContentView: View {
                 }
             }
             .buttonStyle(.plain)
+            .accessibilityLabel("Scan folder")
+            .accessibilityHint("Opens a folder picker to select a folder to analyze")
         }
     }
 
@@ -72,6 +76,8 @@ struct ContentView: View {
             }
             .buttonStyle(.borderedProminent)
             .controlSize(.large)
+            .accessibilityLabel("Scan folder")
+            .accessibilityHint("Opens a folder picker to select a folder to analyze")
         }
     }
 
@@ -79,6 +85,7 @@ struct ContentView: View {
         VStack(spacing: 20) {
             ProgressView()
                 .scaleEffect(1.5)
+                .accessibilityLabel("Scanning in progress")
 
             VStack(spacing: 8) {
                 Text("Scanning...")
@@ -92,6 +99,8 @@ struct ContentView: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
             }
+            .accessibilityElement(children: .combine)
+            .accessibilityLabel("Scan progress: \(progress.filesScanned) files scanned, \(progress.formattedBytesScanned), \(progress.formattedSpeed)")
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
@@ -106,6 +115,8 @@ struct ContentView: View {
             Button("Try Again") {
                 viewModel.reset()
             }
+            .accessibilityLabel("Try scanning again")
+            .accessibilityHint("Resets the scan state so you can select a new folder")
         }
     }
 

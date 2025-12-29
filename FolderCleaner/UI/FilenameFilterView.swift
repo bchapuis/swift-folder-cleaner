@@ -25,6 +25,9 @@ struct FilenameFilterView: View {
                     .onChange(of: searchText) { _, newValue in
                         viewModel.setFilenameFilter(newValue)
                     }
+                    .accessibilityLabel("Filename filter")
+                    .accessibilityHint("Enter text or wildcards to filter files by name. Use asterisk for any characters.")
+                    .accessibilityValue(searchText.isEmpty ? "No filter" : searchText)
 
                 if !searchText.isEmpty {
                     Button {
@@ -37,6 +40,8 @@ struct FilenameFilterView: View {
                     }
                     .buttonStyle(.borderless)
                     .help("Clear filter")
+                    .accessibilityLabel("Clear filename filter")
+                    .accessibilityHint("Removes the filename filter to show all files")
                 }
             }
             .padding(.horizontal, 8)

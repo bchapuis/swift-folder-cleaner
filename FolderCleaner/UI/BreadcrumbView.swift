@@ -49,9 +49,14 @@ struct BreadcrumbView: View {
             }
             .buttonStyle(BreadcrumbButtonStyle())
             .help("Click to navigate to \(node.name)")
+            .accessibilityLabel("Navigate to \(node.name)")
+            .accessibilityHint("Opens this folder in the treemap")
+            .accessibilityAddTraits(.isButton)
         } else {
             // Current directory (not clickable)
             segmentLabel(node: node, isLast: isLast, isHoverable: false)
+                .accessibilityLabel("Current folder: \(node.name), \(ByteCountFormatter.string(fromByteCount: node.totalSize, countStyle: .file))")
+                .accessibilityAddTraits(.isStaticText)
         }
     }
 
