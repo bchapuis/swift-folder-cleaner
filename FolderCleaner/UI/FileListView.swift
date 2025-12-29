@@ -106,20 +106,20 @@ struct FileListView: View {
 
     private var headerView: some View {
         HStack(spacing: 0) {
-            // Name column
-            columnHeader("Name", column: .name, flex: 3)
+            // Name column (flexible)
+            columnHeaderFlexible("Name", column: .name, minWidth: 150)
 
-            // Size column
-            columnHeader("Size", column: .size, flex: 1.5)
+            // Path column (flexible)
+            columnHeaderFlexible("Path", column: .path, minWidth: 250)
 
-            // Percentage column
-            columnHeader("%", column: .percentage, flex: 0.8)
+            // Type column (fixed)
+            columnHeaderFixed("Type", column: .type, width: 80)
 
-            // Type column
-            columnHeader("Type", column: .type, flex: 1)
+            // Size column (fixed)
+            columnHeaderFixed("Size", column: .size, width: 80)
 
-            // Path column
-            columnHeader("Path", column: .path, flex: 2)
+            // Percentage column (fixed)
+            columnHeaderFixed("%", column: .percentage, width: 80)
         }
         .padding(.vertical, 8)
         .padding(.horizontal, 12)
@@ -127,7 +127,35 @@ struct FileListView: View {
     }
 
     @ViewBuilder
-    private func columnHeader(_ title: String, column: SortColumn, flex: CGFloat) -> some View {
+    private func columnHeaderFixed(_ title: String, column: SortColumn, width: CGFloat) -> some View {
+        Button {
+            if sortBy == column {
+                sortAscending.toggle()
+            } else {
+                sortBy = column
+                sortAscending = false
+            }
+        } label: {
+            HStack(spacing: 4) {
+                Text(title)
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundStyle(.secondary)
+
+                if sortBy == column {
+                    Image(systemName: sortAscending ? "chevron.up" : "chevron.down")
+                        .font(.system(size: 9))
+                        .foregroundStyle(.secondary)
+                }
+
+                Spacer()
+            }
+        }
+        .buttonStyle(.plain)
+        .frame(width: width, alignment: .leading)
+    }
+
+    @ViewBuilder
+    private func columnHeaderFlexible(_ title: String, column: SortColumn, minWidth: CGFloat) -> some View {
         Button {
             if sortBy == column {
                 sortAscending.toggle()
@@ -152,7 +180,7 @@ struct FileListView: View {
             .frame(maxWidth: .infinity)
         }
         .buttonStyle(.plain)
-        .frame(maxWidth: .infinity * flex)
+        .frame(minWidth: minWidth, maxWidth: .infinity, alignment: .leading)
     }
 
     // MARK: - File Row
@@ -162,7 +190,7 @@ struct FileListView: View {
         let isSelected = file.path == viewModel.selectedNode?.path
 
         HStack(spacing: 0) {
-            // Name
+            // Name (flexible)
             HStack(spacing: 6) {
                 Image(systemName: file.fileType.icon)
                     .font(.system(size: 12))
@@ -175,34 +203,35 @@ struct FileListView: View {
                     .lineLimit(1)
                     .help(file.name)
             }
-            .frame(maxWidth: .infinity * 3, alignment: .leading)
-
-            // Size
-            Text(ByteCountFormatter.string(fromByteCount: file.totalSize, countStyle: .file))
-                .font(.system(size: 12))
-                .fontWeight(isSelected ? .semibold : .regular)
-                .foregroundStyle(isSelected ? .primary : .secondary)
-                .frame(maxWidth: .infinity * 1.5, alignment: .leading)
-
-            // Percentage
-            Text(String(format: "%.1f%%", percentage(for: file)))
-                .font(.system(size: 12))
-                .foregroundStyle(isSelected ? .primary : .secondary)
-                .frame(maxWidth: .infinity * 0.8, alignment: .leading)
-
-            // Type
-            Text(file.fileType.displayName)
-                .font(.system(size: 12))
-                .foregroundStyle(isSelected ? .primary : .secondary)
-                .frame(maxWidth: .infinity * 1, alignment: .leading)
-
-            // Path
+            .frame(minWidth: 150, maxWidth: .infinity, alignment: .leading)
+            
+            // Path (flexible)
             Text(file.path.deletingLastPathComponent().path)
                 .font(.system(size: 11))
                 .foregroundStyle(isSelected ? .secondary : .tertiary)
                 .lineLimit(1)
                 .help(file.path.path)
-                .frame(maxWidth: .infinity * 2, alignment: .leading)
+                .frame(minWidth: 250, maxWidth: .infinity, alignment: .leading)
+            
+            // Type (fixed)
+            Text(file.fileType.displayName)
+                .font(.system(size: 12))
+                .foregroundStyle(isSelected ? .primary : .secondary)
+                .frame(width: 80, alignment: .leading)
+
+            // Size (fixed)
+            Text(ByteCountFormatter.string(fromByteCount: file.totalSize, countStyle: .file))
+                .font(.system(size: 12))
+                .fontWeight(isSelected ? .semibold : .regular)
+                .foregroundStyle(isSelected ? .primary : .secondary)
+                .frame(width: 80, alignment: .leading)
+
+            // Percentage (fixed)
+            Text(String(format: "%.1f%%", percentage(for: file)))
+                .font(.system(size: 12))
+                .foregroundStyle(isSelected ? .primary : .secondary)
+                .frame(width: 80, alignment: .leading)
+
         }
         .padding(.vertical, 8)
         .padding(.horizontal, 12)
