@@ -1,10 +1,10 @@
 #!/bin/bash
-# Test runner for FolderCleaner
+# Test runner for SwiftFolderCleaner
 # Since tests aren't in Xcode project, this compiles and runs them manually
 
 set -e
 
-echo "🧪 FolderCleaner Test Runner"
+echo "🧪 SwiftFolderCleaner Test Runner"
 echo "=============================="
 echo ""
 
@@ -16,12 +16,12 @@ NC='\033[0m' # No Color
 
 # Build paths
 BUILD_DIR="./build/tests"
-APP_PATH="$HOME/Library/Developer/Xcode/DerivedData/FolderCleaner-"*"/Build/Products/Debug/FolderCleaner.app"
+APP_PATH="$HOME/Library/Developer/Xcode/DerivedData/SwiftFolderCleaner-"*"/Build/Products/Debug/SwiftFolderCleaner.app"
 
 # Check if app is built
 if ! ls $APP_PATH > /dev/null 2>&1; then
     echo "${YELLOW}⚠️  App not found. Building...${NC}"
-    xcodebuild -scheme FolderCleaner -configuration Debug build > /dev/null 2>&1
+    xcodebuild -scheme SwiftFolderCleaner -configuration Debug build > /dev/null 2>&1
     if [ $? -eq 0 ]; then
         echo "${GREEN}✅ Build successful${NC}"
     else
@@ -34,12 +34,12 @@ echo ""
 echo "${YELLOW}⚠️  Note: Tests need to be added to Xcode project to run properly${NC}"
 echo ""
 echo "To add tests to Xcode:"
-echo "1. Open FolderCleaner.xcodeproj in Xcode"
+echo "1. Open SwiftFolderCleaner.xcodeproj in Xcode"
 echo "2. File → New → Target → macOS → Unit Testing Bundle"
-echo "3. Name it 'FolderCleanerTests'"
+echo "3. Name it 'SwiftFolderCleanerTests'"
 echo "4. Add test files from Tests/DiskAnalyzerTests/ to the test target"
-echo "5. Add FolderCleaner app as a dependency"
-echo "6. Run tests with Cmd+U or: xcodebuild test -scheme FolderCleaner"
+echo "5. Add SwiftFolderCleaner app as a dependency"
+echo "6. Run tests with Cmd+U or: xcodebuild test -scheme SwiftFolderCleaner"
 echo ""
 echo "Test files created:"
 echo "  ✓ FileTypeTests.swift (60+ test cases)"

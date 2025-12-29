@@ -95,6 +95,6 @@ func testActorIsolation() async throws {
 ## Commands
 
 ```bash
-xcodebuild test -scheme FolderCleaner
+xcodebuild test -scheme SwiftFolderCleaner
 swift test
 ```

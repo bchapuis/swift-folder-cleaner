@@ -10,9 +10,9 @@ Phase: $1
 2. Reference REQUIREMENTS.md, DESIGN.md
 3. Implement tasks
 4. Write tests (XCTest)
-5. Run: `xcodebuild test -scheme FolderCleaner`
+5. Run: `xcodebuild test -scheme SwiftFolderCleaner`
 6. Verify checkpoint
 7. Update PLAN.md checkboxes
-8. Build: `xcodebuild build -scheme FolderCleaner`
+8. Build: `xcodebuild build -scheme SwiftFolderCleaner`
 
 Use subagents: swift-architect, test-engineer, performance-optimizer, ui-polish

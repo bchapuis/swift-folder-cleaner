@@ -472,7 +472,7 @@ for english_text in translations.keys():
     catalog["strings"][english_text] = create_string_entry(english_text)
 
 # Write to file
-with open("/Users/bchapuis/Projects/bchapuis/diskmanager/FolderCleaner/Localizable.xcstrings", "w", encoding="utf-8") as f:
+with open("/Users/bchapuis/Projects/bchapuis/diskmanager/SwiftFolderCleaner/Localizable.xcstrings", "w", encoding="utf-8") as f:
     json.dump(catalog, f, ensure_ascii=False, indent=2)
 
 print(f"✓ Generated translations for {len(translations)} strings in 10 languages")

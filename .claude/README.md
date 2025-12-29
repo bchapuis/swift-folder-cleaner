@@ -27,7 +27,7 @@ This directory contains Claude Code configurations for the Disk Analyzer project
 └── README.md
 
 ../.mcp.json         # MCP server configuration (project root)
-../FolderCleaner.xcodeproj  # Xcode project file
+../SwiftFolderCleaner.xcodeproj  # Xcode project file
 ```
 
 ## Subagents
@@ -198,7 +198,7 @@ This command:
 Refactor code following project design principles from DESIGN.md.
 
 ```
-/refactor Sources/FolderCleaner/Scanner.swift
+/refactor Sources/SwiftFolderCleaner/Scanner.swift
 /refactor the file scanner to use protocols
 ```
 
@@ -213,7 +213,7 @@ Add comprehensive tests for a component or feature.
 
 ```
 /add-tests FileScanner
-/add-tests Sources/FolderCleaner/Domain/FileNode.swift
+/add-tests Sources/SwiftFolderCleaner/Domain/FileNode.swift
 ```
 
 Uses the test-engineer subagent to write:

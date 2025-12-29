@@ -15,10 +15,10 @@ Analyzes CPU usage and identifies performance bottlenecks:
 
 ```bash
 # Build Release version
-xcodebuild -scheme FolderCleaner -configuration Release build
+xcodebuild -scheme SwiftFolderCleaner -configuration Release build
 
 # Run Time Profiler
-APP_PATH=~/Library/Developer/Xcode/DerivedData/FolderCleaner-*/Build/Products/Release/FolderCleaner.app
+APP_PATH=~/Library/Developer/Xcode/DerivedData/SwiftFolderCleaner-*/Build/Products/Release/SwiftFolderCleaner.app
 xcrun xctrace record --template "Time Profiler" --launch "$APP_PATH" --output time_profiler.trace
 
 # Or open in Instruments GUI
@@ -152,7 +152,7 @@ Test with various directory sizes:
 
 ```bash
 # Enable code coverage
-xcodebuild test -scheme FolderCleaner -enableCodeCoverage YES
+xcodebuild test -scheme SwiftFolderCleaner -enableCodeCoverage YES
 
 # View coverage report in Xcode:
 # 1. Open Xcode

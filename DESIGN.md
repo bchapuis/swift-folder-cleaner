@@ -1,4 +1,4 @@
-# FolderCleaner - Software Design
+# SwiftFolderCleaner - Software Design
 
 ## Architecture
 

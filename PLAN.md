@@ -1,4 +1,4 @@
-# Implementation Plan - FolderCleaner
+# Implementation Plan - SwiftFolderCleaner
 
 **Status:** Feature complete. Polishing for release.
 
@@ -124,19 +124,20 @@
 - PROFILING.md - Performance analysis guide and benchmarks
 - MEMORY_LEAK_ANALYSIS.md - Memory leak analysis and recommendations
 
-## Phase 11: Distribution
+## Phase 11: App Store Distribution
 
-**Goal:** Prepare for release
+**Goal:** Submit to Mac App Store
 
 - [ ] 11.1: App icon and assets
-- [ ] 11.2: Code signing (Developer ID)
-- [ ] 11.3: Hardened Runtime
-- [ ] 11.4: Notarization (notarytool)
-- [ ] 11.5: DMG installer
-- [ ] 11.6: DocC documentation
-- [ ] 11.7: Release notes
+- [ ] 11.2: App Sandbox entitlements review (stricter than Developer ID)
+- [ ] 11.3: Code signing with "Apple Distribution" certificate
+- [ ] 11.4: App Store Connect configuration (metadata, screenshots, categories)
+- [ ] 11.5: Archive and validate build
+- [ ] 11.6: Upload to App Store Connect
+- [ ] 11.7: DocC documentation
+- [ ] 11.8: App Review submission with release notes
 
-**Checkpoint:** Notarized app installs and runs on clean Mac
+**Checkpoint:** App uploaded to App Store Connect and submitted for review
 
 ## Features Removed from Codebase
 

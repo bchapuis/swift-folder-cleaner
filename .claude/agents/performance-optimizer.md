@@ -97,13 +97,13 @@ class FileScanner {
 
 ```bash
 # Time Profiler - CPU hotspots
-instruments -t "Time Profiler" ./FolderCleaner.app
+instruments -t "Time Profiler" ./SwiftFolderCleaner.app
 
 # Allocations - memory usage
-instruments -t "Allocations" ./FolderCleaner.app
+instruments -t "Allocations" ./SwiftFolderCleaner.app
 
 # Leaks - retain cycles
-instruments -t "Leaks" ./FolderCleaner.app
+instruments -t "Leaks" ./SwiftFolderCleaner.app
 ```
 
 ## Checklist

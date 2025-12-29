@@ -132,10 +132,10 @@ All ViewModels use `@Observable` which:
 
 ```bash
 # Build Release version
-xcodebuild -scheme FolderCleaner -configuration Release build
+xcodebuild -scheme SwiftFolderCleaner -configuration Release build
 
 # Find app path
-APP_PATH=~/Library/Developer/Xcode/DerivedData/FolderCleaner-*/Build/Products/Release/FolderCleaner.app
+APP_PATH=~/Library/Developer/Xcode/DerivedData/SwiftFolderCleaner-*/Build/Products/Release/SwiftFolderCleaner.app
 
 # Run Leaks profiler
 xcrun xctrace record --template "Leaks" --launch "$APP_PATH" --output leaks.trace

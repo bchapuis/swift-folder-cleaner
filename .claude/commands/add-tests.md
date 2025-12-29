@@ -17,4 +17,4 @@ Use test-engineer subagent. Follow DESIGN.md testing:
 
 **Frameworks:** XCTest, Swift Testing (5.9+), protocol-based mocking
 
-Run: `xcodebuild test -scheme FolderCleaner`
+Run: `xcodebuild test -scheme SwiftFolderCleaner`

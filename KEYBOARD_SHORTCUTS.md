@@ -1,4 +1,4 @@
-# Keyboard Shortcuts - FolderCleaner
+# Keyboard Shortcuts - SwiftFolderCleaner
 
 ## Global Shortcuts
 

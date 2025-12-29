@@ -1,4 +1,4 @@
-# SwiftLint Configuration for FolderCleaner
+# SwiftLint Configuration for SwiftFolderCleaner
 
 disabled_rules:
   - trailing_whitespace # Handled by Xcode
@@ -22,7 +22,7 @@ opt_in_rules:
 excluded:
   - .build
   - .swiftpm
-  - FolderCleaner.xcodeproj
+  - SwiftFolderCleaner.xcodeproj
   - build
   - DerivedData
   - Pods

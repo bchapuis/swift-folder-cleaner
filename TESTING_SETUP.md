@@ -23,37 +23,37 @@ Located in `Tests/DiskAnalyzerTests/`:
 
 1. **Open Xcode**
    ```bash
-   open FolderCleaner.xcodeproj
+   open SwiftFolderCleaner.xcodeproj
    ```
 
 2. **Create Test Target**
    - File → New → Target
    - macOS → Unit Testing Bundle
-   - Product Name: `FolderCleanerTests`
+   - Product Name: `SwiftFolderCleanerTests`
    - Language: Swift
    - Click Finish
 
 3. **Delete Default Test File**
-   - Delete the auto-generated `FolderCleanerTests.swift` file
+   - Delete the auto-generated `SwiftFolderCleanerTests.swift` file
 
 4. **Add Test Files**
    - Select all test files in `Tests/DiskAnalyzerTests/`
    - Drag them into the project navigator
    - In the dialog:
      - ✅ Check "Copy items if needed"
-     - ✅ Check target: `FolderCleanerTests`
+     - ✅ Check target: `SwiftFolderCleanerTests`
      - Click Add
 
 5. **Configure Test Target**
-   - Select FolderCleanerTests target
+   - Select SwiftFolderCleanerTests target
    - Build Phases → Target Dependencies
-   - Click + and add `FolderCleaner`
+   - Click + and add `SwiftFolderCleaner`
 
 6. **Update Scheme**
    - Product → Scheme → Edit Scheme (Cmd+<)
    - Select Test action
    - Click + under Test section
-   - Add FolderCleanerTests
+   - Add SwiftFolderCleanerTests
 
 ### Option 2: Swift Package Manager
 
@@ -65,16 +65,16 @@ Convert project to use SPM:
    import PackageDescription
 
    let package = Package(
-       name: "FolderCleaner",
+       name: "SwiftFolderCleaner",
        platforms: [.macOS(.v13)],
        products: [
-           .executable(name: "FolderCleaner", targets: ["FolderCleaner"])
+           .executable(name: "SwiftFolderCleaner", targets: ["SwiftFolderCleaner"])
        ],
        targets: [
-           .executableTarget(name: "FolderCleaner"),
+           .executableTarget(name: "SwiftFolderCleaner"),
            .testTarget(
-               name: "FolderCleanerTests",
-               dependencies: ["FolderCleaner"]
+               name: "SwiftFolderCleanerTests",
+               dependencies: ["SwiftFolderCleaner"]
            )
        ]
    )
@@ -91,13 +91,13 @@ Convert project to use SPM:
 
 ```bash
 # Run all tests
-xcodebuild test -scheme FolderCleaner
+xcodebuild test -scheme SwiftFolderCleaner
 
 # Run specific test class
-xcodebuild test -scheme FolderCleaner -only-testing:FolderCleanerTests/FileTypeTests
+xcodebuild test -scheme SwiftFolderCleaner -only-testing:SwiftFolderCleanerTests/FileTypeTests
 
 # Run with coverage
-xcodebuild test -scheme FolderCleaner -enableCodeCoverage YES
+xcodebuild test -scheme SwiftFolderCleaner -enableCodeCoverage YES
 
 # Run in Xcode
 # Press Cmd+U
@@ -112,11 +112,11 @@ xcodebuild test -scheme FolderCleaner -enableCodeCoverage YES
 2. **Coverage Report**
    - Product → Test (Cmd+U)
    - Report Navigator → Select test run → Coverage tab
-   - Filter by module: FolderCleaner
+   - Filter by module: SwiftFolderCleaner
 
 3. **Terminal**
    ```bash
-   xcodebuild test -scheme FolderCleaner 2>&1 | \
+   xcodebuild test -scheme SwiftFolderCleaner 2>&1 | \
      grep -E "(Test Suite|Test Case|passed|failed)"
    ```
 
@@ -126,7 +126,7 @@ When tests are integrated and run:
 
 ```
 Test Suite 'All tests' started
-Test Suite 'FolderCleanerTests.xctest' started
+Test Suite 'SwiftFolderCleanerTests.xctest' started
 
 FileTypeTests
   ✓ testImageFileType
@@ -165,7 +165,7 @@ FileScannerTests
   ✓ testScanDirectoryWithFiles
   (... more tests)
 
-Test Suite 'FolderCleanerTests' passed
+Test Suite 'SwiftFolderCleanerTests' passed
    Total: 90+ tests
    Passed: 90+
    Failed: 0
@@ -181,18 +181,18 @@ Test Suite 'FolderCleanerTests' passed
 
 ### Import Errors
 
-**Problem**: `@testable import FolderCleaner` fails
+**Problem**: `@testable import SwiftFolderCleaner` fails
 **Solution**:
-- Verify FolderCleaner is added as a dependency in test target
-- Check that app target is named "FolderCleaner"
+- Verify SwiftFolderCleaner is added as a dependency in test target
+- Check that app target is named "SwiftFolderCleaner"
 - Clean build folder: Product → Clean Build Folder (Cmd+Shift+K)
 
 ### Linker Errors
 
 **Problem**: Undefined symbols during test compilation
 **Solution**:
-- All source files must be in FolderCleaner target
-- Test files must be in FolderCleanerTests target only
+- All source files must be in SwiftFolderCleaner target
+- Test files must be in SwiftFolderCleanerTests target only
 - Check Build Phases → Compile Sources
 
 ### Test Files Not Running
@@ -226,7 +226,7 @@ Create `.git/hooks/pre-commit`:
 ```bash
 #!/bin/bash
 echo "Running tests..."
-xcodebuild test -scheme FolderCleaner -quiet
+xcodebuild test -scheme SwiftFolderCleaner -quiet
 if [ $? -ne 0 ]; then
     echo "Tests failed. Commit aborted."
     exit 1
@@ -240,7 +240,7 @@ chmod +x .git/hooks/pre-commit
 ## Next Steps
 
 1. ⚠️ **Add test target to Xcode** (see Option 1 above)
-2. Run tests: `xcodebuild test -scheme FolderCleaner`
+2. Run tests: `xcodebuild test -scheme SwiftFolderCleaner`
 3. Verify all 90+ tests pass
 4. Generate coverage report
 5. Fix any failures

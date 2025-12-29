@@ -1,4 +1,4 @@
-# FolderCleaner - Requirements
+# SwiftFolderCleaner - Requirements
 
 **Mission:** Analyze disk usage, identify waste, clean it up.
 **Philosophy:** Clean, focused interface for disk space management.

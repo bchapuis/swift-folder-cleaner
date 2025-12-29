@@ -6,38 +6,38 @@ Quick reference for Claude Code.
 
 ```bash
 # Clean, Build & Run (use /run slash command)
-xcodebuild clean && rm -rf ~/Library/Developer/Xcode/DerivedData/*FolderCleaner* && xcodebuild -scheme FolderCleaner -configuration Debug build && open ~/Library/Developer/Xcode/DerivedData/FolderCleaner-*/Build/Products/Debug/FolderCleaner.app
+xcodebuild clean && rm -rf ~/Library/Developer/Xcode/DerivedData/*SwiftFolderCleaner* && xcodebuild -scheme SwiftFolderCleaner -configuration Debug build && open ~/Library/Developer/Xcode/DerivedData/SwiftFolderCleaner-*/Build/Products/Debug/SwiftFolderCleaner.app
 
 # Build (Release)
-xcodebuild -scheme FolderCleaner -configuration Release build
+xcodebuild -scheme SwiftFolderCleaner -configuration Release build
 
 # Test
-xcodebuild test -scheme FolderCleaner
+xcodebuild test -scheme SwiftFolderCleaner
 swift test
 
 # Clean
 xcodebuild clean
-rm -rf ~/Library/Developer/Xcode/DerivedData/*FolderCleaner*
+rm -rf ~/Library/Developer/Xcode/DerivedData/*SwiftFolderCleaner*
 
 # Archive & Export
-xcodebuild archive -scheme FolderCleaner -archivePath ./build/FolderCleaner.xcarchive
-xcodebuild -exportArchive -archivePath ./build/FolderCleaner.xcarchive -exportPath ./build/Release -exportOptionsPlist ExportOptions.plist
+xcodebuild archive -scheme SwiftFolderCleaner -archivePath ./build/SwiftFolderCleaner.xcarchive
+xcodebuild -exportArchive -archivePath ./build/SwiftFolderCleaner.xcarchive -exportPath ./build/Release -exportOptionsPlist ExportOptions.plist
 
 # Code Sign & Notarize
-codesign --deep --force --sign "Developer ID Application" ./build/Release/FolderCleaner.app
-xcrun notarytool submit ./build/FolderCleaner.dmg --keychain-profile "AC_PASSWORD" --wait
-xcrun stapler staple ./build/FolderCleaner.dmg
+codesign --deep --force --sign "Developer ID Application" ./build/Release/SwiftFolderCleaner.app
+xcrun notarytool submit ./build/SwiftFolderCleaner.dmg --keychain-profile "AC_PASSWORD" --wait
+xcrun stapler staple ./build/SwiftFolderCleaner.dmg
 
 # Lint
 swiftlint lint
 swiftlint --fix
 
 # DocC
-xcodebuild docbuild -scheme FolderCleaner -destination 'platform=macOS'
+xcodebuild docbuild -scheme SwiftFolderCleaner -destination 'platform=macOS'
 
 # Profile
-instruments -t "Time Profiler" ./build/Release/FolderCleaner.app
-instruments -t "Allocations" ./build/Release/FolderCleaner.app
+instruments -t "Time Profiler" ./build/Release/SwiftFolderCleaner.app
+instruments -t "Allocations" ./build/Release/SwiftFolderCleaner.app
 ```
 
 ## Tech Stack
@@ -49,12 +49,12 @@ instruments -t "Allocations" ./build/Release/FolderCleaner.app
 ## Structure
 
 ```
-FolderCleaner/
-├── FolderCleaner.xcodeproj
-├── FolderCleaner/
-│   ├── FolderCleanerApp.swift  # @main
+SwiftFolderCleaner/
+├── SwiftFolderCleaner.xcodeproj
+├── SwiftFolderCleaner/
+│   ├── SwiftFolderCleanerApp.swift  # @main
 │   ├── Info.plist
-│   ├── FolderCleaner.entitlements
+│   ├── SwiftFolderCleaner.entitlements
 │   ├── Domain/                 # Models, use cases
 │   ├── Data/                   # FileManager, I/O
 │   └── UI/                     # SwiftUI views
