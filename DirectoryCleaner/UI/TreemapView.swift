@@ -31,13 +31,7 @@ struct TreemapView: View {
                 // Draw selection highlight
                 if let selected = viewModel.selectedNode,
                    let selectedRect = layoutViewModel.rectangle(for: selected.path) {
-                    // For directories: just draw border
-                    // For files: draw full highlight
-                    if selectedRect.node.isDirectory && !selectedRect.node.children.isEmpty {
-                        drawDirectoryBorder(selectedRect, in: context)
-                    } else {
-                        drawSelectionHighlight(selectedRect, in: context)
-                    }
+                    drawSelectionHighlight(selectedRect, in: context)
                 }
 
                 // Draw hover highlight
@@ -47,6 +41,7 @@ struct TreemapView: View {
                     drawHoverHighlight(hoveredRect, in: context)
                 }
             }
+            .background(Color(white: 0.8))
             .onTapGesture(count: 2) {
                 // Double-tap - drill down if directory
                 handleDoubleTap(at: mouseLocation)
@@ -117,6 +112,27 @@ struct TreemapView: View {
         // Fully opaque fill to prevent anti-aliasing gaps
         context.fill(path, with: .color(fillColor))
 
+        // Add subtle edge darkening for separation (top and left edges)
+        if rect.width > 2 && rect.height > 2 {
+            // Top edge - very subtle dark line
+            let topEdge = Path(CGRect(
+                x: rect.minX,
+                y: rect.minY,
+                width: rect.width,
+                height: 1
+            ))
+            context.fill(topEdge, with: .color(.black.opacity(0.08)))
+
+            // Left edge - very subtle dark line
+            let leftEdge = Path(CGRect(
+                x: rect.minX,
+                y: rect.minY,
+                width: 1,
+                height: rect.height
+            ))
+            context.fill(leftEdge, with: .color(.black.opacity(0.08)))
+        }
+
         // Label if space allows
         if rectangle.canShowLabel {
             drawLabel(for: rectangle, in: context)
@@ -134,6 +150,24 @@ struct TreemapView: View {
         let displayName = smartTruncate(node.name, maxWidth: rect.width - 8)
         let fontSize = rectangle.labelFontSize
 
+        // Check if we can show size
+        let showSize = rectangle.canShowSize
+
+        // Calculate vertical position based on whether we show size
+        let nameY: CGFloat
+        let sizeY: CGFloat
+
+        if showSize {
+            // Two lines: center them together
+            let totalHeight: CGFloat = fontSize + (fontSize - 2) + 6 // name + size + gap
+            nameY = centerY - totalHeight / 2 + fontSize / 2
+            sizeY = nameY + fontSize / 2 + 6 + (fontSize - 2) / 2
+        } else {
+            // Single line: just center it
+            nameY = centerY
+            sizeY = 0
+        }
+
         // Name - clean and simple, no shadow
         let nameText = Text(displayName)
             .font(.system(size: fontSize, weight: .medium))
@@ -141,12 +175,12 @@ struct TreemapView: View {
 
         context.draw(
             nameText,
-            at: CGPoint(x: centerX, y: centerY - 8),
+            at: CGPoint(x: centerX, y: nameY),
             anchor: .center
         )
 
         // Size if space allows
-        if rectangle.canShowSize {
+        if showSize {
             let size = ByteCountFormatter.string(fromByteCount: node.totalSize, countStyle: .file)
             let sizeText = Text(size)
                 .font(.system(size: fontSize - 2, weight: .regular))
@@ -154,7 +188,7 @@ struct TreemapView: View {
 
             context.draw(
                 sizeText,
-                at: CGPoint(x: centerX, y: centerY + 10),
+                at: CGPoint(x: centerX, y: sizeY),
                 anchor: .center
             )
         }
@@ -187,41 +221,26 @@ struct TreemapView: View {
     }
 
     private func drawSelectionHighlight(_ rectangle: TreemapRectangle, in context: GraphicsContext) {
-        let rect = rectangle.rect.insetBy(dx: 2, dy: 2)
-        let cornerRadius = max(0, rectangle.cornerRadius - 1)
-        let path = Path(roundedRect: rect, cornerRadius: cornerRadius)
+        let rect = rectangle.rect.insetBy(dx: 1, dy: 1)
+        let path = Path(rect)
 
-        // Simple clean selection border
+        // Bold semi-transparent white border for selection (files and directories)
         context.stroke(
             path,
-            with: .color(.accentColor),
-            style: StrokeStyle(lineWidth: 2.5, lineCap: .round, lineJoin: .round)
-        )
-    }
-
-    private func drawDirectoryBorder(_ rectangle: TreemapRectangle, in context: GraphicsContext) {
-        let rect = rectangle.rect.insetBy(dx: 2, dy: 2)
-        let cornerRadius = max(0, rectangle.cornerRadius - 1)
-        let path = Path(roundedRect: rect, cornerRadius: cornerRadius)
-
-        // Simple clean directory border
-        context.stroke(
-            path,
-            with: .color(.accentColor),
-            style: StrokeStyle(lineWidth: 3, lineCap: .round, lineJoin: .round)
+            with: .color(.white.opacity(0.9)),
+            style: StrokeStyle(lineWidth: 2, lineCap: .square, lineJoin: .miter)
         )
     }
 
     private func drawHoverHighlight(_ rectangle: TreemapRectangle, in context: GraphicsContext) {
         let rect = rectangle.rect.insetBy(dx: 1, dy: 1)
-        let cornerRadius = max(0, rectangle.cornerRadius - 0.5)
-        let path = Path(roundedRect: rect, cornerRadius: cornerRadius)
+        let path = Path(rect)
 
-        // Simple subtle hover border
+        // Lighter semi-transparent white border for hover
         context.stroke(
             path,
             with: .color(.white.opacity(0.6)),
-            style: StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round)
+            style: StrokeStyle(lineWidth: 2, lineCap: .square, lineJoin: .miter)
         )
     }
 

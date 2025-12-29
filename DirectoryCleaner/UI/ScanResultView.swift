@@ -82,7 +82,7 @@ struct ScanResultView: View {
 
                 // Actions
                 if viewModel.canPreviewSelection {
-                    Button("Show in Preview") {
+                    Button("Open in Application") {
                         viewModel.showInPreview()
                     }
                 }
