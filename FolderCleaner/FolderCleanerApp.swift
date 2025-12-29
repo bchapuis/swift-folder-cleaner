@@ -1,7 +1,7 @@
 import SwiftUI
 
 @main
-struct DirectoryCleanerApp: App {
+struct FolderCleanerApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
     var body: some Scene {

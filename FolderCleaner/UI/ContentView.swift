@@ -64,6 +64,14 @@ struct ContentView: View {
             Label("Ready to Scan", systemImage: "folder.badge.gearshape")
         } description: {
             Text("Click \"Scan Folder\" to analyze disk usage")
+        } actions: {
+            Button {
+                startScan()
+            } label: {
+                Label("Scan Folder", systemImage: "folder.badge.gearshape")
+            }
+            .buttonStyle(.borderedProminent)
+            .controlSize(.large)
         }
     }
 
