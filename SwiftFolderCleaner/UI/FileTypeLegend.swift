@@ -21,7 +21,7 @@ struct FileTypeLegend: View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 12) {
                 Text("Type:")
-                    .font(.system(size: 11, weight: .semibold))
+                    .font(.system(size: 11, weight: .medium))
                     .foregroundStyle(.secondary)
                     .frame(width: 40, alignment: .leading)
 
@@ -32,8 +32,7 @@ struct FileTypeLegend: View {
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
         }
-        .frame(height: 36)
-        .background(Color(.controlBackgroundColor).opacity(0.5))
+        .frame(height: 32)
     }
 
     @ViewBuilder
@@ -45,20 +44,20 @@ struct FileTypeLegend: View {
         } label: {
             HStack(spacing: 6) {
                 // Color indicator - automatically adapts to light/dark mode
-                RoundedRectangle(cornerRadius: 3)
+                Circle()
                     .fill(type.color)
-                    .frame(width: 16, height: 16)
+                    .frame(width: 12, height: 12)
                     .opacity(isSelected ? 1.0 : 0.3)
 
                 // Type name
                 Text(type.displayName)
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundStyle(isSelected ? .primary : .tertiary)
+                    .font(.system(size: 11))
+                    .foregroundStyle(isSelected ? .primary : .secondary)
             }
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
-            .background(isSelected ? Color.accentColor.opacity(0.1) : Color.clear)
-            .cornerRadius(6)
+            .background(isSelected ? Color(nsColor: .controlAccentColor).opacity(0.15) : Color.clear)
+            .clipShape(RoundedRectangle(cornerRadius: 4))
         }
         .buttonStyle(.borderless)
         .help(isSelected ? "Hide \(type.displayName)" : "Show \(type.displayName)")

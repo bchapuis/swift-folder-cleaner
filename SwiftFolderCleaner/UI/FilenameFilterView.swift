@@ -9,15 +9,15 @@ struct FilenameFilterView: View {
         HStack(spacing: 12) {
             // Label
             Text("Name:")
-                .font(.system(size: 11, weight: .semibold))
+                .font(.system(size: 11, weight: .medium))
                 .foregroundStyle(.secondary)
                 .frame(width: 40, alignment: .leading)
 
-            // Search field
+            // Search field with subtle styling
             HStack(spacing: 6) {
                 Image(systemName: "magnifyingglass")
                     .font(.system(size: 11))
-                    .foregroundStyle(.tertiary)
+                    .foregroundStyle(.secondary)
 
                 TextField("Filter by name (*.ts, node_modules, etc.)", text: $searchText)
                     .textFieldStyle(.plain)
@@ -34,7 +34,6 @@ struct FilenameFilterView: View {
                 if !searchText.isEmpty {
                     Button {
                         searchText = ""
-                        viewModel.setFilenameFilter("")
                     } label: {
                         Image(systemName: "xmark.circle.fill")
                             .font(.system(size: 12))
@@ -42,32 +41,29 @@ struct FilenameFilterView: View {
                     }
                     .buttonStyle(.borderless)
                     .help("Clear filter")
-                    .accessibilityLabel(String(localized: "Clear filename filter"))
-                    .accessibilityHint(String(localized: "Removes the filename filter to show all files"))
                 }
             }
             .padding(.horizontal, 8)
-            .padding(.vertical, 4)
-            .background(Color(.controlBackgroundColor))
-            .cornerRadius(6)
+            .padding(.vertical, 5)
+            .background(Color(nsColor: .textBackgroundColor))
+            .clipShape(RoundedRectangle(cornerRadius: 5))
             .overlay(
-                RoundedRectangle(cornerRadius: 6)
-                    .stroke(Color.gray.opacity(0.2), lineWidth: 1)
+                RoundedRectangle(cornerRadius: 5)
+                    .strokeBorder(Color(nsColor: .separatorColor), lineWidth: 1)
             )
 
             // Helper text
             if !searchText.isEmpty {
                 Text("Wildcards: * (any)")
                     .font(.system(size: 10))
-                    .foregroundStyle(.tertiary)
+                    .foregroundStyle(.secondary)
             }
 
             Spacer()
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
-        .frame(height: 36)
-        .background(Color(.controlBackgroundColor).opacity(0.5))
+        .frame(height: 32)
     }
 }
 

@@ -6,10 +6,8 @@ struct FileListView: View {
 
     @State private var sortBy: SortColumn = .size
     @State private var sortAscending = false
-
-    // Double-click tracking
-    @State private var lastTapTime: Date = .distantPast
-    @State private var lastTapNode: FileNode?
+    @State private var selection: URL?
+    @State private var scrollPosition: URL?
 
     // Cache sorted files to prevent recomputation on selection changes
     @State private var cachedSortedFiles: [FileNode] = []
@@ -18,37 +16,80 @@ struct FileListView: View {
     @State private var lastSortAscending = false
 
     var body: some View {
-        VStack(spacing: 0) {
-            // Header
-            headerView
+        Table(of: FileNode.self, selection: $selection) {
+            TableColumn("Name") { file in
+                HStack(spacing: 6) {
+                    Image(systemName: file.fileType.icon)
+                        .font(.system(size: 12))
+                        .foregroundStyle(file.fileType.color)
+                        .frame(width: 16)
 
-            Divider()
-
-            // File list with scroll-to-selection
-            ScrollViewReader { proxy in
-                ScrollView {
-                    LazyVStack(spacing: 0) {
-                        ForEach(cachedSortedFiles, id: \.path) { file in
-                            fileRow(file)
-                                .id(file.path)
-                        }
-                    }
-                }
-                .onChange(of: viewModel.selectedNode?.path) { _, newPath in
-                    // Scroll to selected item (both files and directories are now in the list)
-                    if let path = newPath {
-                        proxy.scrollTo(path, anchor: .center)
-                    }
+                    Text(file.name)
+                        .font(.system(size: 13))
+                        .lineLimit(1)
                 }
             }
+            .width(min: 150, ideal: 250)
+
+            TableColumn("Path") { file in
+                Text(file.path.deletingLastPathComponent().path)
+                    .font(.system(size: 12))
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+            }
+            .width(min: 250, ideal: 350)
+
+            TableColumn("Type") { file in
+                Text(file.fileType.displayName)
+                    .font(.system(size: 12))
+                    .foregroundStyle(.secondary)
+            }
+            .width(80)
+
+            TableColumn("Size") { file in
+                Text(ByteCountFormatter.string(fromByteCount: file.totalSize, countStyle: .file))
+                    .font(.system(size: 12))
+                    .foregroundStyle(.secondary)
+            }
+            .width(80)
+
+            TableColumn("%") { file in
+                let totalSize = viewModel.currentRoot.totalSize
+                let percentage = totalSize > 0 ? Double(file.totalSize) / Double(totalSize) : 0
+                Text(percentage.formatted(.percent.precision(.fractionLength(1))))
+                    .font(.system(size: 12))
+                    .foregroundStyle(.secondary)
+            }
+            .width(80)
+        } rows: {
+            ForEach(cachedSortedFiles, id: \.path) { file in
+                TableRow(file)
+                    .itemProvider {
+                        NSItemProvider(object: file.path as NSURL)
+                    }
+            }
         }
-        .background(Color(.controlBackgroundColor))
+        .tableStyle(.inset(alternatesRowBackgrounds: true))
+        .background(Color(nsColor: .controlBackgroundColor))
+        .scrollPosition(id: $scrollPosition, anchor: .center)
+        .onChange(of: selection) { _, newValue in
+            if let path = newValue, let node = cachedSortedFiles.first(where: { $0.path == path }) {
+                viewModel.selectNode(node)
+            } else {
+                viewModel.selectNode(nil)
+            }
+        }
+        .onChange(of: viewModel.selectedNode?.path) { _, newPath in
+            selection = newPath
+            // Auto-scroll to selected item when selection changes from treemap
+            if let path = newPath {
+                scrollPosition = path
+            }
+        }
         .onChange(of: viewModel.currentRoot.path) { _, _ in
-            // Navigation changed - update file list
             updateCache()
         }
         .onChange(of: viewModel.filterVersion) { _, _ in
-            // Any filter changed (type, size, filename, etc.) - update file list
             updateCache()
         }
         .onChange(of: sortBy) { _, _ in
@@ -59,6 +100,13 @@ struct FileListView: View {
         }
         .onAppear {
             updateCache()
+        }
+        .onKeyPress(.return) {
+            if let selected = viewModel.selectedNode, selected.isDirectory {
+                viewModel.drillDown(to: selected)
+                return .handled
+            }
+            return .ignored
         }
     }
 
@@ -102,171 +150,6 @@ struct FileListView: View {
         return Double(file.totalSize) / Double(totalSize) * 100
     }
 
-    // MARK: - Header
-
-    private var headerView: some View {
-        HStack(spacing: 0) {
-            // Name column (flexible)
-            columnHeaderFlexible("Name", column: .name, minWidth: 150)
-
-            // Path column (flexible)
-            columnHeaderFlexible("Path", column: .path, minWidth: 250)
-
-            // Type column (fixed)
-            columnHeaderFixed("Type", column: .type, width: 80)
-
-            // Size column (fixed)
-            columnHeaderFixed("Size", column: .size, width: 80)
-
-            // Percentage column (fixed)
-            columnHeaderFixed("%", column: .percentage, width: 80)
-        }
-        .padding(.vertical, 8)
-        .padding(.horizontal, 12)
-        .background(Color(.controlBackgroundColor).opacity(0.5))
-    }
-
-    @ViewBuilder
-    private func columnHeaderFixed(_ title: String, column: SortColumn, width: CGFloat) -> some View {
-        Button {
-            if sortBy == column {
-                sortAscending.toggle()
-            } else {
-                sortBy = column
-                sortAscending = false
-            }
-        } label: {
-            HStack(spacing: 4) {
-                Text(title)
-                    .font(.system(size: 11, weight: .semibold))
-                    .foregroundStyle(.secondary)
-
-                if sortBy == column {
-                    Image(systemName: sortAscending ? "chevron.up" : "chevron.down")
-                        .font(.system(size: 9))
-                        .foregroundStyle(.secondary)
-                }
-
-                Spacer()
-            }
-        }
-        .buttonStyle(.plain)
-        .frame(width: width, alignment: .leading)
-    }
-
-    @ViewBuilder
-    private func columnHeaderFlexible(_ title: String, column: SortColumn, minWidth: CGFloat) -> some View {
-        Button {
-            if sortBy == column {
-                sortAscending.toggle()
-            } else {
-                sortBy = column
-                sortAscending = false
-            }
-        } label: {
-            HStack(spacing: 4) {
-                Text(title)
-                    .font(.system(size: 11, weight: .semibold))
-                    .foregroundStyle(.secondary)
-
-                if sortBy == column {
-                    Image(systemName: sortAscending ? "chevron.up" : "chevron.down")
-                        .font(.system(size: 9))
-                        .foregroundStyle(.secondary)
-                }
-
-                Spacer()
-            }
-            .frame(maxWidth: .infinity)
-        }
-        .buttonStyle(.plain)
-        .frame(minWidth: minWidth, maxWidth: .infinity, alignment: .leading)
-    }
-
-    // MARK: - File Row
-
-    @ViewBuilder
-    private func fileRow(_ file: FileNode) -> some View {
-        let isSelected = file.path == viewModel.selectedNode?.path
-
-        HStack(spacing: 0) {
-            // Name (flexible)
-            HStack(spacing: 6) {
-                Image(systemName: file.fileType.icon)
-                    .font(.system(size: 12))
-                    .foregroundStyle(file.fileType.color)
-                    .frame(width: 16)
-
-                Text(file.name)
-                    .font(.system(size: 12))
-                    .fontWeight(isSelected ? .semibold : .regular)
-                    .lineLimit(1)
-                    .help(file.name)
-            }
-            .frame(minWidth: 150, maxWidth: .infinity, alignment: .leading)
-            
-            // Path (flexible)
-            Text(file.path.deletingLastPathComponent().path)
-                .font(.system(size: 11))
-                .foregroundStyle(isSelected ? .secondary : .tertiary)
-                .lineLimit(1)
-                .help(file.path.path)
-                .frame(minWidth: 250, maxWidth: .infinity, alignment: .leading)
-            
-            // Type (fixed)
-            Text(file.fileType.displayName)
-                .font(.system(size: 12))
-                .foregroundStyle(isSelected ? .primary : .secondary)
-                .frame(width: 80, alignment: .leading)
-
-            // Size (fixed)
-            Text(ByteCountFormatter.string(fromByteCount: file.totalSize, countStyle: .file))
-                .font(.system(size: 12))
-                .fontWeight(isSelected ? .semibold : .regular)
-                .foregroundStyle(isSelected ? .primary : .secondary)
-                .frame(width: 80, alignment: .leading)
-
-            // Percentage (fixed) - locale-aware formatting
-            Text((percentage(for: file) / 100).formatted(.percent.precision(.fractionLength(1))))
-                .font(.system(size: 12))
-                .foregroundStyle(isSelected ? .primary : .secondary)
-                .frame(width: 80, alignment: .leading)
-
-        }
-        .padding(.vertical, 8)
-        .padding(.horizontal, 12)
-        .background(isSelected ? Color.accentColor.opacity(0.15) : Color.clear)
-        .overlay(
-            Rectangle()
-                .fill(isSelected ? Color.accentColor : Color.clear)
-                .frame(width: 3)
-                .padding(.leading, 0),
-            alignment: .leading
-        )
-        .contentShape(Rectangle())
-        .onTapGesture {
-            handleTap(on: file)
-        }
-    }
-
-    // MARK: - Interaction Handler
-
-    private func handleTap(on file: FileNode) {
-        let now = Date()
-        let timeSinceLastTap = now.timeIntervalSince(lastTapTime)
-
-        // Check for double-tap (within 0.3s and same node)
-        let isDoubleTap = timeSinceLastTap < 0.3 && lastTapNode?.path == file.path
-
-        if isDoubleTap && file.isDirectory {
-            viewModel.drillDown(to: file)
-        } else {
-            viewModel.selectNode(file)
-        }
-
-        lastTapTime = now
-        lastTapNode = file
-    }
 }
 
 // MARK: - Sort Column

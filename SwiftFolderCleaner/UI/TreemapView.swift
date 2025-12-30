@@ -292,10 +292,11 @@ struct TreemapView: View {
                     .foregroundStyle(.secondary)
             }
         }
-        .padding(10)
+        .padding(8)
         .background {
             RoundedRectangle(cornerRadius: 6)
-                .fill(.ultraThinMaterial)
+                .fill(.thinMaterial)
+                .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
         }
     }
 }

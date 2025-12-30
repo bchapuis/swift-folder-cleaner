@@ -37,14 +37,8 @@ struct ContentView: View {
             Button {
                 startScan()
             } label: {
-                VStack(spacing: 4) {
-                    Image(systemName: "folder.badge.gearshape")
-                        .font(.system(size: 20))
-                    Text("Scan Folder")
-                        .font(.system(size: 11))
-                }
+                Label("Scan Folder", systemImage: "folder.badge.gearshape")
             }
-            .buttonStyle(.plain)
             .accessibilityLabel(String(localized: "Scan folder"))
             .accessibilityHint(String(localized: "Opens a folder picker to select a folder to analyze"))
             .keyboardShortcut("o", modifiers: .command)

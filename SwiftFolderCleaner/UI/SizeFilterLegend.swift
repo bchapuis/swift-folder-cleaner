@@ -11,7 +11,7 @@ struct SizeFilterLegend: View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 12) {
                 Text("Size:")
-                    .font(.system(size: 11, weight: .semibold))
+                    .font(.system(size: 11, weight: .medium))
                     .foregroundStyle(.secondary)
                     .frame(width: 40, alignment: .leading)
 
@@ -22,8 +22,7 @@ struct SizeFilterLegend: View {
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
         }
-        .frame(height: 36)
-        .background(Color(.controlBackgroundColor).opacity(0.5))
+        .frame(height: 32)
     }
 
     @ViewBuilder
@@ -36,18 +35,18 @@ struct SizeFilterLegend: View {
             HStack(spacing: 6) {
                 // Size icon
                 Image(systemName: filter.systemImage)
-                    .font(.system(size: 12))
-                    .foregroundStyle(isSelected ? .primary : .tertiary)
+                    .font(.system(size: 11))
+                    .foregroundStyle(isSelected ? .primary : .secondary)
 
                 // Size threshold
                 Text(filter.rawValue)
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundStyle(isSelected ? .primary : .tertiary)
+                    .font(.system(size: 11))
+                    .foregroundStyle(isSelected ? .primary : .secondary)
             }
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
-            .background(isSelected ? Color.accentColor.opacity(0.1) : Color.clear)
-            .cornerRadius(6)
+            .background(isSelected ? Color(nsColor: .controlAccentColor).opacity(0.15) : Color.clear)
+            .clipShape(RoundedRectangle(cornerRadius: 4))
         }
         .buttonStyle(.borderless)
         .help(filter == .all ? "Show all file sizes" : "Show only files \(filter.rawValue)")

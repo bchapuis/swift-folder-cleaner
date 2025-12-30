@@ -85,6 +85,21 @@ final class ScanResultViewModel {
         selection.selected
     }
 
+    /// Selected path for table binding
+    var selectedPath: URL? {
+        get { selection.selected?.path }
+        set {
+            if let path = newValue {
+                // Find node by path in displayFiles
+                if let node = displayFiles.first(where: { $0.path == path }) {
+                    selection.select(node)
+                }
+            } else {
+                selection.select(nil)
+            }
+        }
+    }
+
     /// Active file types (from filter)
     var selectedTypes: Set<FileType> {
         filter.types

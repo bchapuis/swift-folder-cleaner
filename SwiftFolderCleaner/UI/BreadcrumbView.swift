@@ -15,9 +15,9 @@ struct BreadcrumbView: View {
                         HStack(spacing: 4) {
                             // Separator
                             if index > 0 {
-                                Image(systemName: "chevron.right")
-                                    .font(.system(size: 10))
-                                    .foregroundStyle(.tertiary)
+                                Image(systemName: "chevron.compact.right")
+                                    .font(.system(size: 12, weight: .semibold))
+                                    .foregroundStyle(.quaternary)
                             }
 
                             // Breadcrumb segment
@@ -34,8 +34,8 @@ struct BreadcrumbView: View {
 
             Spacer()
         }
-        .frame(height: 36)
-        .background(.quaternary.opacity(0.5))
+        .frame(height: 32)
+        .background(Color(nsColor: .windowBackgroundColor))
     }
 
     @ViewBuilder
@@ -66,25 +66,29 @@ struct BreadcrumbView: View {
         HStack(spacing: 6) {
             // Icon
             Image(systemName: node.fileType.icon)
-                .font(.system(size: 12))
-                .foregroundStyle(node.fileType.color)
+                .font(.system(size: 11))
+                .foregroundStyle(isLast ? node.fileType.color : .secondary)
 
             // Name
             Text(node.name)
-                .font(.system(size: 12, weight: isLast ? .semibold : .regular))
-                .foregroundStyle(isLast ? .primary : (isHoverable ? .primary : .secondary))
+                .font(.system(size: 12, weight: isLast ? .medium : .regular))
+                .foregroundStyle(isLast ? .primary : .secondary)
                 .lineLimit(1)
-                .underline(isHoverable, color: .secondary.opacity(0.5))
 
-            // Size
-            Text(ByteCountFormatter.string(fromByteCount: node.totalSize, countStyle: .file))
-                .font(.system(size: 11))
-                .foregroundStyle(.tertiary)
+            // Size (only for current directory)
+            if isLast {
+                Text("·")
+                    .foregroundStyle(.quaternary)
+                    .font(.system(size: 11))
+                Text(ByteCountFormatter.string(fromByteCount: node.totalSize, countStyle: .file))
+                    .font(.system(size: 11))
+                    .foregroundStyle(.tertiary)
+            }
         }
-        .padding(.horizontal, 8)
-        .padding(.vertical, 6)
-        .background(isLast ? Color.accentColor.opacity(0.1) : (isHoverable ? Color.blue.opacity(0.05) : Color.clear))
-        .cornerRadius(6)
+        .padding(.horizontal, 6)
+        .padding(.vertical, 4)
+        .background(isLast ? Color(nsColor: .controlBackgroundColor) : Color.clear)
+        .clipShape(RoundedRectangle(cornerRadius: 4))
     }
 }
 
@@ -93,9 +97,8 @@ struct BreadcrumbView: View {
 struct BreadcrumbButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .background(configuration.isPressed ? Color.accentColor.opacity(0.15) : Color.clear)
-            .cornerRadius(6)
-            .scaleEffect(configuration.isPressed ? 0.98 : 1.0)
+            .background(configuration.isPressed ? Color(nsColor: .controlAccentColor).opacity(0.1) : Color.clear)
+            .clipShape(RoundedRectangle(cornerRadius: 4))
             .animation(.easeInOut(duration: 0.1), value: configuration.isPressed)
             .onHover { isHovering in
                 if isHovering {
