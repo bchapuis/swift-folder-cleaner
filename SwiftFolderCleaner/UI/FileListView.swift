@@ -10,13 +10,17 @@ struct FileListView: View {
     @State private var scrollPosition: URL?
 
     // Cache sorted files to prevent recomputation on selection changes
-    @State private var cachedSortedFiles: [FileNode] = []
+    @State private var cachedSortedFiles: [FileItem] = []
     @State private var lastDisplayFilesCount = 0
     @State private var lastSortBy: SortColumn = .size
     @State private var lastSortAscending = false
 
     var body: some View {
-        Table(of: FileNode.self, selection: $selection) {
+        tableView
+    }
+
+    private var tableView: some View {
+        Table(cachedSortedFiles, selection: $selection) {
             TableColumn("Name") { file in
                 HStack(spacing: 6) {
                     Image(systemName: file.fileType.icon)
@@ -61,13 +65,6 @@ struct FileListView: View {
                     .foregroundStyle(.secondary)
             }
             .width(80)
-        } rows: {
-            ForEach(cachedSortedFiles, id: \.path) { file in
-                TableRow(file)
-                    .itemProvider {
-                        NSItemProvider(object: file.path as NSURL)
-                    }
-            }
         }
         .tableStyle(.inset(alternatesRowBackgrounds: true))
         .background(Color(nsColor: .controlBackgroundColor))
@@ -119,7 +116,7 @@ struct FileListView: View {
         lastSortAscending = sortAscending
     }
 
-    private func sortFiles(_ files: [FileNode]) -> [FileNode] {
+    private func sortFiles(_ files: [FileItem]) -> [FileItem] {
         switch sortBy {
         case .name:
             return sortAscending
@@ -144,7 +141,7 @@ struct FileListView: View {
         }
     }
 
-    private func percentage(for file: FileNode) -> Double {
+    private func percentage(for file: FileItem) -> Double {
         let totalSize = viewModel.currentRoot.totalSize
         guard totalSize > 0 else { return 0 }
         return Double(file.totalSize) / Double(totalSize) * 100

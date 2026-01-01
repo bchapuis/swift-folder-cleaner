@@ -9,8 +9,8 @@ import Observation
 final class ScanResultViewModel {
     // MARK: - Core State (Immutable)
 
-    /// The original scan result (immutable) - single source of truth
-    let scanResult: ScanResult
+    /// The root file item (immutable) - single source of truth
+    let rootItem: FileItem
 
     // MARK: - Sub-Modules (Deep modules handling specific concerns)
 
@@ -23,16 +23,11 @@ final class ScanResultViewModel {
     /// Filter state (active types, filtered tree generation)
     let filter: FilterState
 
-    // MARK: - Layout & Operations
-
     /// Treemap layout engine (delegates layout calculations)
     let treemapViewModel = TreemapViewModel()
 
     /// File operations service (show in Finder, delete, etc.)
     private let fileOperations = FileOperationsService()
-
-    /// Query engine for search and statistics
-    private let query: FileTreeQuery
 
     /// Action feedback message
     private(set) var actionMessage: String?
@@ -40,14 +35,14 @@ final class ScanResultViewModel {
     // MARK: - Performance Caches
 
     /// Cached filtered tree (invalidated when navigation or filter changes)
-    private var cachedFilteredRoot: FileNode?
+    private var cachedFilteredRoot: FileItem?
     private var lastNavigationPath: URL?
     private var lastFilterTypes: Set<FileType>?
     private var lastActiveSize: FileSizeFilter?
     private var lastFilenamePattern: String?
 
     /// Cached breadcrumb trail (invalidated when navigation changes)
-    private var cachedBreadcrumb: [FileNode]?
+    private var cachedBreadcrumb: [FileItem]?
     private var lastBreadcrumbPath: [URL]?
 
     /// Filter version to force view updates
@@ -56,12 +51,12 @@ final class ScanResultViewModel {
     // MARK: - Derived State (Computed from sub-modules)
 
     /// Current directory (from navigation)
-    var currentRoot: FileNode {
-        navigation.currentNode
+    var currentRoot: FileItem {
+        navigation.currentItem
     }
 
     /// Breadcrumb trail (from navigation) - cached for performance
-    var breadcrumbTrail: [FileNode] {
+    var breadcrumbTrail: [FileItem] {
         let currentPath = navigation.currentPath
 
         // Return cache if path unchanged
@@ -81,7 +76,7 @@ final class ScanResultViewModel {
     }
 
     /// Selected node (from selection)
-    var selectedNode: FileNode? {
+    var selectedNode: FileItem? {
         selection.selected
     }
 
@@ -110,37 +105,61 @@ final class ScanResultViewModel {
         filter.size
     }
 
-    /// Flattened list of files for display using indexed queries (FAST!)
+    /// Flattened list of files for display
     /// This is the SINGLE SOURCE OF TRUTH for filtered data used by both TreemapView and FileListView
-    var displayFiles: [FileNode] {
-        // Use index for instant filtering - O(1) instead of O(n) tree traversal!
+    var displayFiles: [FileItem] {
         let types = filter.types
         let sizeFilter = filter.size
         let filenamePattern = filter.filename
-        let currentPath = navigation.currentNode.path
+        let currentItem = navigation.currentItem
 
         let minSize: Int64? = sizeFilter == .all ? nil : sizeFilter.threshold
 
-        // Filter by current navigation context + type + size + filename filters
-        return scanResult.index.filter(
-            types: types,
-            minSize: minSize,
-            underPath: currentPath,
-            filenamePattern: filenamePattern.isEmpty ? nil : filenamePattern
-        )
+        // Get all descendants of current item
+        var allItems: [FileItem] = []
+        collectItems(from: currentItem, into: &allItems)
+
+        // Apply filters
+        return allItems.filter { item in
+            // Type filter
+            guard types.contains(item.fileType) else { return false }
+
+            // Size filter
+            if let minSize = minSize, !item.isDirectory {
+                guard item.totalSize >= minSize else { return false }
+            }
+
+            // Filename filter
+            if !filenamePattern.isEmpty {
+                let filter = FilenameFilter(pattern: filenamePattern)
+                guard filter.matches(item) else { return false }
+            }
+
+            return true
+        }
+    }
+
+    /// Helper to collect all items from a tree
+    private func collectItems(from item: FileItem, into array: inout [FileItem]) {
+        for child in item.children {
+            array.append(child)
+            if child.isDirectory {
+                collectItems(from: child, into: &array)
+            }
+        }
     }
 
     /// Filtered tree (coordinated: navigation + filter) - cached for performance
     /// Uses direct tree filtering (faster than rebuild from flat list)
-    var filteredRoot: FileNode {
-        let currentNode = navigation.currentNode
+    var filteredRoot: FileItem {
+        let currentItem = navigation.currentItem
         let currentTypes = filter.types
         let currentSize = filter.size
         let currentFilename = filter.filename
 
         // Return cache if unchanged
         if let cached = cachedFilteredRoot,
-           lastNavigationPath == currentNode.path,
+           lastNavigationPath == currentItem.path,
            lastFilterTypes == currentTypes,
            lastActiveSize == currentSize,
            lastFilenamePattern == currentFilename {
@@ -148,11 +167,11 @@ final class ScanResultViewModel {
         }
 
         // Recompute using direct tree filtering (fast!)
-        let filtered = filter.filteredTree(from: currentNode)
+        let filtered = filter.filteredTree(from: currentItem)
 
         // Cache result
         cachedFilteredRoot = filtered
-        lastNavigationPath = currentNode.path
+        lastNavigationPath = currentItem.path
         lastFilterTypes = currentTypes
         lastActiveSize = currentSize
         lastFilenamePattern = currentFilename
@@ -162,33 +181,20 @@ final class ScanResultViewModel {
 
     // MARK: - Initialization
 
-    init(scanResult: ScanResult) {
-        self.scanResult = scanResult
+    init(rootItem: FileItem) {
+        self.rootItem = rootItem
 
         // Initialize sub-modules
-        self.navigation = NavigationState(rootNode: scanResult.rootNode)
+        self.navigation = NavigationState(rootItem: rootItem)
         self.filter = FilterState()
-        self.query = FileTreeQuery(root: scanResult.rootNode)
-
-        // Initialize index asynchronously for large trees
-        var asyncIndex: FileTreeIndex?
-        if scanResult.rootNode.fileCount > 10_000 {
-            Task {
-                let builtIndex = await Task.detached {
-                    scanResult.rootNode.createIndex()
-                }.value
-                asyncIndex = builtIndex
-            }
-        }
-
-        self.selection = SelectionState(rootNode: scanResult.rootNode, index: asyncIndex)
+        self.selection = SelectionState(rootItem: rootItem)
     }
 
     // MARK: - Navigation Actions (Delegate to NavigationState)
 
     /// Navigate to a specific directory (e.g., double-click)
-    func drillDown(to node: FileNode) {
-        navigation.navigate(.drillDown(node))
+    func drillDown(to item: FileItem) {
+        navigation.navigate(.drillDown(item))
         selection.select(nil) // Clear selection when drilling down
         treemapViewModel.invalidateLayout()
     }
@@ -221,9 +227,9 @@ final class ScanResultViewModel {
 
     // MARK: - Selection Actions (Delegate to SelectionState)
 
-    /// Select a node (single click in treemap or list)
-    func selectNode(_ node: FileNode?) {
-        selection.select(node)
+    /// Select an item (single click in treemap or list)
+    func selectNode(_ item: FileItem?) {
+        selection.select(item)
     }
 
     // MARK: - Filter Actions (Delegate to FilterState)
@@ -310,20 +316,4 @@ final class ScanResultViewModel {
         actionMessage = nil
     }
 
-    // MARK: - Query Methods (Delegate to FileTreeQuery)
-
-    /// Search for files by name
-    func search(name: String) -> [FileNode] {
-        query.find(.name(name))
-    }
-
-    /// Get statistics for current tree
-    func getStatistics() -> FileTreeStatistics {
-        query.statistics()
-    }
-
-    /// Get top N largest files
-    func topFiles(count: Int = 10) -> [FileNode] {
-        query.top(count, by: .size(filesOnly: true))
-    }
 }

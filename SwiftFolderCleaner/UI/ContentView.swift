@@ -1,8 +1,10 @@
 import SwiftUI
+import SwiftData
 
 /// Main app view: scan → treemap
 struct ContentView: View {
     @State private var viewModel = ScanViewModel()
+    @Environment(\.modelContext) private var modelContext
 
     var body: some View {
         VStack(spacing: 0) {
@@ -12,8 +14,8 @@ struct ContentView: View {
                 idleView
             case .scanning(let progress):
                 scanningView(progress: progress)
-            case .complete(let result):
-                ScanResultView(result: result)
+            case .complete(let rootItem):
+                ScanResultView(rootItem: rootItem)
             case .failed(let error):
                 errorView(error: error)
             }
@@ -23,6 +25,9 @@ struct ContentView: View {
             ToolbarItem(placement: .primaryAction) {
                 toolbarButton
             }
+        }
+        .onAppear {
+            viewModel.setModelContext(modelContext)
         }
     }
 

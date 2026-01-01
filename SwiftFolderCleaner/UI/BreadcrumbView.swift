@@ -2,7 +2,7 @@ import SwiftUI
 
 /// Breadcrumb navigation bar - displays current directory path
 struct BreadcrumbView: View {
-    let breadcrumbTrail: [FileNode]
+    let breadcrumbTrail: [FileItem]
     let onNavigate: (Int) -> Void  // Navigate to breadcrumb at index
     let onNavigateUp: () -> Void
 
@@ -39,7 +39,7 @@ struct BreadcrumbView: View {
     }
 
     @ViewBuilder
-    private func breadcrumbSegment(node: FileNode, index: Int, isLast: Bool) -> some View {
+    private func breadcrumbSegment(node: FileItem, index: Int, isLast: Bool) -> some View {
         if !isLast && node.isDirectory {
             // Clickable segment (can navigate to this directory)
             Button {
@@ -62,7 +62,7 @@ struct BreadcrumbView: View {
     }
 
     @ViewBuilder
-    private func segmentLabel(node: FileNode, isLast: Bool, isHoverable: Bool) -> some View {
+    private func segmentLabel(node: FileItem, isLast: Bool, isHoverable: Bool) -> some View {
         HStack(spacing: 6) {
             // Icon
             Image(systemName: node.fileType.icon)
@@ -111,14 +111,14 @@ struct BreadcrumbButtonStyle: ButtonStyle {
 }
 
 #Preview {
-    let documentsNode = FileNode.directory(
+    let documentsNode = FileItem.directory(
         path: URL(fileURLWithPath: "/Users/example/Documents"),
         name: "Documents",
         modifiedDate: Date(),
         children: []
     )
 
-    let photosNode = FileNode.directory(
+    let photosNode = FileItem.directory(
         path: URL(fileURLWithPath: "/Users/example/Documents/Photos"),
         name: "Photos",
         modifiedDate: Date(),

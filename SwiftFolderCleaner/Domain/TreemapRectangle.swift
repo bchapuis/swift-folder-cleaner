@@ -1,15 +1,16 @@
 import Foundation
 import SwiftUI
+import SwiftData
 
 /// Represents a rectangle in the treemap layout
 struct TreemapRectangle: Identifiable {
     let id: UUID = UUID()
-    let node: FileNode
+    let item: FileItem
     let rect: CGRect
 
     /// The color for this rectangle based on file type
     var color: Color {
-        node.fileType.color
+        item.fileType.color
     }
 
     /// Whether this rectangle is large enough to show a label (progressive disclosure)
@@ -62,13 +63,13 @@ struct TreemapRectangle: Identifiable {
 
 extension TreemapRectangle: Equatable {
     static func == (lhs: TreemapRectangle, rhs: TreemapRectangle) -> Bool {
-        lhs.node.path.standardized == rhs.node.path.standardized && lhs.rect == rhs.rect
+        lhs.item.path.standardized == rhs.item.path.standardized && lhs.rect == rhs.rect
     }
 }
 
 extension TreemapRectangle: Hashable {
     func hash(into hasher: inout Hasher) {
-        hasher.combine(node.path)
+        hasher.combine(item.path)
         hasher.combine(rect.origin.x)
         hasher.combine(rect.origin.y)
         hasher.combine(rect.size.width)

@@ -9,16 +9,16 @@ final class TreemapViewModel {
     // MARK: - Layout State
 
     private(set) var rectangles: [TreemapRectangle] = []
-    private(set) var hoveredNode: FileNode?
+    private(set) var hoveredItem: FileItem?
     private(set) var isLayoutValid = false
 
     // MARK: - Performance Caches
 
     private var cachedSize: CGSize = .zero
-    private var cachedRootNode: FileNode?
+    private var cachedRootItem: FileItem?
 
     /// Fast lookup for which nodes have children laid out (avoids O(n²) search)
-    private var nodePathsSet: Set<URL> = []
+    private var itemPathsSet: Set<URL> = []
 
     /// Rectangles to actually draw (cached, filtered)
     private(set) var drawableRectangles: [TreemapRectangle] = []
@@ -28,34 +28,34 @@ final class TreemapViewModel {
 
     // MARK: - Layout Management
 
-    func updateLayout(rootNode: FileNode, size: CGSize) {
+    func updateLayout(rootItem: FileItem, size: CGSize) {
         // Check if we need to recalculate
-        guard shouldRecalculateLayout(rootNode: rootNode, size: size) else {
+        guard shouldRecalculateLayout(rootItem: rootItem, size: size) else {
             return
         }
 
         // Calculate new layout with size-based threshold
         // Only recurse into directories >= 0.5% of current root size
         rectangles = TreemapLayout.layout(
-            node: rootNode,
+            item: rootItem,
             in: CGRect(origin: .zero, size: size),
             minSizeThreshold: 0.005
         )
 
         // Build fast lookup structures (use standardized URLs for consistency)
-        nodePathsSet = Set(rectangles.map { $0.node.path.standardized })
-        rectanglesByPath = Dictionary(uniqueKeysWithValues: rectangles.map { ($0.node.path.standardized, $0) })
+        itemPathsSet = Set(rectangles.map { $0.item.path.standardized })
+        rectanglesByPath = Dictionary(uniqueKeysWithValues: rectangles.map { ($0.item.path.standardized, $0) })
 
         // Pre-filter drawable rectangles to avoid O(n²) in draw loop
         drawableRectangles = rectangles.filter { rectangle in
-            if !rectangle.node.isDirectory {
+            if !rectangle.item.isDirectory {
                 return true // Always draw files
-            } else if rectangle.node.children.isEmpty {
+            } else if rectangle.item.children.isEmpty {
                 return true // Always draw empty directories
             } else {
                 // For directories with children: only draw if children are NOT laid out
-                let hasLaidOutChildren = rectangle.node.children.contains {
-                    nodePathsSet.contains($0.path.standardized)
+                let hasLaidOutChildren = rectangle.item.children.contains {
+                    itemPathsSet.contains($0.path.standardized)
                 }
                 return !hasLaidOutChildren
             }
@@ -63,7 +63,7 @@ final class TreemapViewModel {
 
         // Update cache
         cachedSize = size
-        cachedRootNode = rootNode
+        cachedRootItem = rootItem
         isLayoutValid = true
     }
 
@@ -78,29 +78,29 @@ final class TreemapViewModel {
 
     // MARK: - Hit Testing
 
-    func findNode(at location: CGPoint) -> FileNode? {
+    func findNode(at location: CGPoint) -> FileItem? {
         // Find in rectangles (reverse order to hit top-most first)
-        rectangles.reversed().first(where: { $0.rect.contains(location) })?.node
+        rectangles.reversed().first(where: { $0.rect.contains(location) })?.item
     }
 
     func updateHover(at location: CGPoint?) {
         if let location {
-            hoveredNode = findNode(at: location)
+            hoveredItem = findNode(at: location)
         } else {
-            hoveredNode = nil
+            hoveredItem = nil
         }
     }
 
     // MARK: - Helper Methods
 
-    private func shouldRecalculateLayout(rootNode: FileNode, size: CGSize) -> Bool {
+    private func shouldRecalculateLayout(rootItem: FileItem, size: CGSize) -> Bool {
         // Size changed significantly (more than 1pt)
         if abs(size.width - cachedSize.width) > 1 || abs(size.height - cachedSize.height) > 1 {
             return true
         }
 
         // Root node changed
-        if rootNode.path.standardized != cachedRootNode?.path.standardized {
+        if rootItem.path.standardized != cachedRootItem?.path.standardized {
             return true
         }
 

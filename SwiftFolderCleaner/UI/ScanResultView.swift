@@ -3,13 +3,13 @@ import SwiftUI
 /// Dual-pane view: treemap (left) + file list (right)
 /// All state managed by ScanResultViewModel for perfect synchronization
 struct ScanResultView: View {
-    let result: ScanResult
+    let rootItem: FileItem
 
     @State private var viewModel: ScanResultViewModel
 
-    init(result: ScanResult) {
-        self.result = result
-        self._viewModel = State(initialValue: ScanResultViewModel(scanResult: result))
+    init(rootItem: FileItem) {
+        self.rootItem = rootItem
+        self._viewModel = State(initialValue: ScanResultViewModel(rootItem: rootItem))
     }
 
     var body: some View {
@@ -169,20 +169,12 @@ struct ScanResultView: View {
 }
 
 #Preview {
-    let rootNode = FileNode.directory(
+    let rootItem = FileItem.directory(
         path: URL(fileURLWithPath: "/Users/example/Documents"),
         name: "Documents",
         modifiedDate: Date(),
         children: []
     )
 
-    let scanResult = ScanResult(
-        rootNode: rootNode,
-        scanDuration: 12.5,
-        totalFilesScanned: 5432,
-        errors: [],
-        index: IndexedFileTree(root: rootNode)
-    )
-
-    return ScanResultView(result: scanResult)
+    ScanResultView(rootItem: rootItem)
 }

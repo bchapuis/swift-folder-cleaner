@@ -88,22 +88,14 @@ extension FileType {
 }
 
 #Preview {
-    let rootNode = FileNode.directory(
+    let rootItem = FileItem.directory(
         path: URL(fileURLWithPath: "/Users/example/Documents"),
         name: "Documents",
         modifiedDate: Date(),
         children: []
     )
 
-    let scanResult = ScanResult(
-        rootNode: rootNode,
-        scanDuration: 1.0,
-        totalFilesScanned: 100,
-        errors: [],
-        index: IndexedFileTree(root: rootNode)
-    )
-
-    let viewModel = ScanResultViewModel(scanResult: scanResult)
+    let viewModel = ScanResultViewModel(rootItem: rootItem)
 
     FileTypeLegend(viewModel: viewModel)
         .frame(width: 800)

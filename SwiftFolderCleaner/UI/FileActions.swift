@@ -1,5 +1,6 @@
 import Foundation
 import AppKit
+import SwiftData
 
 /// File operation results
 enum FileActionResult {
@@ -31,36 +32,36 @@ enum FileActionError: LocalizedError {
 class FileActions {
 
     /// Show file or folder in Finder
-    static func showInFinder(_ node: FileNode) {
-        NSWorkspace.shared.activateFileViewerSelecting([node.path])
+    static func showInFinder(_ item: FileItem) {
+        NSWorkspace.shared.activateFileViewerSelecting([item.path])
     }
 
     /// Show multiple files in Finder
-    static func showInFinder(_ nodes: [FileNode]) {
-        let urls = nodes.map { $0.path }
+    static func showInFinder(_ items: [FileItem]) {
+        let urls = items.map { $0.path }
         NSWorkspace.shared.activateFileViewerSelecting(urls)
     }
 
     /// Open file in Quick Look Preview
-    static func showInPreview(_ node: FileNode) {
-        guard !node.isDirectory else { return }
-        NSWorkspace.shared.open(node.path)
+    static func showInPreview(_ item: FileItem) {
+        guard !item.isDirectory else { return }
+        NSWorkspace.shared.open(item.path)
     }
 
-    /// Check if node can be previewed (only files, not directories)
-    static func canPreview(_ node: FileNode) -> Bool {
-        return !node.isDirectory
+    /// Check if item can be previewed (only files, not directories)
+    static func canPreview(_ item: FileItem) -> Bool {
+        return !item.isDirectory
     }
 
     /// Move files to trash with confirmation
-    static func moveToTrash(_ nodes: Set<FileNode>) async -> FileActionResult {
-        guard !nodes.isEmpty else {
+    static func moveToTrash(_ items: Set<FileItem>) async -> FileActionResult {
+        guard !items.isEmpty else {
             return .error(FileActionError.noSelection)
         }
 
         // Calculate totals
-        let totalSize = FileFilters.totalSize(of: nodes)
-        let totalFiles = FileFilters.totalFiles(of: nodes)
+        let totalSize = items.reduce(0) { $0 + $1.totalSize }
+        let totalFiles = items.count
 
         // Show confirmation if needed
         if await shouldConfirmDeletion(count: totalFiles, size: totalSize) {
@@ -75,16 +76,16 @@ class FileActions {
         var deletedSize: Int64 = 0
         let fileManager = FileManager.default
 
-        for node in nodes {
+        for item in items {
             do {
                 // Move to trash
-                try fileManager.trashItem(at: node.path, resultingItemURL: nil)
+                try fileManager.trashItem(at: item.path, resultingItemURL: nil)
 
                 deletedCount += 1
-                deletedSize += node.totalSize
+                deletedSize += item.totalSize
 
             } catch {
-                print("Failed to delete \(node.path.path): \(error)")
+                print("Failed to delete \(item.path.path): \(error)")
                 // Continue deleting other files
             }
         }

@@ -19,8 +19,8 @@ final class FilterState {
     private(set) var filenamePattern: String = ""
 
     /// Cache for filtered trees
-    private var cachedFilteredTree: FileNode?
-    private var lastSourceNode: FileNode?
+    private var cachedFilteredTree: FileItem?
+    private var lastSourceItem: FileItem?
     private var lastActiveTypes: Set<FileType>?
     private var lastActiveSize: FileSizeFilter?
     private var lastFilenamePattern: String?
@@ -75,59 +75,56 @@ final class FilterState {
         filenamePattern = pattern.trimmingCharacters(in: .whitespaces)
     }
 
-    /// Get filtered tree from source node
+    /// Get filtered tree from source item
     /// Hides complexity of caching and tree filtering
-    /// The source node itself (navigation root) always passes through, but its children are filtered
-    func filteredTree(from source: FileNode) -> FileNode {
+    /// The source item itself (navigation root) always passes through, but its children are filtered
+    func filteredTree(from source: FileItem) -> FileItem {
         // Return cache if unchanged
         if let cached = cachedFilteredTree,
-           lastSourceNode?.path.standardized == source.path.standardized,
+           lastSourceItem?.path.standardized == source.path.standardized,
            lastActiveTypes == activeTypes,
            lastActiveSize == activeSize,
            lastFilenamePattern == filenamePattern {
             return cached
         }
 
-        // Build filter list
-        var filters: [FileTreeFilter] = [FileTypeFilter(activeTypes)]
-
-        // Apply size filter if not showing all sizes
-        if activeSize != .all {
-            filters.append(SizeFilter.largerThan(activeSize.threshold))
-        }
-
-        // Apply filename filter if pattern is not empty
-        if !filenamePattern.isEmpty {
-            filters.append(FilenameFilter(pattern: filenamePattern))
-        }
-
-        // Apply filters to children (not the source node itself, which is the navigation context)
-        let filterCombined = AndFilter(filters)
+        // Apply type filter to children using existing filtered method
         let filteredChildren = source.children.compactMap { child in
-            child.filtered(by: filterCombined)
+            child.filtered(by: activeTypes)
+        }
+
+        // Further filter by size if needed
+        let sizeFilteredChildren: [FileItem]
+        if activeSize != .all {
+            sizeFilteredChildren = filteredChildren.filter { child in
+                !child.isDirectory && child.totalSize >= activeSize.threshold
+            }
+        } else {
+            sizeFilteredChildren = filteredChildren
+        }
+
+        // Further filter by filename pattern if needed
+        let finalChildren: [FileItem]
+        if !filenamePattern.isEmpty {
+            let filter = FilenameFilter(pattern: filenamePattern)
+            finalChildren = sizeFilteredChildren.filter { child in
+                filter.matches(child)
+            }
+        } else {
+            finalChildren = sizeFilteredChildren
         }
 
         // Create filtered version of source with filtered children
-        let filteredTotalSize = filteredChildren.reduce(0) { $0 + $1.totalSize }
-        let filteredFileCount = filteredChildren.isEmpty ? 0 : filteredChildren.reduce(0) { $0 + $1.fileCount }
-        let filteredMaxDepth = filteredChildren.isEmpty ? 0 : (filteredChildren.map(\.maxDepth).max() ?? 0) + 1
-
-        let filtered = FileNode(
+        let filtered = FileItem.directory(
             path: source.path,
             name: source.name,
-            size: source.size,
-            fileType: source.fileType,
             modifiedDate: source.modifiedDate,
-            children: filteredChildren,
-            isDirectory: source.isDirectory,
-            totalSize: filteredTotalSize,
-            fileCount: filteredFileCount,
-            maxDepth: filteredMaxDepth
+            children: finalChildren
         )
 
         // Update cache
         cachedFilteredTree = filtered
-        lastSourceNode = source
+        lastSourceItem = source
         lastActiveTypes = activeTypes
         lastActiveSize = activeSize
         lastFilenamePattern = filenamePattern

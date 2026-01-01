@@ -1,4 +1,5 @@
 import SwiftUI
+import SwiftData
 
 @main
 struct FolderCleanerApp: App {
@@ -12,6 +13,7 @@ struct FolderCleanerApp: App {
         .commands {
             CommandGroup(replacing: .newItem) {}
         }
+        .modelContainer(for: FileItem.self)
     }
 }
 

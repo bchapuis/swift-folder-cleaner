@@ -1,38 +1,39 @@
 import Foundation
 import CoreGraphics
+import SwiftData
 
 /// Treemap layout engine using squarified algorithm
 struct TreemapLayout {
-    /// Generates treemap rectangles from a file node tree
+    /// Generates treemap rectangles from a file item tree
     /// - Parameters:
-    ///   - node: Root node to layout
+    ///   - item: Root item to layout
     ///   - bounds: Available rectangle to fill
     ///   - minSizeThreshold: Minimum size (as fraction of root, 0.0-1.0) to recurse into (default 0.005 = 0.5%)
     /// - Returns: Array of rectangles representing each file/folder
-    static func layout(node: FileNode, in bounds: CGRect, minSizeThreshold: Double = 0.005) -> [TreemapRectangle] {
+    static func layout(item: FileItem, in bounds: CGRect, minSizeThreshold: Double = 0.005) -> [TreemapRectangle] {
         var rectangles: [TreemapRectangle] = []
 
-        // Only layout if the node has size
-        guard node.totalSize > 0 else {
+        // Only layout if the item has size
+        guard item.totalSize > 0 else {
             return rectangles
         }
 
         // Calculate absolute minimum size from threshold
-        let minSize = Int64(Double(node.totalSize) * minSizeThreshold)
+        let minSize = Int64(Double(item.totalSize) * minSizeThreshold)
 
-        // Always add the node itself as a rectangle
-        rectangles.append(TreemapRectangle(node: node, rect: bounds))
+        // Always add the item itself as a rectangle
+        rectangles.append(TreemapRectangle(item: item, rect: bounds))
 
         // If it's a directory with children, layout children on top
-        if node.isDirectory && !node.children.isEmpty {
-            let children = node.children
+        if item.isDirectory && !item.children.isEmpty {
+            let children = item.children
                 .filter { $0.totalSize > 0 }  // Filter out empty items
                 .sorted { $0.totalSize > $1.totalSize }  // Sort by size (largest first)
 
             squarify(
                 children: children,
                 bounds: bounds,
-                totalSize: node.totalSize,
+                totalSize: item.totalSize,
                 minSize: minSize,
                 output: &rectangles
             )
@@ -45,7 +46,7 @@ struct TreemapLayout {
 
     // swiftlint:disable:next function_body_length
     private static func squarify(
-        children: [FileNode],
+        children: [FileItem],
         bounds: CGRect,
         totalSize: Int64,
         minSize: Int64,
@@ -63,13 +64,13 @@ struct TreemapLayout {
             let height = currentBounds.height
 
             // Build a row of items
-            var row: [FileNode] = []
+            var row: [FileItem] = []
             var rowSize: Int64 = 0
 
             // Try to add items to the row while improving aspect ratio
-            for node in remaining {
-                let newRow = row + [node]
-                let newRowSize = rowSize + node.totalSize
+            for item in remaining {
+                let newRow = row + [item]
+                let newRowSize = rowSize + item.totalSize
 
                 let currentWorst = worstAspectRatio(
                     row: row,
@@ -104,21 +105,21 @@ struct TreemapLayout {
                 )
 
                 // Add rectangles for items in the row
-                for (node, rect) in zip(row, rowRects) {
-                    // Always add the node itself as a rectangle (directories and files)
-                    output.append(TreemapRectangle(node: node, rect: rect))
+                for (item, rect) in zip(row, rowRects) {
+                    // Always add the item itself as a rectangle (directories and files)
+                    output.append(TreemapRectangle(item: item, rect: rect))
 
-                    // Only recurse if node is large enough (size-based threshold)
-                    if node.isDirectory && !node.children.isEmpty && node.totalSize >= minSize {
+                    // Only recurse if item is large enough (size-based threshold)
+                    if item.isDirectory && !item.children.isEmpty && item.totalSize >= minSize {
                         // Recursively layout children (will be drawn on top)
-                        let children = node.children
+                        let children = item.children
                             .filter { $0.totalSize > 0 }
                             .sorted { $0.totalSize > $1.totalSize }
 
                         squarify(
                             children: children,
                             bounds: rect,
-                            totalSize: node.totalSize,
+                            totalSize: item.totalSize,
                             minSize: minSize,
                             output: &output
                         )
@@ -157,7 +158,7 @@ struct TreemapLayout {
 
     /// Calculates the worst aspect ratio in a row
     private static func worstAspectRatio(
-        row: [FileNode],
+        row: [FileItem],
         rowSize: Int64,
         bounds: CGRect,
         totalSize: Int64
@@ -184,8 +185,8 @@ struct TreemapLayout {
 
         // Find worst aspect ratio among items in the row
         var maxAspect: CGFloat = 0
-        for node in row {
-            let itemArea = rowWidth * rowHeight * CGFloat(node.totalSize) / CGFloat(rowSize)
+        for item in row {
+            let itemArea = rowWidth * rowHeight * CGFloat(item.totalSize) / CGFloat(rowSize)
             let itemWidth: CGFloat
             let itemHeight: CGFloat
 
@@ -210,7 +211,7 @@ struct TreemapLayout {
 
     /// Layouts items in a row
     private static func layoutRow(
-        row: [FileNode],
+        row: [FileItem],
         rowSize: Int64,
         bounds: CGRect,
         totalSize: Int64
@@ -242,8 +243,8 @@ struct TreemapLayout {
 
         var currentPixel: CGFloat = 0
 
-        for (index, node) in row.enumerated() {
-            let itemFraction = CGFloat(node.totalSize) / CGFloat(rowSize)
+        for (index, item) in row.enumerated() {
+            let itemFraction = CGFloat(item.totalSize) / CGFloat(rowSize)
 
             let rect: CGRect
             if isHorizontal {

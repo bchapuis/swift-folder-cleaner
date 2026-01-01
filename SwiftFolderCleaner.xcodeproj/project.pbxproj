@@ -42,6 +42,7 @@
 		A1000043 /* SizeFilterLegend.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000045 /* SizeFilterLegend.swift */; };
 		A1000044 /* IndexedFileTree.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000046 /* IndexedFileTree.swift */; };
 		A1000045 /* FilenameFilterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000047 /* FilenameFilterView.swift */; };
+		A1000046 /* FileItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000048 /* FileItem.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -93,6 +94,7 @@
 		A2000045 /* SizeFilterLegend.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SizeFilterLegend.swift; sourceTree = "<group>"; };
 		A2000046 /* IndexedFileTree.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IndexedFileTree.swift; sourceTree = "<group>"; };
 		A2000047 /* FilenameFilterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilenameFilterView.swift; sourceTree = "<group>"; };
+		A2000048 /* FileItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileItem.swift; sourceTree = "<group>"; };
 		A3000001 /* SwiftFolderCleaner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SwiftFolderCleaner.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -171,6 +173,7 @@
 				A2000035 /* FileTreeQuery.swift */,
 				A2000036 /* FileTreeTraversal.swift */,
 				A2000006 /* FileNode.swift */,
+				A2000048 /* FileItem.swift */,
 				A2000007 /* ScanProgress.swift */,
 				A2000008 /* ScanError.swift */,
 				A2000009 /* ScanResult.swift */,
@@ -327,6 +330,7 @@
 				A1000001 /* SwiftFolderCleanerApp.swift in Sources */,
 				A1000003 /* FileType.swift in Sources */,
 				A1000004 /* FileNode.swift in Sources */,
+				A1000046 /* FileItem.swift in Sources */,
 				A1000005 /* ScanProgress.swift in Sources */,
 				A1000006 /* ScanError.swift in Sources */,
 				A1000007 /* ScanResult.swift in Sources */,

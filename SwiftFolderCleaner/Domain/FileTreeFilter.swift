@@ -1,4 +1,5 @@
 import Foundation
+import SwiftData
 
 // MARK: - Filter Protocol
 
@@ -114,32 +115,63 @@ struct DateFilter: FileTreeFilter {
 }
 
 /// Filter by filename with wildcard support (*.ts, node_modules, etc.)
-struct FilenameFilter: FileTreeFilter {
-    private let nameFilter: NameFilter
+struct FilenameFilter {
+    private let pattern: String
+    private let matchType: MatchType
+
+    enum MatchType {
+        case contains(String)
+        case prefix(String)
+        case suffix(String)
+    }
 
     init(pattern: String) {
         let trimmed = pattern.trimmingCharacters(in: .whitespaces)
+        self.pattern = trimmed
 
         if trimmed.hasPrefix("*") && trimmed.hasSuffix("*") {
             // *something* - contains
             let text = String(trimmed.dropFirst().dropLast())
-            self.nameFilter = NameFilter(pattern: .contains(text, caseSensitive: false))
+            self.matchType = .contains(text)
         } else if trimmed.hasPrefix("*") {
             // *.ts - suffix
             let text = String(trimmed.dropFirst())
-            self.nameFilter = NameFilter(pattern: .suffix(text, caseSensitive: false))
+            self.matchType = .suffix(text)
         } else if trimmed.hasSuffix("*") {
             // test* - prefix
             let text = String(trimmed.dropLast())
-            self.nameFilter = NameFilter(pattern: .prefix(text, caseSensitive: false))
+            self.matchType = .prefix(text)
         } else {
             // node_modules - exact match (using contains for simplicity)
-            self.nameFilter = NameFilter(pattern: .contains(trimmed, caseSensitive: false))
+            self.matchType = .contains(trimmed)
         }
     }
 
+    func matches(_ item: FileItem) -> Bool {
+        let name = item.name
+        switch matchType {
+        case .contains(let text):
+            return name.localizedCaseInsensitiveContains(text)
+        case .prefix(let text):
+            return name.lowercased().hasPrefix(text.lowercased())
+        case .suffix(let text):
+            return name.lowercased().hasSuffix(text.lowercased())
+        }
+    }
+}
+
+// Keep FileTreeFilter conformance for backwards compatibility with FileNode
+extension FilenameFilter: FileTreeFilter {
     func matches(_ node: FileNode) -> Bool {
-        nameFilter.matches(node)
+        let name = node.name
+        switch matchType {
+        case .contains(let text):
+            return name.localizedCaseInsensitiveContains(text)
+        case .prefix(let text):
+            return name.lowercased().hasPrefix(text.lowercased())
+        case .suffix(let text):
+            return name.lowercased().hasSuffix(text.lowercased())
+        }
     }
 }
 

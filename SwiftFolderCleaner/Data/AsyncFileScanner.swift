@@ -1,4 +1,5 @@
 import Foundation
+import SwiftData
 
 /// Async file scanner with progress tracking and cancellation support
 actor AsyncFileScanner {
@@ -7,8 +8,10 @@ actor AsyncFileScanner {
     private let startTime: Date
     private var lastProgressUpdate: Date = .distantPast
     private let progressUpdateInterval: TimeInterval = 0.2 // 200ms throttle
+    private let modelContext: ModelContext
 
-    init(fileManager: FileManager = .default) {
+    init(modelContext: ModelContext, fileManager: FileManager = .default) {
+        self.modelContext = modelContext
         self.fileManager = fileManager
         self.startTime = Date()
         self.currentProgress = .initial()
@@ -17,10 +20,10 @@ actor AsyncFileScanner {
     /// Scans a directory asynchronously with AsyncStream progress updates
     /// - Parameter url: The root directory to scan
     /// - Returns: An AsyncStream of progress updates and the final result
-    func scanWithStream(url: URL) -> (stream: AsyncStream<ScanProgress>, result: Task<ScanResult, Error>) {
+    func scanWithStream(url: URL) -> (stream: AsyncStream<ScanProgress>, result: Task<FileItem, Error>) {
         let (stream, continuation) = AsyncStream.makeStream(of: ScanProgress.self)
 
-        let task = Task<ScanResult, Error> {
+        let task = Task<FileItem, Error> {
             defer { continuation.finish() }
 
             let result = try await scan(url: url) { progress in
@@ -37,12 +40,12 @@ actor AsyncFileScanner {
     /// - Parameters:
     ///   - url: The root directory to scan
     ///   - progressHandler: Optional closure called with progress updates
-    /// - Returns: A ScanResult containing the scanned tree
+    /// - Returns: A FileItem representing the root of the scanned tree
     /// - Throws: ScanError if the scan fails or is cancelled
     func scan(
         url: URL,
         progressHandler: ((ScanProgress) -> Void)? = nil
-    ) async throws -> ScanResult {
+    ) async throws -> FileItem {
         // Reset progress
         currentProgress = ScanProgress(
             filesScanned: 0,
@@ -64,18 +67,24 @@ actor AsyncFileScanner {
             throw ScanError.notADirectory(path: url.path)
         }
 
-        // Scan the directory tree
-        let rootNode = try await scanDirectory(at: url, progressHandler: progressHandler)
+        // Clear previous scan data
+        try modelContext.delete(model: FileItem.self)
 
-        // Create scan result
-        return ScanResult.from(rootNode: rootNode, startTime: startTime)
+        // Scan the directory tree
+        let rootItem = try await scanDirectory(at: url, progressHandler: progressHandler)
+
+        // Save to database
+        modelContext.insert(rootItem)
+        try modelContext.save()
+
+        return rootItem
     }
 
     /// Recursively scans a directory and its contents
     private func scanDirectory(
         at url: URL,
         progressHandler: ((ScanProgress) -> Void)?
-    ) async throws -> FileNode {
+    ) async throws -> FileItem {
         // Check for cancellation
         try Task.checkCancellation()
 
@@ -90,7 +99,7 @@ actor AsyncFileScanner {
         let contents = try await getDirectoryContents(at: url)
 
         // Scan children concurrently using TaskGroup (all cores)
-        let children = try await withThrowingTaskGroup(of: FileNode?.self) { group in
+        let children = try await withThrowingTaskGroup(of: FileItem?.self) { group in
             // Add tasks for each child
             for childURL in contents {
                 group.addTask {
@@ -106,7 +115,7 @@ actor AsyncFileScanner {
             }
 
             // Collect results
-            var results: [FileNode] = []
+            var results: [FileItem] = []
             for try await child in group {
                 if let child {
                     results.append(child)
@@ -118,7 +127,7 @@ actor AsyncFileScanner {
             return results
         }
 
-        return FileNode.directory(
+        return FileItem.directory(
             path: url,
             name: url.lastPathComponent,
             modifiedDate: modifiedDate,
@@ -130,7 +139,7 @@ actor AsyncFileScanner {
     private func scanItem(
         at url: URL,
         progressHandler: ((ScanProgress) -> Void)?
-    ) async throws -> FileNode {
+    ) async throws -> FileItem {
         var isDirectory: ObjCBool = false
         fileManager.fileExists(atPath: url.path, isDirectory: &isDirectory)
 
@@ -145,7 +154,7 @@ actor AsyncFileScanner {
     private func scanFile(
         at url: URL,
         progressHandler: ((ScanProgress) -> Void)?
-    ) async throws -> FileNode {
+    ) async throws -> FileItem {
         // Check for cancellation
         try Task.checkCancellation()
 
@@ -154,7 +163,7 @@ actor AsyncFileScanner {
         // Update progress (throttled)
         updateProgressThrottled(path: url.path, size: attributes.size, handler: progressHandler)
 
-        return FileNode.file(
+        return FileItem.file(
             path: url,
             name: url.lastPathComponent,
             size: attributes.size,

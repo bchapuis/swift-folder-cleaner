@@ -1,36 +1,37 @@
 import Foundation
+import SwiftData
 
-/// Service for performing file system operations on FileNodes
+/// Service for performing file system operations on FileItems
 /// Separates file operations from ViewModel to improve testability
 @MainActor
 final class FileOperationsService {
     // MARK: - Operations
 
     /// Show file or directory in Finder
-    func showInFinder(_ node: FileNode) {
-        FileActions.showInFinder([node])
+    func showInFinder(_ item: FileItem) {
+        FileActions.showInFinder([item])
     }
 
     /// Open file in Preview
-    func showInPreview(_ node: FileNode) {
-        FileActions.showInPreview(node)
+    func showInPreview(_ item: FileItem) {
+        FileActions.showInPreview(item)
     }
 
-    /// Check if node can be previewed
-    func canPreview(_ node: FileNode) -> Bool {
-        FileActions.canPreview(node)
+    /// Check if item can be previewed
+    func canPreview(_ item: FileItem) -> Bool {
+        FileActions.canPreview(item)
     }
 
     /// Move file or directory to trash
     /// - Returns: Result indicating success or failure with message
-    func moveToTrash(_ node: FileNode) async -> FileActionResult {
-        await FileActions.moveToTrash([node])
+    func moveToTrash(_ item: FileItem) async -> FileActionResult {
+        await FileActions.moveToTrash([item])
     }
 
     /// Move multiple files or directories to trash
     /// - Returns: Result indicating success or failure with message
-    func moveToTrash(_ nodes: Set<FileNode>) async -> FileActionResult {
-        await FileActions.moveToTrash(nodes)
+    func moveToTrash(_ items: Set<FileItem>) async -> FileActionResult {
+        await FileActions.moveToTrash(items)
     }
 
     /// Format a result message for display to user

@@ -33,7 +33,7 @@ struct TreemapView: View {
                 }
 
                 // Draw hover highlight
-                if let hovered = layoutViewModel.hoveredNode,
+                if let hovered = layoutViewModel.hoveredItem,
                    hovered.path != viewModel.selectedNode?.path,
                    let hoveredRect = layoutViewModel.rectangle(for: hovered.path) {
                     drawHoverHighlight(hoveredRect, in: context)
@@ -58,7 +58,7 @@ struct TreemapView: View {
                 }
             }
             .overlay(alignment: .topLeading) {
-                if let hovered = layoutViewModel.hoveredNode {
+                if let hovered = layoutViewModel.hoveredItem {
                     tooltipView(for: hovered)
                         .position(
                             x: min(mouseLocation.x + 100, geometry.size.width - 100),
@@ -71,23 +71,23 @@ struct TreemapView: View {
                 let heightChanged = abs(newSize.height - currentSize.height) > 1
                 if oldSize != newSize && (widthChanged || heightChanged) {
                     currentSize = newSize
-                    layoutViewModel.updateLayout(rootNode: viewModel.filteredRoot, size: newSize)
+                    layoutViewModel.updateLayout(rootItem: viewModel.filteredRoot, size: newSize)
                     canvasID = UUID() // Force Canvas redraw
                 }
             }
             .onChange(of: viewModel.currentRoot.path) { _, _ in
                 // Navigation changed - update layout
-                layoutViewModel.updateLayout(rootNode: viewModel.filteredRoot, size: currentSize)
+                layoutViewModel.updateLayout(rootItem: viewModel.filteredRoot, size: currentSize)
                 canvasID = UUID()
             }
             .onChange(of: viewModel.filterVersion) { _, _ in
                 // Any filter changed (type, size, filename, etc.) - update layout with new filtered tree
-                layoutViewModel.updateLayout(rootNode: viewModel.filteredRoot, size: currentSize)
+                layoutViewModel.updateLayout(rootItem: viewModel.filteredRoot, size: currentSize)
                 canvasID = UUID()
             }
             .onAppear {
                 currentSize = geometry.size
-                layoutViewModel.updateLayout(rootNode: viewModel.filteredRoot, size: geometry.size)
+                layoutViewModel.updateLayout(rootItem: viewModel.filteredRoot, size: geometry.size)
             }
             .id(canvasID)
         }
@@ -102,7 +102,7 @@ struct TreemapView: View {
         guard rect.width > 1 && rect.height > 1 else { return }
 
         // Color automatically adapts to light/dark mode via asset catalog
-        let fillColor = rectangle.node.fileType.color
+        let fillColor = rectangle.item.fileType.color
 
         // Create sharp rectangle path (no rounding)
         let path = Path(rect)
@@ -139,7 +139,7 @@ struct TreemapView: View {
 
     private func drawLabel(for rectangle: TreemapRectangle, in context: GraphicsContext) {
         let rect = rectangle.rect
-        let node = rectangle.node
+        let node = rectangle.item
 
         let centerX = rect.midX
         let centerY = rect.midY
@@ -265,7 +265,7 @@ struct TreemapView: View {
     // MARK: - Tooltip
 
     @ViewBuilder
-    private func tooltipView(for node: FileNode) -> some View {
+    private func tooltipView(for node: FileItem) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             // Name
             Text(node.name)
